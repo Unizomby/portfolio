@@ -297,6 +297,7 @@ img {
   color: var(--first-color-alt);
 }
 
+/* blob */
 .home__blob{
   width: 200px;
   fill: var(--first-color);
