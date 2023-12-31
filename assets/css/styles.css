@@ -6,6 +6,8 @@
 :root {
     --header-height: 3rem;
 
+    /* purple=#6e57e0 */
+
     /*========== Colors ==========*/
     /* Change favorite color */
     --hue-color: 250; /*Purple 250 - Green 142 - Blue 230 - Pink 340*/
