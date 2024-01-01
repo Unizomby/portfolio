@@ -824,6 +824,11 @@ img {
 .swiper-pagination-bullet{
   outline: none;
 }
+
+#container--projects{
+  max-width: 900px;
+  margin: 0 auto;
+}
 /*==================== PROJECT IN MIND ====================*/
 .project{
   text-align: center;
@@ -1307,5 +1312,6 @@ img {
   .contact__inputs{
     grid-template-columns: repeat(2, 1fr);
   }
+
 }
 
