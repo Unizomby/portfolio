@@ -584,6 +584,10 @@ img {
   width: 80%
 }
 
+.skills__metrics{
+  width: 85%
+}
+
 
 .skills__close .skills__list{
   height: 0;
