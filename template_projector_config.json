@@ -1,21 +1,12 @@
 {
-    "embeddings": [
-      {
-        "tensorName": "My tensor",
-        "tensorShape": [
-          1000,
-          50
-        ],
-        "tensorPath": "https://raw.githubusercontent.com/.../tensors.tsv",
-        "metadataPath": "https://raw.githubusercontent.com/.../optional.metadata.tsv",
-        "sprite": {
-          "imagePath": "https://github.com/.../optional.sprite.png",
-          "singleImageDim": [
-            32,
-            32
-          ]
-        },
-        "bookmarksPath": "https://raw.githubusercontent.com/.../bookmarks.txt"
-      }
-    ]
-  }
+  "embeddings": [
+    {
+      "tensorName": "My tensor",
+      "tensorShape": [
+        1000,
+        50
+      ],
+      "tensorPath": "https://dtucker.xyz/embedding_kaggle_vectors.tsv"
+    }
+  ]
+}
