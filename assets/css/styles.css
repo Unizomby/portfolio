@@ -553,7 +553,7 @@ img {
 }
 
 .skills__improve{
-  width: 90%;
+  width: 85%;
 }
 
 .skills__sketch{
@@ -587,10 +587,6 @@ img {
 .skills__bo{
   width: 80%
 }
-.skills__new{
-  width: 75%
-}
-
 
 .skills__close .skills__list{
   height: 0;
