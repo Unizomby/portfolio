@@ -540,6 +540,10 @@ img {
   width: 75%;
 }
 
+.skills__met{
+  width: 90%;
+}
+
 .skills__ml{
   width: 60%;
 }
@@ -584,9 +588,6 @@ img {
   width: 80%
 }
 
-.skills__metricrep{
-  width: 90%
-}
 
 .skills__close .skills__list{
   height: 0;
