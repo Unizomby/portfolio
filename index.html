@@ -16,6 +16,10 @@
         <!--==================== CSS ====================-->
         <link rel="stylesheet" href="assets/css/styles.css">
 
+        <!--==================== PyViz Script ====================-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
         <title>Donald Tucker</title>
     </head>
             <!-- Google tag (gtag.js) -->
@@ -207,7 +211,7 @@
             </section>
 
             <!--==================== SKILLS ====================-->
-            <section class="skills section" id="skills">
+            <section class="about section" id="about">
                 <h2 class="section__title">Skills</h2>
                 <span class="section__subtitle">Technical level</span>
 
@@ -422,6 +426,82 @@
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <!--==================== SKILLS PyVis====================-->
+            
+            <section class="home section" id="home">
+                <span class="section__subtitle">Skills Diagram (click and drag to explore)</span>
+                <div class="card" style="width: 100%">
+                    <div id="mynetwork" class="card-body"></div>
+                </div>
+                <script type="text/javascript">
+                      // initialize global variables.
+                      var edges;
+                      var nodes;
+                      var allNodes;
+                      var allEdges;
+                      var nodeColors;
+                      var originalNodes;
+                      var network;
+                      var container;
+                      var options, data;
+                      var filter = {
+                          item : '',
+                          property : '',
+                          value : []
+                      };
+        
+                      // This method is responsible for drawing the graph, returns the drawn network
+                      function drawGraph() {
+                          var container = document.getElementById('mynetwork');
+                          // parsing and collecting nodes and edges from the python
+                          nodes = new vis.DataSet([{"color": "#6e57e0", "id": "Software", "label": "Software", "namespace": ["1n"], "shape": "dot", "size": 50, "workload": {"1": "1w"}}, {"color": "#6e57e0", "id": "Python", "label": "Python", "namespace": ["2n"], "shape": "dot", "size": 10, "workload": "2w"}, {"color": "#6e57e0", "id": "SQL", "label": "SQL", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Excel", "label": "Excel", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "HTML", "label": "HTML", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Tableau", "label": "Tableau", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Business Objects", "label": "Business Objects", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Data Analysis", "label": "Data Analysis", "namespace": ["3n"], "shape": "dot", "size": 50, "workload": "3w"}, {"color": "#6e57e0", "id": "EDA", "label": "EDA", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Regression", "label": "Regression", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Machine Learning", "label": "Machine Learning", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Data Viz", "label": "Data Viz", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Industrial Engineering", "label": "Industrial Engineering", "namespace": ["3n"], "shape": "dot", "size": 50, "workload": "3w"}, {"color": "#6e57e0", "id": "Process Improvements, A3", "label": "Process Improvements, A3", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Impact assessments", "label": "Impact assessments", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Metric Reporting", "label": "Metric Reporting", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Capacity, Staffing Analysis", "label": "Capacity, Staffing Analysis", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Line Balancing", "label": "Line Balancing", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "Tensorflow", "label": "Tensorflow", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}, {"color": "#6e57e0", "id": "CSS", "label": "CSS", "namespace": ["3n"], "shape": "dot", "size": 10, "workload": "3w"}]);
+                          edges = new vis.DataSet([{"color": "#c1b6fc", "from": "Software", "to": "Python", "width": 1}, {"color": "#c1b6fc", "from": "Software", "to": "SQL", "width": 1}, {"color": "#c1b6fc", "from": "Software", "to": "Excel", "width": 1}, {"color": "#c1b6fc", "from": "Software", "to": "HTML", "width": 1}, {"color": "#c1b6fc", "from": "Software", "to": "Tableau", "width": 1}, {"color": "#c1b6fc", "from": "Software", "to": "Business Objects", "width": 1}, {"color": "#c1b6fc", "from": "Data Analysis", "to": "EDA", "width": 1}, {"color": "#c1b6fc", "from": "Data Analysis", "to": "Regression", "width": 1}, {"color": "#c1b6fc", "from": "Data Analysis", "to": "Machine Learning", "width": 1}, {"color": "#c1b6fc", "from": "Data Analysis", "to": "Data Viz", "width": 1}, {"color": "#c1b6fc", "from": "Industrial Engineering", "to": "Process Improvements, A3", "width": 1}, {"color": "#c1b6fc", "from": "Industrial Engineering", "to": "Impact assessments", "width": 1}, {"color": "#c1b6fc", "from": "Industrial Engineering", "to": "Metric Reporting", "width": 1}, {"color": "#c1b6fc", "from": "Industrial Engineering", "to": "Capacity, Staffing Analysis", "width": 1}, {"color": "#c1b6fc", "from": "Industrial Engineering", "to": "Line Balancing", "width": 1}, {"color": "#c1b6fc", "from": "Python", "to": "Regression", "width": 1}, {"color": "#c1b6fc", "from": "Python", "to": "Machine Learning", "width": 1}, {"color": "#c1b6fc", "from": "Python", "to": "Data Analysis", "width": 1}, {"color": "#c1b6fc", "from": "Python", "to": "SQL", "width": 1}, {"color": "#c1b6fc", "from": "Python", "to": "Tensorflow", "width": 1}, {"color": "#c1b6fc", "from": "Excel", "to": "Regression", "width": 1}, {"color": "#c1b6fc", "from": "Excel", "to": "SQL", "width": 1}, {"color": "#c1b6fc", "from": "HTML", "to": "CSS", "width": 1}, {"color": "#c1b6fc", "from": "Tableau", "to": "Data Viz", "width": 1}, {"color": "#c1b6fc", "from": "Tableau", "to": "SQL", "width": 1}, {"color": "#c1b6fc", "from": "Business Objects", "to": "Data Analysis", "width": 1}, {"color": "#c1b6fc", "from": "Machine Learning", "to": "Tensorflow", "width": 1}, {"color": "#c1b6fc", "from": "Data Viz", "to": "Metric Reporting", "width": 1}, {"color": "#c1b6fc", "from": "Process Improvements, A3", "to": "Data Analysis", "width": 1}]);
+        
+                          nodeColors = {};
+                          allNodes = nodes.get({ returnType: "Object" });
+                          for (nodeId in allNodes) {
+                            nodeColors[nodeId] = allNodes[nodeId].color;
+                          }
+                          allEdges = edges.get({ returnType: "Object" });
+                          // adding nodes and edges to the graph
+                          data = {nodes: nodes, edges: edges};
+        
+                          var options = {
+                "configure": {
+                    "enabled": false
+                },
+                "edges": {
+                    "color": {
+                        "inherit": true
+                    },
+                    "smooth": {
+                        "enabled": true,
+                        "type": "dynamic"
+                    }
+                },
+                "interaction": {
+                    "dragNodes": true,
+                    "hideEdgesOnDrag": false,
+                    "hideNodesOnDrag": false
+                },
+                "physics": {
+                    "enabled": true,
+                    "stabilization": {
+                        "enabled": true,
+                        "fit": true,
+                        "iterations": 1000,
+                        "onlyDynamicEdges": false,
+                        "updateInterval": 50
+                    }
+                }
+                };
+                          network = new vis.Network(container, data, options);
+                          return network;
+                      }
+                      drawGraph();
+                </script>
             </section>
 
             <!--==================== QUALIFICATION ====================-->
@@ -639,7 +719,7 @@
                 
             </section> -->
 
-            <!--==================== PORTFOLIO ====================-->
+            <!--==================== Certifications ====================-->
             <section class="services section" id="services">
                 <h2 class="section__title">Certifications</h2>
                 <span class="section__subtitle">Technical certifications</span>
@@ -1114,6 +1194,12 @@
                     
                 </script>
             </section>
+
+
+
+
+
+
         </main>
 
         <!--==================== FOOTER ====================-->

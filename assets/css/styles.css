@@ -1318,3 +1318,14 @@ img {
 
 }
 
+
+/* PyVis */
+#mynetwork {
+  width: 800px;
+  height: 400px;
+  background-color: #fbfbfe;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto auto;
+}
