@@ -1332,7 +1332,7 @@ img {
 #mynetwork {
   /* width: 800px; */
   height: 400px;
-  background-color: #fbfbfe;
+  background-color: var(--body-color);
   display: flex;
   justify-content: center;
   align-items: center;
