@@ -150,6 +150,11 @@ img {
   color: var(--title-color);
 }
 
+.section__title_projects {
+  font-size: var(--h2-font-size);
+  color: var(--first-color);
+}
+
 .section__subtitle {
   display: block;
   font-size: var(--small-font-size);
