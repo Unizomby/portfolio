@@ -1,6 +1,6 @@
 /*==================== GOOGLE FONTS ====================*/
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
-/* version 4 */ 
+/* version 5 */ 
 
 /*==================== VARIABLES CSS ====================*/
 :root {
@@ -306,7 +306,7 @@ img {
   fill: var(--first-color);
 }
 .home__blob-img{
-  width: 200px;
+  width: 400px;
 }
 
 .icon_svg{
