@@ -51,16 +51,9 @@
 
     <body>
         <div class="card" style="width: 100%">
-            
-            
             <div id="mynetwork" class="card-body"></div>
         </div>
-
-        
-        
-
         <script type="text/javascript">
-
               // initialize global variables.
               var edges;
               var nodes;
@@ -76,10 +69,6 @@
                   property : '',
                   value : []
               };
-
-              
-
-              
 
               // This method is responsible for drawing the graph, returns the drawn network
               function drawGraph() {
@@ -129,25 +118,8 @@
         }
     }
 };
-
-                  
-
-
-                  
-
                   network = new vis.Network(container, data, options);
-
-                  
-
-                  
-
-                  
-
-
-                  
-
                   return network;
-
               }
               drawGraph();
         </script>
