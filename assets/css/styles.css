@@ -1,6 +1,6 @@
 /*==================== GOOGLE FONTS ====================*/
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
-/* version 1.9 */ 
+/* version 1.10 */ 
 
 /*==================== VARIABLES CSS ====================*/
 :root {
@@ -601,6 +601,10 @@ img {
 
 .skills__network{
   width: 85%
+}
+
+.skills__timeseries{
+  width: 70%
 }
 
 .skills__close .skills__list{
