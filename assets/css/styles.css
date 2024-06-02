@@ -1,6 +1,6 @@
 /*==================== GOOGLE FONTS ====================*/
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
-/* version 1.10 */ 
+/* version 1.12 */ 
 
 /*==================== VARIABLES CSS ====================*/
 :root {
@@ -427,6 +427,12 @@ img {
 .about__description{
   text-align: center;
   margin-bottom: var(--mb-2-5);
+}
+
+.about__highlight{
+  text-align: center;
+  margin-bottom: var(--mb-2-5);
+  color: var(--first-color-alt);
 }
 
 .about__info{
@@ -1341,7 +1347,7 @@ img {
 /* PyVis */
 #mynetwork {
   /* width: 800px; */
-  height: 400px;
+  height: 500px;
   background-color: var(--body-color);
   display: flex;
   justify-content: center;
