@@ -7527,7 +7527,8 @@ a.anchor-link {
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">'predecessor'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">,</span> <span class="s1">'D'</span><span class="p">,</span> <span class="s1">'E'</span><span class="p">,</span> <span class="s1">'F'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'I'</span><span class="p">],</span>
     <span class="s1">'successor'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'B'</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">,</span> <span class="s1">'D'</span><span class="p">,</span> <span class="s1">'E'</span><span class="p">,</span> <span class="s1">'F'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'H'</span><span class="p">,</span> <span class="s1">'J'</span><span class="p">,</span> <span class="s1">'J'</span><span class="p">,</span> <span class="s1">'I'</span><span class="p">,</span> <span class="s1">'K'</span><span class="p">],</span>
-    <span class="s1">'duration'</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="s1">'duration'</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="s1">'color'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span><span class="s1">'#DAF7A6'</span><span class="p">,</span> <span class="s1">'#FF00CC'</span><span class="p">,</span> <span class="s1">'#DAF7A6'</span><span class="p">,</span> <span class="s1">'#DAF7A6'</span><span class="p">]</span>
 <span class="p">}</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -7565,6 +7566,7 @@ a.anchor-link {
 <th>predecessor</th>
 <th>successor</th>
 <th>duration</th>
+<th>color</th>
 </tr>
 </thead>
 <tbody>
@@ -7573,30 +7575,35 @@ a.anchor-link {
 <td>A</td>
 <td>B</td>
 <td>5</td>
+<td>#FF00CC</td>
 </tr>
 <tr>
 <th>1</th>
 <td>B</td>
 <td>C</td>
 <td>3</td>
+<td>#FF00CC</td>
 </tr>
 <tr>
 <th>2</th>
 <td>C</td>
 <td>D</td>
 <td>2</td>
+<td>#FF00CC</td>
 </tr>
 <tr>
 <th>3</th>
 <td>D</td>
 <td>E</td>
 <td>4</td>
+<td>#FF00CC</td>
 </tr>
 <tr>
 <th>4</th>
 <td>E</td>
 <td>F</td>
 <td>7</td>
+<td>#FF00CC</td>
 </tr>
 </tbody>
 </table>
@@ -7713,8 +7720,56 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="s1">'500px'</span><span class="p">,</span> <span class="s1">'800px'</span><span class="p">,</span> <span class="n">notebook</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Warning: When  cdn_resources is 'local' jupyter notebook has issues displaying graphics on chrome/safari. Use cdn_resources='in_line' or cdn_resources='remote' if you have issues viewing graphics in a notebook.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Add nodes with custom colors based on the DataFrame</span>
+<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+    <span class="c1"># Find the color associated with the node</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'predecessor'</span><span class="p">]</span> <span class="o">==</span> <span class="n">node</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">color</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'successor'</span><span class="p">]</span> <span class="o">==</span> <span class="n">node</span><span class="p">,</span> <span class="s1">'color'</span><span class="p">]</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">color</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">color</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="s1">'gray'</span>  <span class="c1"># Default to gray if no color found</span>
+    <span class="n">net</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Plot with pyvis</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">Network</span><span class="p">(</span><span class="s1">'500px'</span><span class="p">,</span> <span class="s1">'800px'</span><span class="p">,</span> <span class="n">notebook</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 <span class="c1"># net.show_buttons() # Show part 3 in the plot (optional)</span>
 <span class="n">net</span><span class="o">.</span><span class="n">from_nx</span><span class="p">(</span><span class="n">G</span><span class="p">)</span> <span class="c1"># Create directly from nx graph</span>
 <span class="n">net</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="s1">'criticalpath.html'</span><span class="p">)</span>
@@ -7730,8 +7785,7 @@ a.anchor-link {
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Warning: When  cdn_resources is 'local' jupyter notebook has issues displaying graphics on chrome/safari. Use cdn_resources='in_line' or cdn_resources='remote' if you have issues viewing graphics in a notebook.
-criticalpath.html
+<pre>criticalpath.html
 </pre>
 </div>
 </div>
