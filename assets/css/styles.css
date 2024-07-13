@@ -377,6 +377,17 @@ img {
   
 }
 
+.buttonopen{
+  display: inline-block;
+  background-color: #E0E0E0;
+  color: #6e57e0;
+  padding: .5rem;
+  border-radius: .5rem;
+  font-weight: var(--font-medium);
+  border-style: none;
+  
+}
+
 .button:hover{
   background-color: var(--first-color-alt);
 }
