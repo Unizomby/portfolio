@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap');
+        body {
+            /* display: flex; */
+            flex-direction: column; /* Added */
+            justify-content: center;
+            align-items: center;
+            /* height: 100vh; */
+            /* margin: 0;
+            padding: 0; */
+            background-color: whitesmoke;
+        }
+
+        .image-container {
+            flex: 0 0 100%;
+            box-sizing: border-box;
+            padding: 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+        p {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+
+        *{
+            font-family: 'Readex Pro';
+            line-height: 1em;
+            color: rgb(78, 78, 78);
+        }
+
+
+        .div-left {
+            align-self: flex-start; /* Aligns the div (and its content) to the start of the flex container */
+            margin-left: 10%;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Student Scores Optimization</h1>
+
+    <div width: 50%;>
+        <p>Linear Programming model to rebalance student teams minimizing the difference between team skill averages</p>
+        <br>
+        <br>
+        <h3>Current Team State</h3>
+        <br>
+    </div>
+    <h3 style="text-align: left; margin-left: 10%;">Scatterplot</h3>
+    <br>
+    <!-- 3d scatter-->
+
+
+    <!-- First team skills chart (teamskills1_current)-->
+
+    <!-- 2nd team chart (teamsskills2_current)-->
+    
+    <h3 style="text-align: left; margin-left: 10%;">Boxplot of Team Skills</h3>
+    <br>
+
+    <!-- Boxplot (boxplot_current)-->
+
+
+
+
+    
+    <hr>
+	<h3>Future Team State</h3>
+    <div class="div-left">
+        <p style="text-align: left; margin-left: 10%;">Groundrules:</p>
+        <br>
+        <li style="text-align: left; margin-left: 10%;">New Teams were created by minimizing the difference between team averages</li>
+        <li style="text-align: left; margin-left: 10%;">Finds optimal/feasible solution where at least 1 person with a score of 3 or more in each Skill Category</li>
+        <li style="text-align: left; margin-left: 10%;">Included Categories: Analysis, Continuous Improvement, Cost, Performance Reporting, Scheduling, Staffing</li>
+        <li style="text-align: left; margin-left: 10%;">Removed Team Leads, not included in new teams</li>
+        <li style="text-align: left; margin-left: 10%;">Removed Teams: Ops Analysis, Prod Sched </li>
+        
+        <br>
+        <br>
+    </div>
+
+    <h3 style="text-align: left; margin-left: 10%;">Boxplot of Team Skills</h3>
+    <p style="text-align: left; margin-left: 10%;">Future Team means = 47.05</p>
+    <br>
+    
+    </div>
+    <br>
+    <br>
+    <p style="text-align: right; margin-left: 10%;">v0.5</p>
+</body>
+</html>
