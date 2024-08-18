@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap');
+        body {
+            /* display: flex; */
+            flex-direction: column; /* Added */
+            justify-content: center;
+            align-items: center;
+            /* height: 100vh; */
+            /* margin: 0;
+            padding: 0; */
+            background-color: whitesmoke;
+        }
+
+        .image-container {
+            flex: 0 0 100%;
+            box-sizing: border-box;
+            padding: 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+        h3 {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+        p {
+            text-align: center;
+            margin-bottom: 1px;
+        }
+
+        *{
+            font-family: 'Readex Pro';
+            line-height: 1em;
+            color: rgb(78, 78, 78);
+        }
+
+
+        .div-left {
+            align-self: flex-start; /* Aligns the div (and its content) to the start of the flex container */
+            margin-left: 10%;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Student Scores Optimization</h1>
+
+    <div width: 50%;>
+        <p>Rebalance 100 students on 7 teams into 5 new teams of different sizes, using Linear Programming to minimize the difference between the avg team score.</p>
+        <p>Making the teams as balanced as possible.</p>
+        <br>
+        <br>
+        <h3>Current Team State</h3>
+        <table border="0" class="dataframe" style="text-align: left; margin-left: 10%;">
+            <thead>
+              <tr style="text-align: right;">
+                <th>Team Average</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>43.250000</td>
+              </tr>
+              <tr>
+                <td>45.421875</td>
+              </tr>
+              <tr>
+                <td>47.634615</td>
+              </tr>
+              <tr>
+                <td>47.750000</td>
+              </tr>
+              <tr>
+                <td>50.852941</td>
+              </tr>
+              <tr>
+                <td>48.916667</td>
+              </tr>
+              <tr>
+                <td>44.458333</td>
+              </tr>
+            </tbody>
+          </table>
+        <br>
+    </div>
+    
+    <br>
+    <!-- 3d scatter-->
+
+
+    <!-- First team skills chart (teamskills1_current)-->
+
+    <!-- 2nd team chart (teamsskills2_current)-->
+    
+    <h3 style="text-align: left; margin-left: 10%;">Boxplot of Team Skills</h3>
+    <br>
+
+    <!-- Boxplot (boxplot_current)-->
+    <div class="image-container">
+		<img src="currentplot.png" alt="current_boxplot" >
+	</div>
+    
+    <hr>
+	<h3>Future Team State</h3>
+    <div class="div-left">
+        <p style="text-align: left; margin-left: 10%;">Groundrules:</p>
+        <br>
+        <li style="text-align: left; margin-left: 10%;">New Teams were created by minimizing the difference between team averages</li>
+        <li style="text-align: left; margin-left: 10%;">Finds optimal/feasible solution where at least 1 person with a score of 70 or more in each Skill Category</li>
+        <li style="text-align: left; margin-left: 10%;">Each team must be matched preset team size [15, 25, 20, 20, 20].</li>
+        <br>
+        <br>
+    </div>
+
+    <h3 style="text-align: left; margin-left: 10%;">Boxplot of Team Skills</h3>
+    <p style="text-align: left; margin-left: 10%;">All 5 future teams have identical team averages.</p>
+    <p style="text-align: left; margin-left: 10%;">Future Team means = 47.05 ✅</p>
+    <br>
+    <div class="image-container">
+		<img src="newplot.png" alt="future_boxplot" >
+	</div>
+
+
+    </div>
+    <br>
+    <br>
+    <p style="text-align: right; margin-left: 10%;">v0.5</p>
+</body>
+</html>
