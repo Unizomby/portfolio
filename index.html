@@ -30,7 +30,21 @@
         gtag('js', new Date());
 
         gtag('config', 'G-FW49FK1LY8');
-        </script>    
+        </script>   
+        
+        <!-- JavaScript to switch photo on click -->
+        <script>
+            function switchImage() {
+                var img = document.getElementById("profile_image");
+                if (img.src.includes("assets/img/profile_pic2.png")) {
+                    img.src = "assets/img/selfie_cartoon.jpg";
+                } else {
+                    img.src = "assets/img/profile_pic2.png";
+                }
+            }
+        </script>
+
+
     <body>
         <!--==================== HEADER ====================-->
         <header class="header" id="header">
@@ -119,6 +133,7 @@
                             </svg>
                         </div>
 
+                        <!-- old version of blob -->
                         <!-- <div class="home__img">
                             <svg class="home__blob" viewBox="0 0 200 187" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                 <mask id="mask0" mask-type="alpha">
@@ -175,8 +190,11 @@
                 <h2 class="section__title">About Me</h2>
                 <span class="section__subtitle">Introduction</span> 
 
+                
+
+
                 <div class="about__container container grid">
-                    <img src="assets/img/profile_pic2.png" alt="" class="about__img">
+                    <img id="profile_image" src="assets/img/profile_pic2.png" alt="" class="about__img" onclick="switchImage()" style="cursor: pointer;">
 
                     <div class="about__data">
                         <p class="about__description">I am an Industrial Engineer with manufacturing experience of over 15 years
