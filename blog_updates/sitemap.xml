@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dtucker.xyz/updates/about.html</loc>
+    <loc>https://dtucker.xyz/blog_updates/about.html</loc>
     <lastmod>2024-09-08T00:49:06.682Z</lastmod>
   </url>
   <url>
-    <loc>https://dtucker.xyz/updates/posts/welcome/index.html</loc>
+    <loc>https://dtucker.xyz/blog_updates/posts/welcome/index.html</loc>
     <lastmod>2024-09-08T00:58:11.876Z</lastmod>
   </url>
   <url>
-    <loc>https://dtucker.xyz/updates/posts/post-with-code/index.html</loc>
+    <loc>https://dtucker.xyz/blog_updates/posts/post-with-code/index.html</loc>
     <lastmod>2024-09-08T00:58:22.318Z</lastmod>
   </url>
   <url>
-    <loc>https://dtucker.xyz/updates/index.html</loc>
+    <loc>https://dtucker.xyz/blog_updates/index.html</loc>
     <lastmod>2024-09-08T01:04:53.038Z</lastmod>
   </url>
 </urlset>
