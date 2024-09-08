@@ -6,15 +6,15 @@
       version="2.0">
 <channel>
 <title>Donald&#39;s blog</title>
-<link>https://dtucker.xyz/</link>
-<atom:link href="https://dtucker.xyz/index.xml" rel="self" type="application/rss+xml"/>
+<link>https://dtucker.xyz/_site/</link>
+<atom:link href="https://dtucker.xyz/_site/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog by me</description>
 <generator>quarto-1.5.56</generator>
 <lastBuildDate>Sun, 08 Sep 2024 05:00:00 GMT</lastBuildDate>
 <item>
   <title>Post With Code</title>
   <dc:creator>me </dc:creator>
-  <link>https://dtucker.xyz/posts/post-with-code/</link>
+  <link>https://dtucker.xyz/_site/posts/post-with-code/</link>
   <description><![CDATA[ 
 
 
@@ -29,14 +29,14 @@
   <category>news</category>
   <category>code</category>
   <category>analysis</category>
-  <guid>https://dtucker.xyz/posts/post-with-code/</guid>
+  <guid>https://dtucker.xyz/_site/posts/post-with-code/</guid>
   <pubDate>Sun, 08 Sep 2024 05:00:00 GMT</pubDate>
-  <media:content url="https://dtucker.xyz/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
+  <media:content url="https://dtucker.xyz/_site/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
   <title>Welcome To My Blog</title>
   <dc:creator>me </dc:creator>
-  <link>https://dtucker.xyz/posts/welcome/</link>
+  <link>https://dtucker.xyz/_site/posts/welcome/</link>
   <description><![CDATA[ 
 
 
@@ -44,14 +44,14 @@
 
 
 <p>This is the first post here. Welcome! 😃</p>
-<p><img src="https://dtucker.xyz/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
+<p><img src="https://dtucker.xyz/_site/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
 <p>Check out my other website <a href="https://dtucker.xyz" class="uri">https://dtucker.xyz</a></p>
 
 
 
  ]]></description>
   <category>news</category>
-  <guid>https://dtucker.xyz/posts/welcome/</guid>
+  <guid>https://dtucker.xyz/_site/posts/welcome/</guid>
   <pubDate>Sat, 07 Sep 2024 05:00:00 GMT</pubDate>
 </item>
 </channel>
