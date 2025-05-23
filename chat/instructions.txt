@@ -1,0 +1,6 @@
+to update the chatbot dataset on hugging face, update resume or add documents to the documents folder. (docx or txt, havent tried pdfs yet)
+
+things to add
+-resume
+-skills list
+-projects
