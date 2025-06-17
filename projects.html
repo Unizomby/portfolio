@@ -58,158 +58,51 @@
         <main class="main">
             <section class="home section" id="container--projects"> 
                 <h2 class="section__title">Projects</h2>
-                <h2 class="section__title_projects">Machine Learning</h2>
-                <br>
-                <section>
-                    <h3>
-                        Spaceship Titanic classification model
-                    </h3>
-                    <p class="about__description">Random Forest and XGBoost classification prediction python model. Predicting which passengers will be transported to an alternate dimension.</p>  
-                    <a href="https://public.tableau.com/app/profile/donald.tucker4155/viz/SpaceshipTitanic_16882551562560/PassengerDashboard"> Tableau Dashboard</a><br>
-                    <a href="https://www.kaggle.com/code/glenn23/spaceship-titanic-model"> Kaggle Notebook</a><br>
-                    <a href="https://blog.dtucker.xyz/spaceship-titanic-classification-model"> blog</a>
-                    <hr>
-                </section>
-
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        Housing Prices Regressor Predictions
-                    </h3>
-                    <p class="about__description">XGBoost Regressor predictions of housing prices</p>  
-                    <a href="https://public.tableau.com/app/profile/donald.tucker4155/viz/HousingPrices_16960239787650/Sheet12"> Tableau Dashboard</a><br>
-                    <a href="https://www.kaggle.com/code/glenn23/housing-prices/notebook"> Kaggle Notebook</a><br>
-                    <a href="https://blog.dtucker.xyz/predicting-housing-prices"> blog</a>
-                    <hr>
-                </section>
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        NLP Tweet Classification
-                    </h3>
-                    <p class="about__description">Binary classification model to determine if tweets are about disaters or not. 
-                        Uses a TensorFlow Hub pretrained sentence encoder, USE, in a Sequential Model.</p>  
-                    <a href="https://www.kaggle.com/code/glenn23/nlp-tweets-classification-use-sequential-api"> Kaggle Notebook</a><br>
-                    <a href="https://blog.dtucker.xyz/nlp-binary-classification-of-tweets"> blog</a>
-                    <hr>
-                </section>
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        Food Not Food Text Classification 🍕🫐
-                    </h3>
-                    <p class="about__description">Binary classification model to determine if sentences are about food. Hosted on Hugging Face.</p>  
-                    <a href="https://unizomby-food-not-food-text-classifier-distilber-b130c78.hf.space"> App</a><br>
-                </section>
-                <hr>
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        Portfolio Chatbot RAG model 🤖
-                    </h3>
-                    <p class="about__description">This app is a personalized chatbot that uses OpenAI and LlamaIndex to answer questions based on my portfolio, hosted with a custom interface on HuggingFace Spaces.</p>  
-                    <a href="https://huggingface.co/spaces/Unizomby/dtuckchat"> App</a><br>
-                </section>
-                <hr>
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        Time Series Forecasting
-                    </h3>
-                    <p class="about__description">Modeling timeseries data using multiple machine learning methods. 
-                        Uses Prophet model, tableau, excel.</p>  
-                    <a href="https://github.com/Unizomby/online_retail_eda/blob/main/Prophet_02_Forecast_AAPL.ipynb"> Prophet Model Notebook</a><br>
-                    <a href="https://blog.dtucker.xyz/series/time-series"> blog series</a>
-                </section>
-                <hr>
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        Multi-target Regression Model
-                    </h3>
-                    <p class="about__description">Forecasting product completion times using multi-output regression.</p>  
-                    <a href="https://public.tableau.com/shared/PKNH7JR6N?:display_count=n&:origin=viz_share_link"> Tableau Dashboard</a><br>
-                </section>
-                <hr>
-                <section id="container--projects">
-                    <br>
-                    <h3>
-                        Crop Classification and Clustering Model
-                    </h3>
-                    <p class="about__description">Multi-class Crop classification and clustering model built to recommend which farm crop to plant based on soil characteristics.</p>  
+                <span class="section__subtitle">Portfolio Collection</span>
+                
+                <!--==================== FILTER BAR ====================-->
+                <div class="filter-container">
+                    <div class="search-container">
+                        <input type="text" id="search-input" placeholder="Search projects..." class="search-input">
+                        <i class="uil uil-search search-icon"></i>
+                    </div>
                     
-                    <a href="projects/crop/crop_classification.html"> 📝 ipynb Notebook</a><br>
-                    <a href="https://blog.dtucker.xyz/crop-classification-model"> blog</a>
-                    <!-- <hr> -->
-                </section>
-                <hr>
-                <br>
-                <br>
-                <h2 class="section__title_projects">Other</h2>
-                <br>
-                <h3>
-                    Online retail sales exploratory data analysis 
-                </h3>
-                <p class="about__description">Gaining some practice performing exploratory data analysis, since this is often one of the first steps in preparing data for machine learning.</p>  
-                <a href="https://public.tableau.com/app/profile/donald.tucker4155/viz/OnlineRetailsalesEDA/Dashboard1"> Tableau Dashboard</a><br>
-                <a href="projects/online_retail/online_retail.html"> ipynb Notebook</a><br>
-                <a href="https://blog.dtucker.xyz/online-retail-exploratory-data-analysis-with-python"> blog</a>
-                <hr>
-            </section>
-            
-            <section id="container--projects">
-                <h3>
-                    Network Diagrams and analysis
-                </h3><br>
-                <h3>
-                    Relational Network Diagram
-                </h3>
-                <p class="about__description">A relational interactive Marvel network</p>  
-                <a href="buckey.html"> Character Network Diagram</a><br>
-                <a href="https://www.kaggle.com/code/glenn23/interactive-marvel-character-network?scriptVersionId=141110769"> Network Diagram Kaggle Notebook</a><br>
-                <br>
-                <h3>
-                    Other Network analysis
-                </h3>
-                
-                <a href="skills/skill_diagram_expanded.html"> My Skills diagram</a><br>
-                <a href="projects/networks/critical_path_example.html"> Critical Path notebook</a>
-                <hr>
-                <br>
+                    <div class="filter-tags">
+                        <button class="filter-tag active" data-filter="all">All</button>
+                        <button class="filter-tag" data-filter="machine-learning">ML</button>
+                        <button class="filter-tag" data-filter="classification">Classification</button>
+                        <button class="filter-tag" data-filter="regression">Regression</button>
+                        <button class="filter-tag" data-filter="nlp">NLP</button>
+                        <button class="filter-tag" data-filter="data-viz">Data Viz</button>
+                        <button class="filter-tag" data-filter="network-analysis">Networks</button>
+                        <button class="filter-tag" data-filter="statistics">Statistics</button>
+                        <button class="filter-tag" data-filter="optimization">Optimization</button>
+                        <button class="filter-tag" data-filter="time-series">Time Series</button>
+                    </div>
+                </div>
+                    <!--==================== PROJECTS GRID ====================-->
+                    <div class="projects-grid" id="projects-grid">
+                        <!-- Projects will be dynamically generated here -->
+                    </div>
+                </div>
             </section>
 
-            <section id="container--projects">
-                <h3>
-                    2 Sample Hypothesis T-test
-                </h3>
-                <p class="about__description">Utilizing hypothesis testing t-tests to validate process improvements initiatives.  Created a template and custom p-value function to interpret the results of the hypothesis tests.</p>  
-                
-                <a href="projects/T-test_hypothesis.html"> 📝 ipynb Notebook</a><br>
-                <a href="https://blog.dtucker.xyz/hypothesis-testing-2-sample-t-test"> blog</a>
-                <hr>
+            <!--==================== FEATURED PROJECT ====================-->
+            <section class="featured-project section" id="featured">
+                <div class="container">
+                    <h2 class="section__title">Featured Project</h2>
+                    <span class="section__subtitle">Interactive ML Demo</span>
+                    <div class="featured-project-container">
+                        <iframe
+                            src="https://unizomby-food-not-food-text-classifier-distilber-b130c78.hf.space"
+                            frameborder="0"
+                            width="100%"
+                            height="550"
+                            style="border-radius: 1rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); max-width: 850px; margin: 0 auto; display: block;"
+                        ></iframe>
+                    </div>
+                </div>
             </section>
-
-            <section id="container--projects">
-                <br>
-                <h3>
-                    Linear Programming Optimization
-                </h3>
-                <p class="about__description">Rebalance 100 students on 7 teams into 5 new teams of different sizes, using Linear Programming to minimize the difference between the avg team score.
-                    Making the teams as balanced as possible.</p>  
-                
-                <a href="projects/student_LP/students.html"> 📝 Project Summary</a><br>
-                <a href="https://blog.dtucker.xyz/lp-optimization"> blog</a>
-                <hr>
-            </section>
-            <h3 class="section__title">Recent ML Project</h3>
-            <span class="section__subtitle">Binary Classification</span>
-            <div style="display: flex; justify-content: center; align-items: center; height: 45vh;">
-                <iframe
-                    src="https://unizomby-food-not-food-text-classifier-distilber-b130c78.hf.space"
-                    frameborder="0"
-                    width="850"
-                    height="550"
-                ></iframe>
         </main>
 
         <!--==================== FOOTER ====================-->
@@ -260,6 +153,292 @@
         <!--==================== SWIPER JS ====================-->
         <script src="assets/js/swiper-bundle.min.js"></script>
 
+        <!--==================== PROJECTS DATA & FILTERING ====================-->
+        <script>
+            // Project data structure
+            const projects = [
+                {
+                    id: 1,
+                    title: "Spaceship Titanic Classification Model",
+                    description: "Random Forest and XGBoost classification prediction python model. Predicting which passengers will be transported to an alternate dimension.",
+                    tags: ["machine-learning", "classification", "python", "data-viz"],
+                    image: 'assets/img/titanic_pairplot.png', 
+                    links: [
+                        { text: "Tableau Dashboard", url: "https://public.tableau.com/app/profile/donald.tucker4155/viz/SpaceshipTitanic_16882551562560/PassengerDashboard" },
+                        { text: "Kaggle Notebook", url: "https://www.kaggle.com/code/glenn23/spaceship-titanic-model" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/spaceship-titanic-classification-model" }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Housing Prices Regressor Predictions",
+                    description: "XGBoost Regressor predictions of housing prices",
+                    tags: ["machine-learning", "regression", "python", "data-viz"],
+                    image: 'assets/img/housing_heatmap.png',
+                    links: [
+                        { text: "Tableau Dashboard", url: "https://public.tableau.com/app/profile/donald.tucker4155/viz/HousingPrices_16960239787650/Sheet12" },
+                        { text: "Kaggle Notebook", url: "https://www.kaggle.com/code/glenn23/housing-prices/notebook" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/predicting-housing-prices" }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "NLP Tweet Classification",
+                    description: "Binary classification model to determine if tweets are about disasters or not. Uses a TensorFlow Hub pretrained sentence encoder, USE, in a Sequential Model.",
+                    tags: ["machine-learning", "nlp", "classification", "python"],
+                    image: 'assets/img/nlp_cloud.png',
+                    links: [
+                        { text: "Kaggle Notebook", url: "https://www.kaggle.com/code/glenn23/nlp-tweets-classification-use-sequential-api" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/nlp-binary-classification-of-tweets" }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Food Not Food Text Classification 🍕🫐",
+                    description: "Binary classification model to determine if sentences are about food. Hosted on Hugging Face.",
+                    tags: ["machine-learning", "nlp", "classification", "huggingface"],
+                    image: 'assets/img/food.png',
+                    links: [
+                        { text: "App", url: "https://unizomby-food-not-food-text-classifier-distilber-b130c78.hf.space" }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: "Portfolio Chatbot RAG Model 🤖",
+                    description: "This app is a personalized chatbot that uses OpenAI and LlamaIndex to answer questions based on my portfolio, hosted with a custom interface on HuggingFace Spaces.",
+                    tags: ["machine-learning", "nlp", "rag", "huggingface"],
+                    image: 'assets/img/ragbot.png',
+                    links: [
+                        { text: "App", url: "https://huggingface.co/spaces/Unizomby/dtuckchat" }
+                    ]
+                },
+                {
+                    id: 6,
+                    title: "Time Series Forecasting",
+                    description: "Modeling timeseries data using multiple machine learning methods. Uses Prophet model, tableau, excel.",
+                    tags: ["machine-learning", "time-series", "python", "data-viz"],
+                    image: 'assets/img/timeseries.png',
+                    links: [
+                        { text: "Prophet Model Notebook", url: "https://github.com/Unizomby/online_retail_eda/blob/main/Prophet_02_Forecast_AAPL.ipynb" },
+                        { text: "Blog Series", url: "https://blog.dtucker.xyz/series/time-series" }
+                    ]
+                },
+                {
+                    id: 7,
+                    title: "Multi-target Regression Model",
+                    description: "Forecasting product completion times using multi-output regression.",
+                    tags: ["machine-learning", "regression", "data-viz"],
+                    image: 'assets/img/mutli_target_regression.png',
+                    links: [
+                        { text: "Tableau Dashboard", url: "https://public.tableau.com/views/ProductCompletionProjection/ProjectedCompletion?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link" }
+                    ]
+                },
+                {
+                    id: 8,
+                    title: "Crop Classification and Clustering Model",
+                    description: "Multi-class Crop classification and clustering model built to recommend which farm crop to plant based on soil characteristics.",
+                    tags: ["machine-learning", "classification", "clustering", "python"],
+                    image: 'assets/img/crop.png',
+                    links: [
+                        { text: "📝 ipynb Notebook", url: "projects/crop/crop_classification.html" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/crop-classification-model" }
+                    ]
+                },
+                {
+                    id: 9,
+                    title: "Online Retail Sales Exploratory Data Analysis",
+                    description: "Gaining some practice performing exploratory data analysis, since this is often one of the first steps in preparing data for machine learning.",
+                    tags: ["data-viz", "eda", "python"],
+                    image: 'assets/img/retail_eda.png',
+                    links: [
+                        { text: "Tableau Dashboard", url: "https://public.tableau.com/app/profile/donald.tucker4155/viz/OnlineRetailsalesEDA/Dashboard1" },
+                        { text: "ipynb Notebook", url: "projects/online_retail/online_retail.html" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/online-retail-exploratory-data-analysis-with-python" }
+                    ]
+                },
+                {
+                    id: 10,
+                    title: "Marvel Character Network Diagram",
+                    description: "A relational interactive Marvel network analysis showing character relationships.",
+                    tags: ["network-analysis", "data-viz", "python"],
+                    image: 'assets/img/marvel_network.png',
+                    links: [
+                        { text: "Character Network Diagram", url: "buckey.html" },
+                        { text: "Network Diagram Kaggle Notebook", url: "https://www.kaggle.com/code/glenn23/interactive-marvel-character-network?scriptVersionId=141110769" }
+                    ]
+                },
+                {
+                    id: 11,
+                    title: "Network Analysis",
+                    description: "Interactive network diagrams showing skill relationships and critical path analysis.",
+                    tags: ["network-analysis", "data-viz"],
+                    image: 'projects/networks/cp_image2.png',
+                    links: [
+                        { text: "My Skills Diagram", url: "skills/skill_diagram_expanded.html" },
+                        { text: "Critical Path Notebook", url: "projects/networks/critical_path_example.html" }
+                    ]
+                },
+                {
+                    id: 12,
+                    title: "2 Sample Hypothesis T-test",
+                    description: "Utilizing hypothesis testing t-tests to validate process improvements initiatives. Created a template and custom p-value function to interpret the results of the hypothesis tests.",
+                    tags: ["statistics", "python", "hypothesis-testing"],
+                    image: 'assets/img/pvalue.png',
+                    links: [
+                        { text: "📝 ipynb Notebook", url: "projects/T-test_hypothesis.html" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/hypothesis-testing-2-sample-t-test" }
+                    ]
+                },
+                {
+                    id: 13,
+                    title: "Linear Programming Optimization",
+                    description: "Rebalance 100 students on 7 teams into 5 new teams of different sizes, using Linear Programming to minimize the difference between the avg team score. Making the teams as balanced as possible.",
+                    tags: ["optimization", "python", "linear-programming"],
+                    image: 'projects/student_LP/newplot.png',
+                    links: [
+                        { text: "📝 Project Summary", url: "projects/student_LP/students.html" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/lp-optimization" }
+                    ]
+                }
+            ];
+
+            // Render projects function
+            function renderProjects(projectsToRender = projects) {
+                const grid = document.getElementById('projects-grid');
+                grid.innerHTML = '';
+                
+                projectsToRender.forEach(project => {
+                    const projectCard = document.createElement('div');
+                    projectCard.className = 'project-card';
+                    projectCard.setAttribute('data-tags', project.tags.join(' '));
+                    
+                    const tagsHTML = project.tags.map(tag => 
+                        `<span class="project-tag">#${tag.replace('-', ' ')}</span>`
+                    ).join('');
+                    
+                    const linksHTML = project.links.map(link => 
+                        `<a href="${link.url}" class="project-link" target="_blank">${link.text}</a>`
+                    ).join('');
+                    
+                    // Generate image - use custom image if available, otherwise use category-based placeholder
+                    const getProjectImage = (project) => {
+                        // If project has a custom image, use it
+                        if (project.image) {
+                            return project.image;
+                        }
+                        
+                        // Otherwise fall back to category-based placeholders
+                        const tags = project.tags;
+                        if (tags.includes('machine-learning') || tags.includes('classification') || tags.includes('regression')) {
+                            return 'https://via.placeholder.com/300x180/6e57e0/ffffff?text=ML+Project';
+                        } else if (tags.includes('data-viz')) {
+                            return 'https://via.placeholder.com/300x180/c1b6fc/333333?text=Data+Viz';
+                        } else if (tags.includes('network-analysis')) {
+                            return 'https://via.placeholder.com/300x180/8b5cf6/ffffff?text=Network';
+                        } else if (tags.includes('statistics')) {
+                            return 'https://via.placeholder.com/300x180/a855f7/ffffff?text=Statistics';
+                        } else if (tags.includes('optimization')) {
+                            return 'assests/img/projects/optimization-category.png';
+                        } else {
+                            return 'https://via.placeholder.com/300x180/7c3aed/ffffff?text=Project';
+                        }
+                    };
+                    
+                    // Legacy function for backwards compatibility
+                    const getPlaceholderImage = (tags) => {
+                        if (tags.includes('machine-learning') || tags.includes('classification') || tags.includes('regression')) {
+                            return 'https://via.placeholder.com/300x180/6e57e0/ffffff?text=ML+Project';
+                        } else if (tags.includes('data-viz')) {
+                            return 'https://via.placeholder.com/300x180/c1b6fc/333333?text=Data+Viz';
+                        } else if (tags.includes('network-analysis')) {
+                            return 'https://via.placeholder.com/300x180/8b5cf6/ffffff?text=Network';
+                        } else if (tags.includes('statistics')) {
+                            return 'https://via.placeholder.com/300x180/a855f7/ffffff?text=Statistics';
+                        } else if (tags.includes('optimization')) {
+                            return 'https://via.placeholder.com/300x180/9333ea/ffffff?text=Optimization';
+                        } else {
+                            return 'assests/img/projects/optimization-category.png';
+                        }
+                    };
+                    
+                    projectCard.innerHTML = `
+                        <div class="project-image">
+                            <img src="${getProjectImage(project)}" alt="${project.title}" class="project-img">
+                        </div>
+                        <div class="project-content">
+                            <div class="project-header">
+                                <h3 class="project-title">${project.title}</h3>
+                            </div>
+                            <p class="project-description">${project.description}</p>
+                            <div class="project-links">${linksHTML}</div>
+                            <div class="project-tags">${tagsHTML}</div>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(projectCard);
+                });
+            }
+
+            // Filter functionality
+            function filterProjects(filterTag) {
+                if (filterTag === 'all') {
+                    renderProjects(projects);
+                } else {
+                    const filtered = projects.filter(project => 
+                        project.tags.includes(filterTag)
+                    );
+                    renderProjects(filtered);
+                }
+            }
+
+            // Search functionality
+            function searchProjects(searchTerm) {
+                const filtered = projects.filter(project => 
+                    project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    project.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+                renderProjects(filtered);
+            }
+
+            // Event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initial render
+                renderProjects();
+                
+                // Filter tag clicks
+                document.querySelectorAll('.filter-tag').forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        document.querySelectorAll('.filter-tag').forEach(btn => btn.classList.remove('active'));
+                        // Add active class to clicked button
+                        this.classList.add('active');
+                        // Filter projects
+                        filterProjects(this.getAttribute('data-filter'));
+                    });
+                });
+                
+                // Search input
+                const searchInput = document.getElementById('search-input');
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const searchTerm = this.value.trim();
+                        if (searchTerm === '') {
+                            renderProjects();
+                        } else {
+                            searchProjects(searchTerm);
+                        }
+                        // Reset filter buttons when searching
+                        if (searchTerm !== '') {
+                            document.querySelectorAll('.filter-tag').forEach(btn => btn.classList.remove('active'));
+                        }
+                    }, 300);
+                });
+            });
+        </script>
+        
         <!--==================== MAIN JS ====================-->
         <script src="assets/js/main.js"></script>
     </body>

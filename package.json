@@ -1,0 +1,25 @@
+{
+  "name": "portfolio-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Unizomby/portfolio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Unizomby/portfolio/issues"
+  },
+  "homepage": "https://github.com/Unizomby/portfolio#readme",
+  "dependencies": {
+    "@modelcontextprotocol/server-puppeteer": "^2025.5.12",
+    "puppeteer": "^24.10.1"
+  }
+}
