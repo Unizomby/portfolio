@@ -78,6 +78,8 @@
                         <button class="filter-tag" data-filter="statistics">Statistics</button>
                         <button class="filter-tag" data-filter="optimization">Optimization</button>
                         <button class="filter-tag" data-filter="time-series">Time Series</button>
+                        <button class="filter-tag" data-filter="LLM">LLM</button>
+                        <button class="filter-tag" data-filter="HuggingFace">HuggingFace</button>
                     </div>
                 </div>
                     <!--==================== PROJECTS GRID ====================-->
@@ -196,7 +198,7 @@
                     id: 4,
                     title: "Food Not Food Text Classification 🍕🫐",
                     description: "Binary classification model to determine if sentences are about food. Hosted on Hugging Face.",
-                    tags: ["machine-learning", "nlp", "classification", "huggingface"],
+                    tags: ["machine-learning", "nlp", "classification", "HuggingFace", "LLM"],
                     image: 'assets/img/food.png',
                     links: [
                         { text: "App", url: "https://unizomby-food-not-food-text-classifier-distilber-b130c78.hf.space" }
@@ -206,7 +208,7 @@
                     id: 5,
                     title: "Portfolio Chatbot RAG Model 🤖",
                     description: "This app is a personalized chatbot that uses OpenAI and LlamaIndex to answer questions based on my portfolio, hosted with a custom interface on HuggingFace Spaces.",
-                    tags: ["machine-learning", "nlp", "rag", "huggingface"],
+                    tags: ["machine-learning", "nlp", "rag", "HuggingFace", "LLM"],
                     image: 'assets/img/ragbot.png',
                     links: [
                         { text: "App", url: "https://huggingface.co/spaces/Unizomby/dtuckchat" }
@@ -298,6 +300,17 @@
                     links: [
                         { text: "📝 Project Summary", url: "projects/student_LP/students.html" },
                         { text: "Blog", url: "https://blog.dtucker.xyz/lp-optimization" }
+                    ]
+                },
+                {
+                    id: 14,
+                    title: "Prompt Comparison Tool 🗣️",
+                    description: "The tool is a lightweight Gradio web app that sends any user prompt to two hosted chat models—Mistral-7B-Instruct and LLaMA-2-7B-Chat—via the Hugging Face Inference API and displays their responses side-by-side.",
+                    tags: ["machine-learning", "python", "LLM", "HuggingFace", "nlp"],
+                    image: 'assets/img/prompt_comparison.png',
+                    links: [
+                        { text: "App", url: "https://huggingface.co/spaces/Unizomby/prompt_comparison" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/prompt-comparison-app" }
                     ]
                 }
             ];
