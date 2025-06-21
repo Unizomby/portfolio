@@ -80,6 +80,7 @@
                         <button class="filter-tag" data-filter="time-series">Time Series</button>
                         <button class="filter-tag" data-filter="LLM">LLM</button>
                         <button class="filter-tag" data-filter="HuggingFace">HuggingFace</button>
+                        <button class="filter-tag" data-filter="anomaly">Anomaly</button>
                     </div>
                 </div>
                     <!--==================== PROJECTS GRID ====================-->
@@ -211,7 +212,8 @@
                     tags: ["machine-learning", "nlp", "rag", "HuggingFace", "LLM"],
                     image: 'assets/img/ragbot.png',
                     links: [
-                        { text: "App", url: "https://huggingface.co/spaces/Unizomby/dtuckchat" }
+                        { text: "App", url: "https://huggingface.co/spaces/Unizomby/dtuckchat" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/building-a-personalized-chatbot-powered-by-portfolio" }
                     ]
                 },
                 {
@@ -284,7 +286,7 @@
                     id: 12,
                     title: "2 Sample Hypothesis T-test",
                     description: "Utilizing hypothesis testing t-tests to validate process improvements initiatives. Created a template and custom p-value function to interpret the results of the hypothesis tests.",
-                    tags: ["statistics", "python", "hypothesis-testing"],
+                    tags: ["statistics", "python", "hypothesis-testing", "anomaly"],
                     image: 'assets/img/pvalue.png',
                     links: [
                         { text: "📝 ipynb Notebook", url: "projects/T-test_hypothesis.html" },
@@ -311,6 +313,17 @@
                     links: [
                         { text: "App", url: "https://huggingface.co/spaces/Unizomby/prompt_comparison" },
                         { text: "Blog", url: "https://blog.dtucker.xyz/prompt-comparison-app" }
+                    ]
+                },
+                {
+                    id: 15,
+                    title: "Time-Series Forecast & Anomaly Dashboard",
+                    description: "A time-series forecasting and anomaly-detection tool that lets users upload any dataset, automatically identifies the date and value columns, and produces dual forecasts with Prophet and auto-tuned SARIMAX—complete with Isolation Forest anomaly overlays.",
+                    tags: ["machine-learning", "python", "time-series", "data-viz", "anomaly"],
+                    image: 'assets/img/timeseries_dash.png',
+                    links: [
+                        { text: "Dashboard", url: "https://unizomby-timeseries-dash-app-xkbqpe.streamlit.app" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/building-a-time-series-forecast-and-anomaly-dashboard" }
                     ]
                 }
             ];
