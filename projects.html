@@ -81,6 +81,9 @@
                         <button class="filter-tag" data-filter="LLM">LLM</button>
                         <button class="filter-tag" data-filter="HuggingFace">HuggingFace</button>
                         <button class="filter-tag" data-filter="anomaly">Anomaly</button>
+                        <button class="filter-tag" data-filter="process-improvement">Process Improvement</button>
+                        <button class="filter-tag" data-filter="A3">A3</button>
+                        
                     </div>
                 </div>
                     <!--==================== PROJECTS GRID ====================-->
@@ -286,7 +289,7 @@
                     id: 12,
                     title: "2 Sample Hypothesis T-test",
                     description: "Utilizing hypothesis testing t-tests to validate process improvements initiatives. Created a template and custom p-value function to interpret the results of the hypothesis tests.",
-                    tags: ["statistics", "python", "hypothesis-testing", "anomaly"],
+                    tags: ["statistics", "python", "hypothesis-testing", "anomaly", "process-improvement"],
                     image: 'assets/img/pvalue.png',
                     links: [
                         { text: "📝 ipynb Notebook", url: "projects/T-test_hypothesis.html" },
@@ -324,6 +327,17 @@
                     links: [
                         { text: "Dashboard", url: "https://unizomby-timeseries-dash-app-xkbqpe.streamlit.app" },
                         { text: "Blog", url: "https://blog.dtucker.xyz/building-a-time-series-forecast-and-anomaly-dashboard" }
+                    ]
+                },
+                {
+                    id: 16,
+                    title: "A3 Process Improvement App",
+                    description: "This A3 Process Improvement app is a React-based tool that guides users through Toyota's systematic problem-solving methodology using a focused, one-question-at-a-time interface. Built with Claude's help, it walks users through all eight A3 steps (from problem identification to follow-up planning), then uses Claude's API to automatically analyze their completed document and provide expert-level insights including key findings, recommendations, and risk assessments. ",
+                    tags: ["process-improvement", "A3"],
+                    image: 'assets/img/a3_app.png',
+                    links: [
+                        { text: "Dashboard", url: "https://claude.ai/public/artifacts/22829a62-eadf-439b-9aff-9c9c9a272106?fullscreen=false" },
+                        { text: "Blog", url: "https://blog.dtucker.xyz/building-an-a3-process-improvement-app-with-claude" }
                     ]
                 }
             ];
