@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentiment Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #3730A3;
+            --positive: #10B981;
+            --negative: #EF4444;
+            --neutral: #6B7280;
+            --bg: #F3F4F6;
+            --card: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #111827;
+            --text-muted: #6B7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, #4F46E5 0%, #6D28D9 100%);
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+        }
+        .header-icon { font-size: 2rem; }
+        .header h1 { font-size: 1.25rem; font-weight: 700; }
+        .header-sub { font-size: 0.8125rem; opacity: 0.8; margin-top: 0.125rem; }
+
+        /* ── Layout ── */
+        .main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.75rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.875rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .step-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 1.625rem;
+            height: 1.625rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-badge.complete { background: var(--positive); }
+
+        /* ── Settings grid ── */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) { .settings-grid { grid-template-columns: 1fr; } }
+
+        /* ── Form ── */
+        .field { display: flex; flex-direction: column; gap: 0.375rem; }
+        label.field-label { font-size: 0.8125rem; font-weight: 600; color: var(--text); }
+        .hint { font-size: 0.75rem; color: var(--text-muted); }
+        input[type="text"], input[type="password"], select {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1.5px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            background: white;
+            color: var(--text);
+        }
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+        }
+        select { cursor: pointer; }
+
+        /* ── Upload zone ── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 0.875rem;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #FAFBFC;
+            user-select: none;
+        }
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(79,70,229,0.04);
+        }
+        .upload-zone.has-file { border-color: var(--positive); background: rgba(16,185,129,0.04); }
+        .upload-icon { font-size: 2.75rem; margin-bottom: 0.75rem; }
+        .upload-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+        .upload-sub { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* ── Column chips ── */
+        .columns-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.625rem; }
+        .col-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.875rem;
+            border: 1.5px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: white;
+            user-select: none;
+            color: var(--text);
+        }
+        .col-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .col-chip.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* ── Radio options ── */
+        .radio-group { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .radio-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        .radio-option input[type="radio"] { margin-top: 2px; flex-shrink: 0; accent-color: var(--primary); }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+        .btn-outline:hover { background: rgba(79,70,229,0.05); }
+        .btn-success { background: var(--positive); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+
+        /* ── Progress ── */
+        .progress-wrap { margin-top: 1rem; }
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.375rem;
+        }
+        .progress-label { font-size: 0.8125rem; color: var(--text-muted); }
+        .progress-pct { font-size: 0.8125rem; font-weight: 600; color: var(--primary); }
+        .progress-track {
+            background: var(--border);
+            border-radius: 9999px;
+            height: 0.5rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #7C3AED);
+            border-radius: 9999px;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Summary stats ── */
+        .stat-card {
+            border-radius: 0.875rem;
+            padding: 1.125rem 1.25rem;
+            text-align: center;
+        }
+        .stat-positive { background: rgba(16,185,129,0.1); }
+        .stat-negative { background: rgba(239,68,68,0.1); }
+        .stat-neutral  { background: rgba(107,114,128,0.1); }
+        .stat-count { font-size: 2.25rem; font-weight: 800; line-height: 1; }
+        .stat-positive .stat-count { color: #047857; }
+        .stat-negative .stat-count { color: #B91C1C; }
+        .stat-neutral  .stat-count { color: #374151; }
+        .stat-label { font-size: 0.875rem; font-weight: 600; margin-top: 0.375rem; }
+        .stat-pct   { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.125rem; }
+
+        /* ── Results layout ── */
+        /* stats + chart row */
+        .summary-layout {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            flex: 1;
+        }
+        .chart-wrap {
+            width: 190px;
+            flex-shrink: 0;
+        }
+        @media (max-width: 700px) {
+            .summary-layout { flex-direction: column; }
+            .chart-wrap { width: 100%; max-width: 260px; }
+        }
+
+        /* ── Filter bar ── */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.875rem;
+        }
+        .filter-label { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; margin-right: 0.25rem; }
+        .filter-chip {
+            padding: 0.3rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: white;
+            transition: all 0.15s;
+            color: var(--text);
+        }
+        .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+        .filter-chip.active-all      { background: var(--primary); border-color: var(--primary); color: white; }
+        .filter-chip.active-positive { background: var(--positive); border-color: var(--positive); color: white; }
+        .filter-chip.active-negative { background: var(--negative); border-color: var(--negative); color: white; }
+        .filter-chip.active-neutral  { background: var(--neutral); border-color: var(--neutral); color: white; }
+
+        /* ── Table ── */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        th {
+            background: #F9FAFB;
+            padding: 0.7rem 1rem;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #F3F4F6;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #FAFBFF; }
+        .cell-text {
+            max-width: 230px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text);
+        }
+        .cell-num { color: var(--text-muted); font-size: 0.8rem; text-align: center; }
+
+        /* ── Sentiment badges ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-Positive { background: rgba(16,185,129,0.15); color: #047857; }
+        .badge-Negative { background: rgba(239,68,68,0.15);  color: #B91C1C; }
+        .badge-Neutral  { background: rgba(107,114,128,0.15); color: #374151; }
+        .badge-Error    { background: rgba(245,158,11,0.15);  color: #92400E; }
+
+        /* ── Topic tags (inline in table) ── */
+        .topic-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.175rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background: rgba(79,70,229,0.1);
+            color: var(--primary-dark);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.15s;
+            border: 1px solid rgba(79,70,229,0.2);
+        }
+        .topic-tag:hover  { background: rgba(79,70,229,0.2); }
+        .topic-tag.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .topic-tags-cell  { display: flex; flex-wrap: wrap; gap: 0.25rem; min-width: 120px; }
+
+        /* ── Topics section ── */
+        .topics-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .topics-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .topics-title { font-size: 0.9375rem; font-weight: 700; }
+        /* topic grid: 2-3 columns of compact pills */
+        #topicList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 0.375rem;
+        }
+        .topic-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.625rem;
+            border-radius: 0.5rem;
+            border: 1.5px solid var(--border);
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.12s, background 0.12s;
+        }
+        .topic-row:hover  { border-color: var(--primary); background: rgba(79,70,229,0.03); }
+        .topic-row.active { border-color: var(--primary); background: rgba(79,70,229,0.08); }
+        .topic-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-transform: capitalize;
+        }
+        .topic-dots {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            flex-shrink: 0;
+        }
+        .tdot-pair {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .tdot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .tdot-pos { background: #10B981; }
+        .tdot-neg { background: #EF4444; }
+        .tdot-neu { background: #9CA3AF; }
+        .topic-total {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding-left: 0.25rem;
+            border-left: 1px solid var(--border);
+        }
+        .topic-legend {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.625rem;
+        }
+        .topic-legend span { display: flex; align-items: center; gap: 0.3rem; }
+        .topic-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* ── Score bar ── */
+        .score-wrap { display: flex; align-items: center; gap: 0.5rem; min-width: 90px; }
+        .score-track { flex: 1; height: 5px; border-radius: 9999px; background: var(--border); overflow: hidden; }
+        .score-fill-Positive { background: var(--positive); }
+        .score-fill-Negative { background: var(--negative); }
+        .score-fill-Neutral  { background: var(--neutral); }
+        .score-num { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+
+        /* ── Reason cell ── */
+        .cell-reason { max-width: 200px; font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; }
+
+        /* ── Error ── */
+        .error-box {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: #B91C1C;
+            margin-top: 0.75rem;
+        }
+
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 1rem; height: 1rem;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.65s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Section divider ── */
+        .divider {
+            display: flex; align-items: center; gap: 0.75rem;
+            color: var(--text-muted); font-size: 0.75rem;
+            margin: 1rem 0;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* ── Utilities ── */
+        .hidden { display: none !important; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .flex { display: flex; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .items-center { align-items: center; }
+        .flex-wrap { flex-wrap: wrap; }
+        .muted { color: var(--text-muted); font-size: 0.8125rem; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ════════════════════════════════ -->
+<div class="header">
+    <div class="header-icon">📊</div>
+    <div>
+        <h1>Sentiment Analyzer</h1>
+        <div class="header-sub">Excel upload · Export results</div>
+    </div>
+</div>
+
+<div class="main">
+
+    <!-- ══ STEP 1 · API CONFIG ══ -->
+    <div class="card" id="cardSettings">
+        <div class="card-header">
+            <div class="card-title">
+                <div class="step-badge" id="badge1">1</div>
+                API Configuration
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="toggleSettings()">
+                <span id="toggleIcon">▲</span> <span id="toggleLabel">Hide</span>
+            </button>
+        </div>
+        <div id="settingsBody">
+            <div class="settings-grid">
+                <div class="field">
+                    <label class="field-label" for="apiKey">API Key</label>
+                    <input type="password" id="apiKey" placeholder="sk-…" autocomplete="off" />
+                    <span class="hint">Your API key — never stored or transmitted except to your chosen endpoint</span>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="baseUrl">Base URL</label>
+                    <input type="text" id="baseUrl" value="https://api.openai.com/v1" placeholder="https://api.openai.com/v1" />
+                    <span class="hint">Change to your company's OpenAI-compatible endpoint</span>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="modelName">Model Name</label>
+                    <input type="text" id="modelName" value="gpt-4o-mini" placeholder="gpt-4o-mini" />
+                    <span class="hint">Any chat completions model your endpoint supports</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STEP 2 · UPLOAD ══ -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <div class="step-badge" id="badge2">2</div>
+                Upload Excel File
+            </div>
+        </div>
+        <div class="upload-zone" id="uploadZone" onclick="fileInput.click()">
+            <div class="upload-icon" id="uploadIcon">📂</div>
+            <div class="upload-title" id="uploadTitle">Click to upload or drag &amp; drop</div>
+            <div class="upload-sub" id="uploadSub">.xlsx or .xls files supported</div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" />
+        <div style="text-align:center; margin-top:0.875rem;">
+            <span class="muted" style="margin-right:0.5rem;">No file yet?</span>
+            <button class="btn btn-outline btn-sm" onclick="loadSampleData()" style="display:inline-flex;">
+                🧪 Load Sample Survey Data
+            </button>
+            <span class="muted" style="margin-left:0.5rem;">— 25 rows, 3 text columns</span>
+        </div>
+    </div>
+
+    <!-- ══ STEP 3 · CONFIGURE ══ -->
+    <div class="card hidden" id="cardConfig">
+        <div class="card-header">
+            <div class="card-title">
+                <div class="step-badge" id="badge3">3</div>
+                Configure Analysis
+            </div>
+        </div>
+
+        <!-- Sheet selector (shown only if multiple sheets) -->
+        <div id="sheetSelectorWrap" class="hidden field" style="margin-bottom:1rem; max-width:280px;">
+            <label class="field-label" for="sheetSelect">Sheet</label>
+            <select id="sheetSelect" onchange="loadSheet()"></select>
+        </div>
+
+        <div class="field">
+            <label class="field-label">Select Column(s) to Analyze</label>
+            <span class="hint">Click one or more columns containing the text you want to analyze</span>
+            <div class="columns-grid" id="columnsGrid"></div>
+        </div>
+
+        <div class="divider">Analysis Options</div>
+
+        <div class="field mt-1">
+            <label class="field-label">When multiple columns are selected:</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="multiMode" value="separate" checked />
+                    <div>
+                        <strong>Analyze each column separately</strong>
+                        <div class="hint">Adds Sentiment, Score &amp; Reason columns for each selected column</div>
+                    </div>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="multiMode" value="combined" />
+                    <div>
+                        <strong>Combine into one analysis per row</strong>
+                        <div class="hint">Concatenates selected columns and produces a single sentiment per row</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="field mt-2" style="max-width:280px;">
+            <label class="field-label" for="batchSize">Batch Size</label>
+            <select id="batchSize">
+                <option value="5">5 rows per API call</option>
+                <option value="10" selected>10 rows per API call (recommended)</option>
+                <option value="20">20 rows per API call (faster, more tokens)</option>
+            </select>
+            <span class="hint">Larger batches finish faster but send more tokens per request</span>
+        </div>
+
+        <div class="flex gap-3 items-center flex-wrap mt-2">
+            <button class="btn btn-primary" id="analyzeBtn" onclick="startAnalysis()">✨ Analyze Sentiment</button>
+            <span class="muted" id="rowColInfo"></span>
+        </div>
+
+        <div class="progress-wrap hidden" id="progressWrap">
+            <div class="progress-meta">
+                <span class="progress-label" id="progressLabel">Preparing…</span>
+                <span class="progress-pct" id="progressPct">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <div class="error-box hidden" id="errorBox"></div>
+    </div>
+
+    <!-- ══ STEP 4 · RESULTS ══ -->
+    <div class="card hidden" id="cardResults">
+        <div class="card-header">
+            <div class="card-title">
+                <div class="step-badge complete">✓</div>
+                Results
+            </div>
+            <button class="btn btn-success" onclick="exportToExcel()">⬇️ Export to Excel</button>
+        </div>
+
+        <!-- Summary stats + chart row -->
+        <div class="summary-layout">
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="chart-wrap">
+                <canvas id="sentimentChart"></canvas>
+                <div id="perColumnStats" style="margin-top:0.75rem;"></div>
+            </div>
+        </div>
+
+        <!-- Topics section (shown after analysis) -->
+        <div class="topics-section hidden" id="topicsSection">
+            <div class="topics-hdr">
+                <div class="topics-title">🏷️ Topic Themes</div>
+                <div style="display:flex;align-items:center;gap:0.625rem;">
+                    <span class="muted" id="topicFilterLabel" style="font-size:0.8125rem;"></span>
+                    <button class="btn btn-outline btn-sm hidden" id="clearTopicBtn" onclick="clearTopicFilter()">✕ Clear</button>
+                </div>
+            </div>
+            <div class="topic-legend">
+                <span><span class="topic-legend-dot" style="background:#10B981;"></span>Positive</span>
+                <span><span class="topic-legend-dot" style="background:#EF4444;"></span>Negative</span>
+                <span><span class="topic-legend-dot" style="background:#9CA3AF;"></span>Neutral</span>
+                <span style="margin-left:auto;font-style:italic;">Click a topic to filter the table below</span>
+            </div>
+            <div id="topicList"></div>
+        </div>
+
+        <!-- Full-width table -->
+        <div class="filter-bar" id="filterBar">
+            <span class="filter-label">Filter:</span>
+            <button class="filter-chip active-all" data-filter="all" onclick="applyFilter(this)">All</button>
+            <button class="filter-chip" data-filter="Positive" onclick="applyFilter(this)">😊 Positive</button>
+            <button class="filter-chip" data-filter="Negative" onclick="applyFilter(this)">😞 Negative</button>
+            <button class="filter-chip" data-filter="Neutral"  onclick="applyFilter(this)">😐 Neutral</button>
+        </div>
+        <div class="table-wrap">
+            <table id="resultsTable">
+                <thead id="tHead"></thead>
+                <tbody id="tBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  SAMPLE DATA (embedded Excel, base64)
+// ═══════════════════════════════════════════════════════════
+const SAMPLE_B64 = "UEsDBBQAAAAIAKYxclxGx01IlQAAAM0AAAAQAAAAZG9jUHJvcHMvYXBwLnhtbE3PTQvCMAwG4L9SdreZih6kDkQ9ip68zy51hbYpbYT67+0EP255ecgboi6JIia2mEXxLuRtMzLHDUDWI/o+y8qhiqHke64x3YGMsRoPpB8eA8OibdeAhTEMOMzit7Dp1C5GZ3XPlkJ3sjpRJsPiWDQ6sScfq9wcChDneiU+ixNLOZcrBf+LU8sVU57mym/8ZAW/B7oXUEsDBBQAAAAIAKYxclzSax1D7QAAACsCAAARAAAAAAAAAAAAAACAAcMAAABkb2NQcm9wcy9jb3JlLnhtbFBLAQIUAxQAAAAIAKYxclyZXJwjEAYAAJwnAAATAAAAAAAAAAAAAACAAd8BAAB4bC90aGVtZS90aGVtZTEueG1sUEsBAhQDFAAAAAgApjFyXENVytXrDgAAnjgAABgAAAAAAAAAAAAAAICBIAgAAHhsL3dvcmtzaGVldHMvc2hlZXQxLnhtbFBLAQIUAxQAAAAIAKYxclwZVAHbDQMAABUOAAANAAAAAAAAAAAAAACAAUEXAAB4bC9zdHlsZXMueG1sUEsBAhQDFAAAAAgApjFyXJeKuxzAAAAAEwIAAAsAAAAAAAAAAAAAAIABeRoAAF9yZWxzLy5yZWxzUEsBAhQDFAAAAAgApjFyXIY8JTs6AQAALQIAAA8AAAAAAAAAAAAAAIABYhsAAHhsL3dvcmtib29rLnhtbFBLAQIUAxQAAAAIAKYxclwkHpuirQAAAPgBAAAaAAAAAAAAAAAAAACAAckcAAB4bC9fcmVscy93b3JrYm9vay54bWwucmVsc1BLAQIUAxQAAAAIAKYxclxlkHmSGQEAAM8DAAATAAAAAAAAAAAAAACAAa4dAABbQ29udGVudF9UeXBlc10ueG1sUEsFBgAAAAAJAAkAPgIAAPgeAAAAAA==";
+
+// Proper full base64 will be loaded from the embedded file
+const SAMPLE_FULL_B64 = `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`;
+
+function loadSampleData() {
+    try {
+        const binary = atob(SAMPLE_FULL_B64);
+        const bytes  = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        workbook = XLSX.read(bytes, { type: 'array' });
+
+        const zone = document.getElementById('uploadZone');
+        zone.classList.add('has-file');
+        document.getElementById('uploadIcon').textContent  = '✅';
+        document.getElementById('uploadTitle').textContent = 'sample_survey_data.xlsx';
+        document.getElementById('uploadTitle').style.color = '#047857';
+        document.getElementById('uploadSub').textContent   = '25 rows · 3 text columns (Q1, Q2, Q3) · embedded sample';
+
+        const sel = document.getElementById('sheetSelect');
+        sel.innerHTML = workbook.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+        document.getElementById('sheetSelectorWrap').classList.toggle('hidden', workbook.SheetNames.length <= 1);
+
+        document.getElementById('cardConfig').classList.remove('hidden');
+        document.getElementById('cardResults').classList.add('hidden');
+        loadSheet();
+
+        document.getElementById('cardConfig').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+        alert('Could not load sample data: ' + e.message);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let workbook        = null;
+let sheetData       = [];      // raw rows from selected sheet
+let allColumns      = [];      // all column names in sheet
+let selectedCols    = [];      // user-chosen column names
+let analysisResults = [];      // sheetData + added sentiment columns
+let sentPrefixes    = [];      // e.g. ['Q1 Feedback'] or ['Combined']
+let chartInstance   = null;
+let activeFilter    = 'all';
+let activeTopicFilter = null;   // string topic name, or null for "all"
+
+// ═══════════════════════════════════════════════════════════
+//  SETTINGS TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleSettings() {
+    const body = document.getElementById('settingsBody');
+    const icon = document.getElementById('toggleIcon');
+    const lbl  = document.getElementById('toggleLabel');
+    const open = !body.classList.contains('hidden');
+    body.classList.toggle('hidden', open);
+    icon.textContent = open ? '▼' : '▲';
+    lbl.textContent  = open ? 'Show' : 'Hide';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FILE UPLOAD
+// ═══════════════════════════════════════════════════════════
+const uploadZone = document.getElementById('uploadZone');
+const fileInput  = document.getElementById('fileInput');
+
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        workbook = XLSX.read(e.target.result, { type: 'array' });
+
+        // Update upload zone
+        uploadZone.classList.add('has-file');
+        document.getElementById('uploadIcon').textContent   = '✅';
+        document.getElementById('uploadTitle').textContent  = file.name;
+        document.getElementById('uploadTitle').style.color  = '#047857';
+        document.getElementById('uploadSub').textContent    =
+            `${workbook.SheetNames.length} sheet(s) · ${(file.size/1024).toFixed(1)} KB`;
+
+        // Sheet selector
+        const sel = document.getElementById('sheetSelect');
+        sel.innerHTML = workbook.SheetNames.map(n => `<option value="${n}">${n}</option>`).join('');
+        document.getElementById('sheetSelectorWrap').classList.toggle('hidden', workbook.SheetNames.length <= 1);
+
+        document.getElementById('cardConfig').classList.remove('hidden');
+        document.getElementById('cardResults').classList.add('hidden');
+        loadSheet();
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function loadSheet() {
+    const name = document.getElementById('sheetSelect').value || workbook.SheetNames[0];
+    const ws   = workbook.Sheets[name];
+    sheetData  = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    if (!sheetData.length) {
+        document.getElementById('columnsGrid').innerHTML =
+            '<span class="muted">No data rows found in this sheet.</span>';
+        return;
+    }
+
+    allColumns   = Object.keys(sheetData[0]);
+    selectedCols = [];
+    renderChips();
+    updateInfo();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COLUMN CHIPS
+// ═══════════════════════════════════════════════════════════
+function renderChips() {
+    const grid = document.getElementById('columnsGrid');
+    grid.innerHTML = allColumns.map((col, i) =>
+        `<span class="col-chip" data-idx="${i}" onclick="toggleChip(this,'${esc(col)}')">${col}</span>`
+    ).join('');
+}
+
+function toggleChip(chip, col) {
+    const on = chip.classList.toggle('selected');
+    if (on)  { if (!selectedCols.includes(col)) selectedCols.push(col); }
+    else     { selectedCols = selectedCols.filter(c => c !== col); }
+    updateInfo();
+}
+
+function updateInfo() {
+    document.getElementById('rowColInfo').textContent =
+        `${sheetData.length} rows · ${selectedCols.length} column(s) selected`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ANALYSIS
+// ═══════════════════════════════════════════════════════════
+async function startAnalysis() {
+    const apiKey   = document.getElementById('apiKey').value.trim();
+    const baseUrl  = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+    const model    = document.getElementById('modelName').value.trim();
+    const mode     = document.querySelector('input[name="multiMode"]:checked').value;
+    const batch    = parseInt(document.getElementById('batchSize').value);
+
+    if (!apiKey)               return showError('Please enter your API key in Step 1.');
+    if (!selectedCols.length)  return showError('Please select at least one column to analyze.');
+
+    clearError();
+
+    // Deep copy rows so we don't mutate sheetData
+    analysisResults = sheetData.map(r => ({ ...r }));
+    sentPrefixes    = [];
+
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analyzing…';
+    showProgress('Preparing…', 0);
+
+    try {
+        if (mode === 'combined' && selectedCols.length > 1) {
+            await analyzeSet(analysisResults, selectedCols, 'Combined', apiKey, baseUrl, model, batch, 0, 1);
+            sentPrefixes = ['Combined'];
+        } else {
+            sentPrefixes = selectedCols.slice();
+            for (let i = 0; i < selectedCols.length; i++) {
+                await analyzeSet(analysisResults, [selectedCols[i]], selectedCols[i], apiKey, baseUrl, model, batch, i, selectedCols.length);
+            }
+        }
+        renderResults();
+        document.getElementById('cardResults').classList.remove('hidden');
+        document.getElementById('cardResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+        showError('Analysis failed: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✨ Analyze Sentiment';
+    }
+}
+
+async function analyzeSet(results, cols, prefix, apiKey, baseUrl, model, batchSz, colIdx, totalCols) {
+    const total = results.length;
+    for (let start = 0; start < total; start += batchSz) {
+        const end   = Math.min(start + batchSz, total);
+        const batch = results.slice(start, end).map((row, i) => ({
+            index: i,
+            text: cols.map(c => String(row[c] || '')).join(' | ').trim()
+        }));
+
+        const pct = ((colIdx + start / total) / totalCols) * 100;
+        showProgress(
+            `Analyzing rows ${start + 1}–${end} of ${total}` +
+            (totalCols > 1 ? ` (col ${colIdx + 1}/${totalCols})` : ''),
+            pct
+        );
+
+        const sentiments = await callAPI(batch, apiKey, baseUrl, model);
+        sentiments.forEach(s => {
+            const rowIdx = start + s.index;
+            results[rowIdx][prefix + '_Sentiment'] = s.sentiment || 'Neutral';
+            results[rowIdx][prefix + '_Score']     = s.score     || 50;
+            results[rowIdx][prefix + '_Reason']    = s.reason    || '';
+            results[rowIdx][prefix + '_Topics']    = Array.isArray(s.topics) ? s.topics.join(', ') : '';
+        });
+    }
+    showProgress(`Completed "${prefix}"`, ((colIdx + 1) / totalCols) * 100);
+}
+
+async function callAPI(batch, apiKey, baseUrl, model) {
+    const system = `You are a precise sentiment and topic analysis assistant for survey response data. Always respond with valid JSON only.`;
+
+    const user = `Analyze each survey response below for sentiment AND key topics.
+
+Return a JSON object with a "results" array. Each element MUST have:
+- "index"     : integer matching the input index (0-based)
+- "sentiment" : exactly "Positive", "Negative", or "Neutral"
+- "score"     : integer 0-100 representing confidence
+- "reason"    : one sentence (≤15 words) explaining the sentiment
+- "topics"    : array of 1-3 short topic strings (2-4 words, lowercase, e.g. ["ease of use", "customer support", "pricing"]). Use consistent terminology across responses — prefer canonical terms over variations.
+
+For empty or blank text use: sentiment "Neutral", score 50, reason "No text provided", topics [].
+
+Responses:
+${JSON.stringify(batch, null, 2)}`;
+
+    const resp = await fetch(`${baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model,
+            messages: [
+                { role: 'system', content: system },
+                { role: 'user',   content: user   }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.1
+        })
+    });
+
+    if (!resp.ok) {
+        const errJson = await resp.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `HTTP ${resp.status} — check your API key and endpoint.`);
+    }
+
+    const data    = await resp.json();
+    const content = data.choices[0].message.content;
+    const parsed  = JSON.parse(content);
+
+    if (!Array.isArray(parsed.results)) throw new Error('Unexpected JSON structure from API.');
+    return parsed.results;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PROGRESS / ERROR
+// ═══════════════════════════════════════════════════════════
+function showProgress(label, pct) {
+    document.getElementById('progressWrap').classList.remove('hidden');
+    document.getElementById('progressLabel').textContent = label;
+    document.getElementById('progressPct').textContent   = Math.round(pct) + '%';
+    document.getElementById('progressFill').style.width  = Math.min(100, pct) + '%';
+}
+function showError(msg) {
+    const el = document.getElementById('errorBox');
+    el.textContent = '⚠️  ' + msg;
+    el.classList.remove('hidden');
+}
+function clearError() { document.getElementById('errorBox').classList.add('hidden'); }
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ═══════════════════════════════════════════════════════════
+function renderResults() {
+    // Aggregate all sentiments across prefixes
+    const allVals = [];
+    analysisResults.forEach(row =>
+        sentPrefixes.forEach(p => {
+            const s = row[p + '_Sentiment'];
+            if (s) allVals.push(s);
+        })
+    );
+    const counts = countSentiments(allVals);
+    const total  = allVals.length;
+
+    // Stats row
+    document.getElementById('statsGrid').innerHTML =
+        ['Positive','Negative','Neutral'].map(s => `
+            <div class="stat-card stat-${s.toLowerCase()}">
+                <div class="stat-count">${counts[s]}</div>
+                <div class="stat-label">${s === 'Positive' ? '😊' : s === 'Negative' ? '😞' : '😐'} ${s}</div>
+                <div class="stat-pct">${total ? ((counts[s]/total)*100).toFixed(1) : 0}%</div>
+            </div>`).join('');
+
+    // Per-column breakdown (if more than one prefix)
+    if (sentPrefixes.length > 1) {
+        document.getElementById('perColumnStats').innerHTML =
+            '<div style="font-size:0.8rem;font-weight:600;color:var(--text-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.04em;">Per Column</div>' +
+            sentPrefixes.map(p => {
+                const vals = analysisResults.map(r => r[p + '_Sentiment']).filter(Boolean);
+                const c    = countSentiments(vals);
+                const tot  = vals.length;
+                return `
+                    <div style="margin-bottom:0.625rem;">
+                        <div style="font-size:0.8125rem;font-weight:600;margin-bottom:0.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p}">${p}</div>
+                        <div style="display:flex;gap:0.25rem;font-size:0.75rem;">
+                            <span style="color:#047857;">😊 ${c.Positive}</span>
+                            <span style="color:var(--text-muted);">·</span>
+                            <span style="color:#B91C1C;">😞 ${c.Negative}</span>
+                            <span style="color:var(--text-muted);">·</span>
+                            <span style="color:#374151;">😐 ${c.Neutral}</span>
+                        </div>
+                    </div>`;
+            }).join('');
+    } else {
+        document.getElementById('perColumnStats').innerHTML = '';
+    }
+
+    // Chart
+    renderChart(counts);
+
+    // Topics
+    activeTopicFilter = null;
+    renderTopics();
+
+    // Table
+    activeFilter = 'all';
+    document.querySelectorAll('.filter-chip').forEach(b => {
+        b.className = 'filter-chip' + (b.dataset.filter === 'all' ? ' active-all' : '');
+    });
+    renderTable();
+}
+
+function countSentiments(arr) {
+    return arr.reduce((acc, s) => { acc[s] = (acc[s]||0)+1; return acc; },
+        { Positive: 0, Negative: 0, Neutral: 0 });
+}
+
+// ── Topic aggregation ──
+function buildTopicMap() {
+    // { "ease of use": { count, Positive, Negative, Neutral, rows: Set<idx> } }
+    const map = {};
+    analysisResults.forEach((row, rowIdx) => {
+        sentPrefixes.forEach(p => {
+            const topicsStr = row[p + '_Topics'] || '';
+            const sent      = row[p + '_Sentiment'] || 'Neutral';
+            if (!topicsStr.trim()) return;
+            topicsStr.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).forEach(topic => {
+                if (!map[topic]) map[topic] = { count: 0, Positive: 0, Negative: 0, Neutral: 0, rows: new Set() };
+                map[topic].count++;
+                map[topic][sent] = (map[topic][sent] || 0) + 1;
+                map[topic].rows.add(rowIdx);
+            });
+        });
+    });
+    return map;
+}
+
+function renderTopics() {
+    const map     = buildTopicMap();
+    const section = document.getElementById('topicsSection');
+    const list    = document.getElementById('topicList');
+
+    const entries = Object.entries(map).sort((a, b) => b[1].count - a[1].count);
+    if (!entries.length) { section.classList.add('hidden'); return; }
+
+    section.classList.remove('hidden');
+
+    list.innerHTML = entries.map(([topic, data]) => {
+        const isActive = activeTopicFilter === topic;
+        const posLabel = `${data.Positive} positive`;
+        const negLabel = `${data.Negative} negative`;
+        const neuLabel = `${data.Neutral} neutral`;
+        return `
+        <div class="topic-row${isActive ? ' active' : ''}" onclick="applyTopicFilter('${esc(topic)}')" title="${escHtml(topic)} — ${posLabel}, ${negLabel}, ${neuLabel}">
+            <div class="topic-name">${escHtml(topic)}</div>
+            <div class="topic-dots">
+                <span class="tdot-pair" title="${posLabel}"><span class="tdot tdot-pos"></span>${data.Positive}</span>
+                <span class="tdot-pair" title="${negLabel}"><span class="tdot tdot-neg"></span>${data.Negative}</span>
+                <span class="tdot-pair" title="${neuLabel}"><span class="tdot tdot-neu"></span>${data.Neutral}</span>
+            </div>
+            <span class="topic-total">${data.count}</span>
+        </div>`;
+    }).join('');
+}
+
+function applyTopicFilter(topic) {
+    activeTopicFilter = (activeTopicFilter === topic) ? null : topic; // toggle
+    document.getElementById('topicFilterLabel').textContent =
+        activeTopicFilter ? `Showing: "${activeTopicFilter}"` : '';
+    document.getElementById('clearTopicBtn').classList.toggle('hidden', !activeTopicFilter);
+    renderTopics();   // re-render to update active state
+    renderTable();
+}
+
+function clearTopicFilter() {
+    activeTopicFilter = null;
+    document.getElementById('topicFilterLabel').textContent = '';
+    document.getElementById('clearTopicBtn').classList.add('hidden');
+    renderTopics();
+    renderTable();
+}
+
+function renderChart(counts) {
+    const ctx = document.getElementById('sentimentChart').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive','Negative','Neutral'],
+            datasets: [{
+                data: [counts.Positive, counts.Negative, counts.Neutral],
+                backgroundColor: ['#10B981','#EF4444','#9CA3AF'],
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '62%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } },
+                title: {
+                    display: true,
+                    text: 'Sentiment Distribution',
+                    font: { size: 13, weight: '700' },
+                    padding: { bottom: 12 },
+                    color: '#111827'
+                }
+            }
+        }
+    });
+}
+
+// ── Table ──
+function renderTable() {
+    // Decide display columns: selected text cols + up to 2 other cols for context
+    const textCols  = allColumns.filter(c => selectedCols.includes(c));
+    const otherCols = allColumns.filter(c => !selectedCols.includes(c)).slice(0, 2);
+    const dispCols  = [...otherCols, ...textCols];
+
+    // Build header
+    document.getElementById('tHead').innerHTML = `<tr>
+        <th style="text-align:center;">#</th>
+        ${dispCols.map(c => `<th>${c}</th>`).join('')}
+        ${sentPrefixes.map(p =>
+            `<th>${sentPrefixes.length > 1 ? p + ' — ' : ''}Sentiment</th>
+             <th>Score</th>
+             <th>Reason</th>
+             <th>Topics</th>`
+        ).join('')}
+    </tr>`;
+
+    // Filter rows — apply both sentiment filter and topic filter
+    const rows = analysisResults.filter(row => {
+        const sentOk = activeFilter === 'all' ||
+            sentPrefixes.some(p => row[p + '_Sentiment'] === activeFilter);
+        const topicOk = !activeTopicFilter ||
+            sentPrefixes.some(p => {
+                const topics = (row[p + '_Topics'] || '').split(',').map(t => t.trim().toLowerCase());
+                return topics.includes(activeTopicFilter);
+            });
+        return sentOk && topicOk;
+    });
+
+    if (!rows.length) {
+        document.getElementById('tBody').innerHTML =
+            `<tr><td colspan="99" style="text-align:center;padding:2rem;color:var(--text-muted);">No rows match this filter.</td></tr>`;
+        return;
+    }
+
+    document.getElementById('tBody').innerHTML = rows.map((row, visIdx) => {
+        const origNum = analysisResults.indexOf(row) + 1;
+        return `<tr>
+            <td class="cell-num">${origNum}</td>
+            ${dispCols.map(c =>
+                `<td><div class="cell-text" title="${escHtml(String(row[c]||''))}">${escHtml(String(row[c]||''))}</div></td>`
+            ).join('')}
+            ${sentPrefixes.map(p => {
+                const sent  = row[p + '_Sentiment'] || 'N/A';
+                const score = row[p + '_Score']     || 0;
+                const why   = row[p + '_Reason']    || '';
+                const emoji = sent === 'Positive' ? '😊' : sent === 'Negative' ? '😞' : '😐';
+                return `
+                    <td><span class="badge badge-${sent}">${emoji} ${sent}</span></td>
+                    <td>
+                        <div class="score-wrap">
+                            <div class="score-track">
+                                <div class="score-fill-${sent}" style="height:100%;width:${score}%;border-radius:9999px;"></div>
+                            </div>
+                            <span class="score-num">${score}%</span>
+                        </div>
+                    </td>
+                    <td><div class="cell-reason">${escHtml(why)}</div></td>
+                    <td><div class="topic-tags-cell">${
+                        (row[p + '_Topics'] || '').split(',').map(t => t.trim()).filter(Boolean).map(t => {
+                            const isActive = activeTopicFilter === t.toLowerCase();
+                            return `<span class="topic-tag${isActive ? ' active' : ''}" onclick="event.stopPropagation();applyTopicFilter('${esc(t.toLowerCase())}')">${escHtml(t)}</span>`;
+                        }).join('')
+                    }</div></td>`;
+            }).join('')}
+        </tr>`;
+    }).join('');
+}
+
+// ── Filter ──
+function applyFilter(btn) {
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-chip').forEach(b => {
+        const f = b.dataset.filter;
+        b.className = 'filter-chip' +
+            (f === activeFilter
+                ? (f === 'all' ? ' active-all' : ` active-${f.toLowerCase()}`)
+                : '');
+    });
+    renderTable();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════════════════════
+function exportToExcel() {
+    // Sheet 1 — full results
+    const ws1 = XLSX.utils.json_to_sheet(analysisResults);
+    styleResultsSheet(ws1);
+
+    // Sheet 2 — summary
+    const summaryRows = sentPrefixes.map(p => {
+        const vals = analysisResults.map(r => r[p + '_Sentiment']).filter(Boolean);
+        const c    = countSentiments(vals);
+        const tot  = vals.length;
+        return {
+            'Column / Group': p,
+            'Total Rows':     tot,
+            'Positive':       c.Positive,
+            'Positive %':     tot ? ((c.Positive/tot)*100).toFixed(1)+'%' : '0%',
+            'Negative':       c.Negative,
+            'Negative %':     tot ? ((c.Negative/tot)*100).toFixed(1)+'%' : '0%',
+            'Neutral':        c.Neutral,
+            'Neutral %':      tot ? ((c.Neutral/tot)*100).toFixed(1)+'%' : '0%',
+        };
+    });
+    const ws2 = XLSX.utils.json_to_sheet(summaryRows);
+
+    // Sheet 3 — topics
+    const topicMap   = buildTopicMap();
+    const topicRows  = Object.entries(topicMap)
+        .sort((a, b) => b[1].count - a[1].count)
+        .map(([topic, d]) => ({
+            'Topic':      topic,
+            'Count':      d.count,
+            'Positive':   d.Positive,
+            'Positive %': d.count ? ((d.Positive / d.count) * 100).toFixed(1) + '%' : '0%',
+            'Negative':   d.Negative,
+            'Negative %': d.count ? ((d.Negative / d.count) * 100).toFixed(1) + '%' : '0%',
+            'Neutral':    d.Neutral,
+            'Neutral %':  d.count ? ((d.Neutral  / d.count) * 100).toFixed(1) + '%' : '0%',
+        }));
+    const ws3 = XLSX.utils.json_to_sheet(topicRows);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws1, 'Sentiment Results');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+    if (topicRows.length) XLSX.utils.book_append_sheet(wb, ws3, 'Topics');
+
+    const date = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `sentiment_analysis_${date}.xlsx`);
+}
+
+function styleResultsSheet(ws) {
+    // Auto-width hint for SheetJS (best effort)
+    if (!ws['!cols']) ws['!cols'] = [];
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    for (let C = range.s.c; C <= range.e.c; C++) {
+        ws['!cols'][C] = { wch: 20 };
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
+function esc(str)     { return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function escHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>
