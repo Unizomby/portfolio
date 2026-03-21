@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chucky — Donald Tucker's Portfolio Agent</title>
+  <style>
+    :root {
+      --brand: #6e57e0;
+      --brand-dark: #5643c7;
+      --brand-light: #ede9fb;
+      --bg: #f5f4fb;
+      --panel-bg: #ffffff;
+      --border: #e2ddf7;
+      --text: #1a1535;
+      --text-muted: #6b6390;
+      --bubble-user: #6e57e0;
+      --bubble-bot: #f0eefb;
+      --glow: 0 0 0 3px rgba(110,87,224,0.35), 0 4px 20px rgba(110,87,224,0.25);
+      --radius: 0.875rem;
+      --topbar-h: 52px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+
+    /* ── Topbar ── */
+    #topbar {
+      height: var(--topbar-h);
+      background: var(--panel-bg);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    #topbar-brand {
+      display: flex; align-items: center; gap: 0.625rem;
+      font-weight: 700; font-size: 1.0625rem; color: var(--brand);
+    }
+    #topbar-brand .robot { font-size: 1.375rem; }
+    #topbar-brand .tagline {
+      font-size: 0.75rem; font-weight: 400;
+      color: var(--text-muted); margin-top: 1px;
+    }
+    #settings-btn {
+      background: none; border: none;
+      font-size: 1.25rem; cursor: pointer;
+      color: var(--text-muted); padding: 0.25rem 0.375rem;
+      border-radius: 0.375rem; transition: color 0.2s, background 0.2s;
+    }
+    #settings-btn:hover { color: var(--brand); background: var(--brand-light); }
+
+    /* ── Layout ── */
+    #app {
+      display: flex; flex-direction: column;
+      height: 100vh;
+    }
+    #layout {
+      display: flex; flex: 1; overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── Chat Panel ── */
+    #chat-panel {
+      width: 55%; display: flex; flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--panel-bg);
+      min-height: 0;
+    }
+
+    #chat-messages {
+      flex: 1; overflow-y: auto; padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.875rem;
+      scroll-behavior: smooth;
+      min-height: 0;
+    }
+    #chat-messages::-webkit-scrollbar { width: 5px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .message-row {
+      display: flex; gap: 0.5rem;
+      align-items: flex-end;
+    }
+    .message-row.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      flex-shrink: 0; display: flex; align-items: center;
+      justify-content: center; font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .avatar.bot { background: var(--brand); color: #fff; }
+    .avatar.user { background: var(--brand-light); color: var(--brand); }
+
+    .bubble {
+      max-width: 78%; padding: 0.6875rem 0.9375rem;
+      border-radius: 1rem; font-size: 0.9rem; line-height: 1.55;
+    }
+    .bubble.bot {
+      background: var(--bubble-bot); color: var(--text);
+      border-bottom-left-radius: 0.25rem;
+    }
+    .bubble.user {
+      background: var(--bubble-user); color: #fff;
+      border-bottom-right-radius: 0.25rem;
+    }
+    .bubble.user a { color: #d9d3ff; }
+    .bubble.bot a { color: var(--brand); }
+
+    .proj-ref {
+      display: inline-block;
+      background: var(--brand-light); color: var(--brand);
+      border: 1px solid var(--border); border-radius: 0.3rem;
+      padding: 0 0.3rem; font-weight: 600; font-size: 0.85em;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .proj-ref:hover { background: var(--brand); color: #fff; }
+
+    /* typing indicator */
+    .typing-indicator {
+      display: flex; align-items: center; gap: 4px;
+      padding: 0.6875rem 0.9375rem;
+      background: var(--bubble-bot); border-radius: 1rem;
+      border-bottom-left-radius: 0.25rem;
+      width: fit-content;
+    }
+    .typing-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--brand); opacity: 0.4;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* chat input */
+    #chat-input-row {
+      padding: 0.875rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 0.625rem; align-items: flex-end;
+      background: var(--panel-bg);
+    }
+    #chat-textarea {
+      flex: 1; resize: none; border: 1.5px solid var(--border);
+      border-radius: 0.625rem; padding: 0.625rem 0.75rem;
+      font-size: 0.9rem; font-family: inherit;
+      color: var(--text); background: var(--bg);
+      outline: none; max-height: 120px; min-height: 42px;
+      transition: border-color 0.2s;
+      line-height: 1.45;
+    }
+    #chat-textarea:focus { border-color: var(--brand); box-shadow: var(--glow); }
+    #send-btn {
+      flex-shrink: 0; padding: 0.625rem 1.125rem;
+      background: var(--brand); color: #fff;
+      border: none; border-radius: 0.625rem;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+      align-self: flex-end;
+    }
+    #send-btn:hover { background: var(--brand-dark); }
+    #send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Projects Panel ── */
+    #projects-panel {
+      width: 45%; display: flex; flex-direction: column;
+      background: var(--bg);
+      min-height: 0;
+    }
+
+    #panel-header {
+      padding: 0.875rem 1rem 0.75rem;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    #panel-title {
+      font-size: 0.8125rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 0.625rem;
+    }
+    #search-bar {
+      width: 100%; padding: 0.5625rem 0.75rem;
+      border: 1.5px solid var(--border); border-radius: 0.5rem;
+      font-size: 0.875rem; font-family: inherit;
+      background: var(--panel-bg); color: var(--text);
+      outline: none; transition: border-color 0.2s;
+    }
+    #search-bar:focus { border-color: var(--brand); }
+
+    #project-cards {
+      flex: 1; overflow-y: auto;
+      padding: 0 1rem 1rem;
+      display: flex; flex-direction: column; gap: 0.625rem;
+      min-height: 0;
+    }
+    #project-cards::-webkit-scrollbar { width: 5px; }
+    #project-cards::-webkit-scrollbar-track { background: transparent; }
+    #project-cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    .project-card {
+      background: var(--panel-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+      cursor: default;
+    }
+    .project-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(110,87,224,0.1); }
+    .project-card.highlighted {
+      border-color: var(--brand);
+      box-shadow: var(--glow);
+    }
+
+    .card-visual {
+      height: 160px; width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; color: rgba(255,255,255,0.85);
+      flex-shrink: 0; overflow: hidden;
+    }
+    .card-visual img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top center;
+    }
+
+    .card-body { padding: 0.75rem 0.875rem 0.875rem; }
+
+    .card-title {
+      font-size: 0.875rem; font-weight: 700;
+      color: var(--text); margin-bottom: 0.25rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-desc {
+      font-size: 0.775rem; color: var(--text-muted);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; margin-bottom: 0.5rem;
+    }
+    .card-tags {
+      display: flex; flex-wrap: wrap; gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .tag {
+      font-size: 0.675rem; padding: 0.15rem 0.45rem;
+      background: var(--brand-light); color: var(--brand);
+      border-radius: 999px; font-weight: 600;
+    }
+    .card-links {
+      display: flex; flex-wrap: wrap; gap: 0.375rem;
+    }
+    .card-link {
+      font-size: 0.725rem; font-weight: 600;
+      color: var(--brand); text-decoration: none;
+      border: 1px solid var(--border); border-radius: 0.375rem;
+      padding: 0.175rem 0.5rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .card-link:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+    .no-results {
+      text-align: center; color: var(--text-muted);
+      font-size: 0.875rem; padding: 2rem 1rem;
+      display: none;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      body { overflow: auto; }
+      #app { height: auto; }
+      #layout { flex-direction: column; }
+      #chat-panel { width: 100%; height: 60vh; }
+      #projects-panel { width: 100%; height: auto; }
+      #project-cards { max-height: 60vh; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- App Shell -->
+<div id="app">
+  <div id="topbar">
+    <div id="topbar-brand">
+      <span class="robot">🤖</span>
+      <div>
+        <div>Chucky</div>
+        <div class="tagline">Donald Tucker's Portfolio Agent</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="layout">
+    <!-- Chat Panel -->
+    <div id="chat-panel">
+      <div id="chat-messages"></div>
+      <div id="chat-input-row">
+        <textarea id="chat-textarea" placeholder="Ask about Donald's projects, skills, or experience…" rows="1"></textarea>
+        <button id="send-btn">Send</button>
+      </div>
+    </div>
+
+    <!-- Projects Panel -->
+    <div id="projects-panel">
+      <div id="panel-header">
+        <div id="panel-title">Projects</div>
+        <input id="search-bar" type="text" placeholder="🔍  Search projects…" />
+      </div>
+      <div id="project-cards">
+        <div class="no-results" id="no-results">No projects match your search.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA — replaced by parse_projects.py
+// ============================================================
+// @@PROJECTS_START@@
+const PROJECTS = [
+  {
+    "id": "spaceship-titanic-classification-model",
+    "title": "Spaceship Titanic classification model",
+    "description": "Random Forest and XGBoost classification prediction python model. Predicting which passengers will be transported to an alternate dimension.",
+    "tags": [
+      "#machine-learning",
+      "#classification",
+      "#python",
+      "#data-viz"
+    ],
+    "links": [
+      {
+        "label": "Tableau",
+        "url": "https://public.tableau.com/app/profile/donald.tucker4155/viz/SpaceshipTitanic_16882551562560/PassengerDashboard"
+      },
+      {
+        "label": "Kaggle",
+        "url": "https://www.kaggle.com/code/glenn23/spaceship-titanic-model"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/spaceship-titanic-classification-model"
+      }
+    ],
+    "screenshot": "screenshots/spaceship-titanic-classification-model.png",
+    "category": "ml"
+  },
+  {
+    "id": "housing-prices-regressor-prediction",
+    "title": "Housing Prices Regressor Prediction",
+    "description": "XGBoost Regressor predictions of housing prices.",
+    "tags": [
+      "#machine-learning",
+      "#regression",
+      "#python",
+      "#data-viz"
+    ],
+    "links": [
+      {
+        "label": "Tableau",
+        "url": "https://public.tableau.com/app/profile/donald.tucker4155/viz/HousingPrices_16960239787650/Sheet12"
+      },
+      {
+        "label": "Kaggle",
+        "url": "https://www.kaggle.com/code/glenn23/housing-prices/notebook"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/predicting-housing-prices"
+      }
+    ],
+    "screenshot": "screenshots/housing-prices-regressor-prediction.png",
+    "category": "ml"
+  },
+  {
+    "id": "nlp-tweet-classification",
+    "title": "NLP Tweet Classification",
+    "description": "Binary classification model to determine if tweets are about disasters or not. Uses a TensorFlow Hub pretrained sentence encoder, USE, in a Sequential Model.",
+    "tags": [
+      "#machine-learning",
+      "#classification",
+      "#python",
+      "#nlp"
+    ],
+    "links": [
+      {
+        "label": "Kaggle",
+        "url": "https://www.kaggle.com/code/glenn23/nlp-tweets-classification-use-sequential-api"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/nlp-binary-classification-of-tweets"
+      }
+    ],
+    "screenshot": "screenshots/nlp-tweet-classification.png",
+    "category": "optimization"
+  },
+  {
+    "id": "food-not-food-text-classification",
+    "title": "Food Not Food Text Classification 🍕🫐",
+    "description": "Binary classification model to determine if sentences are about food. Hosted on HuggingFace.",
+    "tags": [
+      "#machine-learning",
+      "#classification",
+      "#python",
+      "#nlp",
+      "#HuggingFace",
+      "#LLM"
+    ],
+    "links": [
+      {
+        "label": "Unizomby-food-not-food-text-classifier-distilber-b130c78",
+        "url": "https://unizomby-food-not-food-text-classifier-distilber-b130c78.hf.space"
+      }
+    ],
+    "screenshot": "screenshots/food-not-food-text-classification.png",
+    "category": "ai"
+  },
+  {
+    "id": "time-series-forecasting",
+    "title": "Time Series Forecasting",
+    "description": "Modeling timeseries data using multiple machine learning methods. Uses Prophet model, tableau, excel.",
+    "tags": [
+      "#machine-learning",
+      "#time-series",
+      "#python",
+      "#data-viz"
+    ],
+    "links": [
+      {
+        "label": "GitHub",
+        "url": "https://github.com/Unizomby/online_retail_eda/blob/main/Prophet_02_Forecast_AAPL.ipynb"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/series/time-series"
+      }
+    ],
+    "screenshot": "screenshots/time-series-forecasting.png",
+    "category": "visualization"
+  },
+  {
+    "id": "multi-target-regression-model",
+    "title": "Multi-target Regression Model",
+    "description": "Forecasting product completion times using multi-output regression.",
+    "tags": [
+      "#machine-learning",
+      "#regression",
+      "#python",
+      "#data-viz"
+    ],
+    "links": [
+      {
+        "label": "Tableau",
+        "url": "https://public.tableau.com/views/ProductCompletionProjection/ProjectedCompletion?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link"
+      }
+    ],
+    "screenshot": "screenshots/multi-target-regression-model.png",
+    "category": "timeseries"
+  },
+  {
+    "id": "crop-classification-and-clustering-model",
+    "title": "Crop Classification and Clustering Model",
+    "description": "Multi-class Crop classification and clustering model built to recommend which farm crop to plant based on soil characteristics.",
+    "tags": [
+      "#machine-learning",
+      "#classification",
+      "#python",
+      "#clustering"
+    ],
+    "links": [
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/projects/crop/crop_classification.html"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/crop-classification-model"
+      }
+    ],
+    "screenshot": "screenshots/crop-classification-and-clustering-model.png",
+    "category": "ml"
+  },
+  {
+    "id": "online-retail-sales-exploratory-data-analysis",
+    "title": "Online retail sales exploratory data analysis",
+    "description": "Gaining some practice performing exploratory data analysis, since this is often one of the first steps in preparing data for machine learning.",
+    "tags": [
+      "#python",
+      "#eda",
+      "#data-viz"
+    ],
+    "links": [
+      {
+        "label": "Tableau",
+        "url": "https://public.tableau.com/app/profile/donald.tucker4155/viz/OnlineRetailsalesEDA/Dashboard1"
+      },
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/projects/online_retail/online_retail.html"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/online-retail-exploratory-data-analysis-with-python"
+      }
+    ],
+    "screenshot": "screenshots/online-retail-sales-exploratory-data-analysis.png",
+    "category": "visualization"
+  },
+  {
+    "id": "relational-network-diagram",
+    "title": "Relational Network Diagram",
+    "description": "A relational interactive Marvel network, precedence diagram.",
+    "tags": [
+      "#network-analysis",
+      "#dat-viz",
+      "#python"
+    ],
+    "links": [
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/buckey.html"
+      },
+      {
+        "label": "Kaggle",
+        "url": "https://www.kaggle.com/code/glenn23/interactive-marvel-character-network?scriptVersionId=141110769"
+      }
+    ],
+    "screenshot": "screenshots/relational-network-diagram.png",
+    "category": "general"
+  },
+  {
+    "id": "2-sample-hypothesis-t-test",
+    "title": "2 Sample Hypothesis T-test",
+    "description": "Utilizing hypothesis testing t-tests to validate process improvements initiatives. Created a template and custom p-value function to interpret the results of the hypothesis tests.",
+    "tags": [
+      "#statistics",
+      "#hypothesis-testing",
+      "#python",
+      "#anomaly"
+    ],
+    "links": [
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/projects/T-test_hypothesis.html"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/hypothesis-testing-2-sample-t-test"
+      }
+    ],
+    "screenshot": "screenshots/2-sample-hypothesis-t-test.png",
+    "category": "timeseries"
+  },
+  {
+    "id": "linear-programming-optimization",
+    "title": "Linear Programming Optimization",
+    "description": "Rebalance 100 students on 7 teams into 5 new teams of different sizes, using Linear Programming to minimize the difference between the avg team score. Making the teams as balanced as possible.",
+    "tags": [
+      "#optimization",
+      "#linear-programming",
+      "#python"
+    ],
+    "links": [
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/projects/student_LP/students.html"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/lp-optimization"
+      }
+    ],
+    "screenshot": "screenshots/linear-programming-optimization.png",
+    "category": "optimization"
+  },
+  {
+    "id": "critical-path-identification",
+    "title": "Critical path identification",
+    "description": "Identify the critical path in a network along with path length in a precedence diagram using python.",
+    "tags": [
+      "#network-analysis",
+      "#data-viz",
+      "#python"
+    ],
+    "links": [
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/projects/networks/critical_path_example.html"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/critical-path"
+      }
+    ],
+    "screenshot": "screenshots/critical-path-identification.png",
+    "category": "optimization"
+  },
+  {
+    "id": "portfolio-chatbot-rag-model",
+    "title": "Portfolio Chatbot RAG model 🤖",
+    "description": "This app is a personalized chatbot that uses OpenAI and LlamaIndex to answer questions based on my portfolio, hosted with a custom interface on HuggingFace Spaces.",
+    "tags": [
+      "#machine-learning",
+      "#rag",
+      "#python",
+      "#nlp",
+      "#HuggingFace",
+      "#LLM"
+    ],
+    "links": [
+      {
+        "label": "Hugging Face",
+        "url": "https://huggingface.co/spaces/Unizomby/dtuckchat"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/building-a-personalized-chatbot-powered-by-portfolio"
+      }
+    ],
+    "screenshot": "screenshots/portfolio-chatbot-rag-model.png",
+    "category": "ai"
+  },
+  {
+    "id": "prompt-comparison-tool",
+    "title": "Prompt Comparison Tool 🤖",
+    "description": "The tool is a lightweight Gradio web app that sends any user prompt to two hosted chat models—Mistral-7B-Instruct and LLaMA-2-7B-Chat—via the HuggingFace Inference API and displays their responses side-by-side. It runs entirely on the free CPU tier, making it an easy sandbox for rapid prompt engineering and qualitative model comparison. Hosted on HuggingFace Space",
+    "tags": [
+      "#s",
+      "#machine-learning",
+      "#python",
+      "#nlp",
+      "#HuggingFace",
+      "#LLM"
+    ],
+    "links": [
+      {
+        "label": "Hugging Face",
+        "url": "https://huggingface.co/spaces/Unizomby/prompt_comparison"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/prompt-comparison-app"
+      }
+    ],
+    "screenshot": "screenshots/prompt-comparison-tool.png",
+    "category": "ai"
+  },
+  {
+    "id": "time-series-forecast-anomaly-dashboard",
+    "title": "Time-Series Forecast & Anomaly Dashboard",
+    "description": "A time-series forecasting and anomaly-detection tool that lets users upload any dataset, automatically identifies the date and value columns, and produces dual forecasts with Prophet and auto-tuned SARIMAX—complete with Isolation Forest anomaly overlays. Build using Streamlit.",
+    "tags": [
+      "#machine-learning",
+      "#time-series",
+      "#data-viz",
+      "#python",
+      "#anomaly",
+      "#streamlit"
+    ],
+    "links": [
+      {
+        "label": "Streamlit",
+        "url": "https://unizomby-timeseries-dash-app-xkbqpe.streamlit.app"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/building-a-time-series-forecast-and-anomaly-dashboard"
+      }
+    ],
+    "screenshot": "",
+    "category": "timeseries"
+  },
+  {
+    "id": "a3-process-improvement-app",
+    "title": "A3 Process Improvement App",
+    "description": "This A3 Process Improvement app is a React-based tool that guides users through Toyota's systematic problem-solving methodology using a focused, one-question-at-a-time interface. Built with Claude's help, it walks users through all eight A3 steps (from problem identification to follow-up planning), then uses Claude's API to automatically analyze their completed document and provide expert-level insights including key findings, recommendations, and risk assessments.",
+    "tags": [
+      "#process-improvement",
+      "#python",
+      "#A3",
+      "#claude",
+      "#LLM"
+    ],
+    "links": [
+      {
+        "label": "Claude",
+        "url": "https://claude.ai/public/artifacts/22829a62-eadf-439b-9aff-9c9c9a272106?fullscreen=false"
+      },
+      {
+        "label": "Blog",
+        "url": "https://blog.dtucker.xyz/building-an-a3-process-improvement-app-with-claude"
+      }
+    ],
+    "screenshot": "screenshots/a3-process-improvement-app.png",
+    "category": "ai"
+  },
+  {
+    "id": "software-development-process-improvement-integration",
+    "title": "Software Development Process Improvement Integration",
+    "description": "Worked on a cross-functional project to improve operational process flows through automation, standardization, and digital tool deployment. Served as a bridge between stakeholders and developers, helping translate business requirements into scalable solutions that applied deterministic and agentic logic to drive more consistent and efficient execution.",
+    "tags": [
+      "#process-improvement",
+      "#automation",
+      "#LLM"
+    ],
+    "links": [],
+    "screenshot": "",
+    "category": "ai"
+  },
+  {
+    "id": "sentiment-analysis",
+    "title": "Sentiment Analysis",
+    "description": "App that performs sentiment analysis on freeform text, adding topic themes. Provides summary of Positive, Negative, and Neutral counts, filterable by topic",
+    "tags": [
+      "#sentiment_analysis",
+      "#LLM"
+    ],
+    "links": [
+      {
+        "label": "Dtucker",
+        "url": "https://dtucker.xyz/projects/sentiment_analysis/sentiment_analyzer.html"
+      }
+    ],
+    "screenshot": "screenshots/sentiment-analysis.png",
+    "category": "ai"
+  }
+];
+// @@PROJECTS_END@@
+
+// @@BIO_START@@
+const BIO = `PASTE YOUR BIO / RESUME CONTENT BELOW THIS LINE — delete this line when done.
+Plain text is fine. Chucky will use everything here to answer questions about your background.
+
+EXAMPLE STRUCTURE (replace with your own):
+
+SUMMARY
+Industrial Engineer with 14+ years at Lockheed Martin, now focused on AI/ML product development.
+Experienced in building end-to-end Python ML pipelines, LLM-powered tools, and Tableau dashboards
+that drive operational decisions. Passionate about applying IE fundamentals (process thinking,
+optimization, measurement) to AI problems.
+
+EXPERIENCE
+Lockheed Martin — Senior Industrial Engineer (20XX – 20XX)
+- Led cross-functional A3 problem-solving initiatives reducing production cycle time by 22%
+- Built Tableau dashboards tracking OEE across 5 manufacturing lines
+- Introduced Python-based scheduling optimization, saving $1.2M annually
+
+EDUCATION
+B.S. Industrial Engineering, [University], [Year]
+[Certifications: e.g., Six Sigma Black Belt, AWS ML Specialty, etc.]
+
+SKILLS
+Languages: Python, SQL, JavaScript
+ML: XGBoost, Random Forest, scikit-learn, NLP (BERT, TF-IDF), Time Series (Prophet, SARIMA)
+LLM/AI: OpenAI API, Claude API, LlamaIndex, RAG, Prompt Engineering
+Viz: Tableau, Plotly, Streamlit
+IE: Lean, A3, Critical Path, Linear Programming (PuLP)
+
+INTERESTS / GOALS
+Open to: AI/ML engineering roles, consulting, fractional AI leadership
+Especially interested in: manufacturing AI, process intelligence, LLM product development`;
+// @@BIO_END@@
+
+// ============================================================
+// PROXY CONFIG — set this to your deployed Cloudflare Worker URL
+// ============================================================
+const PROXY_URL = 'https://chucky-proxy.YOUR-SUBDOMAIN.workers.dev';
+
+// ============================================================
+// CHAT STATE
+// ============================================================
+let apiContext = []; // sliding window of {role, content}
+const MAX_CONTEXT = 15;
+
+// ============================================================
+// CATEGORY → GRADIENT
+// ============================================================
+function categoryGradient(tags = [], category = '') {
+  const haystack = (category + ' ' + tags.join(' ')).toLowerCase();
+  if (/classification|regression|nlp|xgboost|random.forest/.test(haystack) && !/rag|llm|chatbot|claude|openai/.test(haystack))
+    return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  if (/tableau|visualization|eda|dashboard|chart/.test(haystack))
+    return 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+  if (/timeseries|forecast|anomaly|sarima|prophet/.test(haystack))
+    return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+  if (/optim|lp|linear.prog|critical.path|scheduling/.test(haystack))
+    return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+  if (/rag|llm|chatbot|claude|openai|ai|gpt/.test(haystack))
+    return 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+  return 'linear-gradient(135deg, #6e57e0 0%, #8b74f0 100%)';
+}
+
+function categoryEmoji(tags = [], category = '') {
+  const h = (category + ' ' + tags.join(' ')).toLowerCase();
+  if (/rag|llm|chatbot|claude|openai|ai|gpt/.test(h)) return '🤖';
+  if (/tableau|visualization|eda|dashboard/.test(h)) return '📊';
+  if (/timeseries|forecast|anomaly/.test(h)) return '📈';
+  if (/optim|lp|critical.path|scheduling/.test(h)) return '⚙️';
+  if (/nlp|classification|regression|ml/.test(h)) return '🧠';
+  return '💡';
+}
+
+// ============================================================
+// PROJECT CARDS
+// ============================================================
+function createCard(project) {
+  const card = document.createElement('div');
+  card.className = 'project-card';
+  card.id = 'card-' + project.id;
+  card.dataset.searchText = (project.title + ' ' + project.description + ' ' + project.tags.join(' ')).toLowerCase();
+
+  const visualEl = document.createElement('div');
+  visualEl.className = 'card-visual';
+
+  if (project.screenshot) {
+    const img = document.createElement('img');
+    img.src = project.screenshot;
+    img.alt = project.title;
+    img.onerror = () => {
+      img.remove();
+      visualEl.textContent = categoryEmoji(project.tags, project.category);
+      visualEl.style.background = categoryGradient(project.tags, project.category);
+    };
+    visualEl.appendChild(img);
+  } else {
+    visualEl.style.background = categoryGradient(project.tags, project.category);
+    visualEl.textContent = categoryEmoji(project.tags, project.category);
+  }
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'card-title';
+  titleEl.textContent = project.title;
+
+  const descEl = document.createElement('div');
+  descEl.className = 'card-desc';
+  descEl.textContent = project.description;
+
+  const tagsEl = document.createElement('div');
+  tagsEl.className = 'card-tags';
+  (project.tags || []).slice(0, 5).forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = t.startsWith('#') ? t : '#' + t;
+    tagsEl.appendChild(span);
+  });
+
+  const linksEl = document.createElement('div');
+  linksEl.className = 'card-links';
+  (project.links || []).forEach(link => {
+    if (!link.url) return;
+    const a = document.createElement('a');
+    a.className = 'card-link';
+    a.href = link.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = link.label || 'View';
+    linksEl.appendChild(a);
+  });
+
+  body.appendChild(titleEl);
+  body.appendChild(descEl);
+  if ((project.tags || []).length) body.appendChild(tagsEl);
+  if ((project.links || []).length) body.appendChild(linksEl);
+
+  card.appendChild(visualEl);
+  card.appendChild(body);
+  return card;
+}
+
+function buildProjectCards() {
+  const container = document.getElementById('project-cards');
+  const noResults = document.getElementById('no-results');
+  container.innerHTML = '';
+  container.appendChild(noResults);
+  PROJECTS.forEach(p => container.appendChild(createCard(p)));
+}
+
+// ============================================================
+// HIGHLIGHT
+// ============================================================
+let highlightTimers = {};
+
+function highlightCard(projectId) {
+  const card = document.getElementById('card-' + projectId);
+  if (!card) return;
+
+  if (highlightTimers[projectId]) clearTimeout(highlightTimers[projectId]);
+  card.classList.add('highlighted');
+
+  // Scroll card into view within the project-cards panel
+  const panel = document.getElementById('project-cards');
+  const cardTop = card.offsetTop - panel.offsetTop;
+  const cardBottom = cardTop + card.offsetHeight;
+  const panelVisible = panel.scrollTop + panel.clientHeight;
+  if (cardTop < panel.scrollTop || cardBottom > panelVisible) {
+    panel.scrollTo({ top: cardTop - 8, behavior: 'smooth' });
+  }
+
+  highlightTimers[projectId] = setTimeout(() => {
+    card.classList.remove('highlighted');
+    delete highlightTimers[projectId];
+  }, 8000);
+}
+
+// ============================================================
+// SEARCH
+// ============================================================
+function filterCards(query) {
+  const q = query.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('.project-card').forEach(card => {
+    const match = !q || card.dataset.searchText.includes(q);
+    card.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function appendMessage(role, html, isHtml = false) {
+  const container = document.getElementById('chat-messages');
+
+  const row = document.createElement('div');
+  row.className = 'message-row ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ' + role;
+  avatar.textContent = role === 'bot' ? '🤖' : 'You';
+  if (role === 'user') avatar.style.fontSize = '0.65rem';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + role;
+  if (isHtml) bubble.innerHTML = html;
+  else bubble.textContent = html;
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  container.appendChild(row);
+  container.scrollTop = container.scrollHeight;
+  return bubble;
+}
+
+let typingRow = null;
+function showTypingIndicator() {
+  const container = document.getElementById('chat-messages');
+  typingRow = document.createElement('div');
+  typingRow.className = 'message-row bot';
+  typingRow.id = 'typing-indicator';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar bot';
+  avatar.textContent = '🤖';
+
+  const indicator = document.createElement('div');
+  indicator.className = 'typing-indicator';
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'typing-dot';
+    indicator.appendChild(dot);
+  }
+
+  typingRow.appendChild(avatar);
+  typingRow.appendChild(indicator);
+  container.appendChild(typingRow);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+  typingRow = null;
+}
+
+// ============================================================
+// PROJECT REF PARSING  [[Name]] → span + highlight
+// ============================================================
+function parseProjectRefs(text) {
+  // Build a lookup by normalized title
+  const titleMap = {};
+  PROJECTS.forEach(p => {
+    titleMap[p.title.toLowerCase()] = p.id;
+    // also try id-based matching
+    titleMap[p.id.replace(/-/g, ' ')] = p.id;
+  });
+
+  const found = [];
+  const html = text.replace(/\[\[([^\]]+)\]\]/g, (match, name) => {
+    const id = titleMap[name.toLowerCase()] ||
+      PROJECTS.find(p => p.title.toLowerCase().includes(name.toLowerCase()))?.id ||
+      name.toLowerCase().replace(/\s+/g, '-');
+    found.push(id);
+    return `<span class="proj-ref" data-id="${id}" tabindex="0">${name}</span>`;
+  });
+
+  // Schedule highlights with 200ms stagger
+  found.forEach((id, i) => {
+    setTimeout(() => highlightCard(id), 200 + i * 200);
+  });
+
+  return html;
+}
+
+// ============================================================
+// SYSTEM PROMPT
+// ============================================================
+function buildSystemPrompt() {
+  const projectList = PROJECTS.map((p, i) => {
+    const linkSummary = (p.links || []).map(l => l.label).filter(Boolean).join(', ') || 'no public link';
+    const tags = (p.tags || []).join(', ');
+    return `${i + 1}. [[${p.title}]] — ${p.description} (Links: ${linkSummary}; Tags: ${tags})`;
+  }).join('\n');
+
+  const bioSection = BIO.trim()
+    ? `ABOUT DONALD TUCKER:\n${BIO.trim()}`
+    : `ABOUT DONALD TUCKER:
+- Industrial Engineer turned AI/ML builder
+- Python, ML (XGBoost, Random Forest, NLP, Time Series), Tableau, LLM tooling`;
+
+  return `You are Chucky, a conversational portfolio agent representing Donald Tucker.
+
+YOUR ROLE: Represent Donald professionally in hiring and consulting conversations. Answer questions about his projects, skills, background, and approach. Keep replies to 3–5 sentences unless a structured list would be clearer. When you reference any project by name, ALWAYS wrap its exact name in [[double brackets]] like this: [[Project Name]]. Do not fabricate credentials or details. For contact information or compensation questions, politely redirect to donald@dtucker.xyz.
+
+${bioSection}
+
+DONALD'S PROJECTS (${PROJECTS.length} total):
+${projectList}
+
+BEHAVIOR RULES:
+- Always use [[Project Name]] brackets when mentioning any project — this highlights it in the sidebar UI for the user
+- Be enthusiastic but honest about Donald's capabilities
+- Connect projects to real-world business value where possible
+- Draw on the bio above to answer questions about work history, education, skills, and experience`;
+}
+
+// ============================================================
+// API — calls proxy worker, no key needed client-side
+// ============================================================
+async function callOpenAI(userMessage) {
+  // Sliding window: keep last MAX_CONTEXT messages
+  if (apiContext.length > MAX_CONTEXT) {
+    apiContext = apiContext.slice(apiContext.length - MAX_CONTEXT);
+  }
+
+  const messages = [
+    { role: 'system', content: buildSystemPrompt() },
+    ...apiContext
+  ];
+
+  const response = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error('Error: ' + (err?.error?.message || response.statusText));
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// ============================================================
+// HANDLE SEND
+// ============================================================
+async function handleSend() {
+  const textarea = document.getElementById('chat-textarea');
+  const sendBtn = document.getElementById('send-btn');
+  const userText = textarea.value.trim();
+  if (!userText) return;
+
+  textarea.value = '';
+  textarea.style.height = 'auto';
+  sendBtn.disabled = true;
+
+  appendMessage('user', userText);
+
+  // Add to context
+  apiContext.push({ role: 'user', content: userText });
+
+  showTypingIndicator();
+
+  try {
+    const reply = await callOpenAI(userText);
+    hideTypingIndicator();
+
+    if (reply) {
+      apiContext.push({ role: 'assistant', content: reply });
+      const html = parseProjectRefs(reply);
+      appendMessage('bot', html, true);
+    }
+  } catch (err) {
+    hideTypingIndicator();
+    appendMessage('bot', '⚠️ ' + err.message);
+  } finally {
+    sendBtn.disabled = false;
+    textarea.focus();
+  }
+}
+
+// ============================================================
+// AUTO-RESIZE TEXTAREA
+// ============================================================
+function initTextarea() {
+  const ta = document.getElementById('chat-textarea');
+  ta.addEventListener('input', () => {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  });
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  buildProjectCards();
+  initTextarea();
+
+  document.getElementById('send-btn').addEventListener('click', handleSend);
+  document.getElementById('search-bar').addEventListener('input', e => filterCards(e.target.value));
+
+  // Click on [[ProjectName]] pill → re-trigger highlight
+  document.getElementById('chat-messages').addEventListener('click', e => {
+    const ref = e.target.closest('.proj-ref');
+    if (ref) highlightCard(ref.dataset.id);
+  });
+
+  // Hardcoded greeting — no API call
+  const greeting = `Hey there! I'm Chucky, Donald Tucker's portfolio assistant. Donald is an Industrial Engineer turned AI builder — I know all ${PROJECTS.length} of his projects inside and out. Ask me anything: what he built, why he built it, which skills it shows, or where to find it. What would you like to know?`;
+  appendMessage('bot', greeting);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
