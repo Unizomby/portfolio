@@ -66,7 +66,7 @@
                         </li>
                         <li class="nav__item">
                             <a href="#chat" class="nav__link">
-                                <i class="uil uil-robot nav__icon"></i> AskMe
+                                <i class="uil uil-robot nav__icon"></i> <span class="nav__name">Ask Chucky</span>
                             </a>
                         </li>
                         <li class="nav__item">
@@ -1312,6 +1312,20 @@
 
                 <div class="portfolio__container container swiper-container">
                     <div class="swiper-wrapper">
+                        <!--==================== PORTFOLIO 0 Chucky ====================-->
+                        <div class="portfolio__content grid swiper-slide">
+                            <div class="portfolio__data">
+                                <h3 class="portfolio__title">Chucky — AI Portfolio Agent</h3>
+                                <p class="portfolio__description">
+                                    Conversational AI agent that represents my portfolio. Built with GPT-4o-mini,
+                                    a Cloudflare Worker proxy, and 18 live project cards that highlight as Chucky mentions them.
+                                </p>
+                                <a href="/chucky/chucky.html" target="_blank" class="button button--flex button--small portfolio__button">
+                                    <i class="uil uil-robot"></i>&nbsp; Chat with Chucky
+                                    <i class="uil uil-arrow-right button__icon"></i>
+                                </a>
+                            </div>
+                        </div>
                         <!--==================== PORTFOLIO 1 Spaceship Titanic====================-->
                         <div class="portfolio__content grid swiper-slide">
                             <a href="https://www.kaggle.com/code/glenn23/spaceship-titanic-model">
@@ -1528,15 +1542,17 @@
             <!-- Chatbot -->
             <section class="contact section" id="chat">
 
-            <h3 class="section__title">Have a question?</h3>
-            <span class="section__subtitle">🤖 Ask donald's chatbot</span>
-            <div style="display: flex; justify-content: center; align-items: center; height: 60vh;">
+            <h3 class="section__title">Ask Me Anything</h3>
+            <span class="section__subtitle">🤖 Chat with Chucky, my AI portfolio agent</span>
+            <div style="display:flex; justify-content:center; flex-direction:column; align-items:center; gap:1rem;">
                 <iframe
-	                src="https://unizomby-dtuckchat.hf.space"
+                    src="/chucky/chucky.html"
                     frameborder="0"
-                    width="850"
-                    height="550"
+                    style="width:100%; max-width:1100px; height:75vh; border-radius:1rem; box-shadow:0 4px 24px rgba(110,87,224,0.15);"
                 ></iframe>
+                <a href="/chucky/chucky.html" target="_blank" class="button button--flex button--small">
+                    <i class="uil uil-external-link-alt"></i>&nbsp; Open full page
+                </a>
             </div>
             </section>
 
