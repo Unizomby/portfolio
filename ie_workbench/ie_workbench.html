@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IE Workbench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #6e57e0;
+      --primary-dark:  #5a45cc;
+      --primary-light: #ede9fb;
+      --bg:            #f5f4fb;
+      --surface:       #ffffff;
+      --text:          #1a1535;
+      --muted:         #6b6390;
+      --border:        #e2ddf7;
+      --radius-card:   0.75rem;
+      --radius-btn:    0.5rem;
+      --shadow:        0 2px 8px rgba(110,87,224,.12);
+      --shadow-hover:  0 6px 20px rgba(110,87,224,.22);
+      --font:          'Poppins', sans-serif;
+
+      /* Category gradients */
+      --grad-production:   linear-gradient(135deg,#4facfe,#00f2fe);
+      --grad-time-studies: linear-gradient(135deg,#43e97b,#38f9d7);
+      --grad-quality:      linear-gradient(135deg,#f7971e,#ffd200);
+      --grad-lean:         linear-gradient(135deg,#11998e,#38ef7d);
+      --grad-capacity:     linear-gradient(135deg,#667eea,#764ba2);
+      --grad-labor:        linear-gradient(135deg,#f093fb,#f5576c);
+      --grad-inventory:    linear-gradient(135deg,#fa709a,#fee140);
+      --grad-six-sigma:    linear-gradient(135deg,#30cfd0,#5b2d8e);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ── App Shell ─────────────────────────────────────────────────── */
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Top Bar ───────────────────────────────────────────────────── */
+    #top-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0 1.25rem;
+      height: 58px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(110,87,224,.08);
+      flex-shrink: 0;
+      z-index: 50;
+    }
+
+    #logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .logo-text strong { color: var(--primary); font-weight: 700; }
+
+    #search-bar-wrap {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+
+    #search-input {
+      width: 100%;
+      padding: 0.5rem 1rem 0.5rem 2.4rem;
+      border: 1.5px solid var(--border);
+      border-radius: 2rem;
+      background: var(--bg);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(110,87,224,.15); }
+    #search-input::placeholder { color: var(--muted); }
+
+    .search-icon {
+      position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 1rem; pointer-events: none;
+    }
+
+    #top-bar-right {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* ── Main Layout ───────────────────────────────────────────────── */
+    #main-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Chat Panel ────────────────────────────────────────────────── */
+    #chat-panel {
+      width: 35%;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+
+    #chat-header {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    .chat-avatar {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), #8b74f0);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .chat-header-info h3 { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .chat-header-info p  { font-size: 0.72rem; color: var(--muted); }
+
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #22c55e; margin-left: auto; flex-shrink: 0;
+    }
+    .status-dot.offline { background: #94a3b8; }
+
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      scroll-behavior: smooth;
+    }
+
+    .msg-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 88%;
+    }
+    .msg-wrap.user { align-self: flex-end; align-items: flex-end; }
+    .msg-wrap.bot  { align-self: flex-start; align-items: flex-start; }
+
+    .msg-bubble {
+      padding: 0.6rem 0.875rem;
+      border-radius: 1rem;
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+    .msg-wrap.user .msg-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 0.25rem;
+    }
+    .msg-wrap.bot .msg-bubble {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    .msg-time {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+      padding: 0 0.25rem;
+    }
+
+    /* Tool references inside chat */
+    .tool-ref {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid rgba(110,87,224,.3);
+      border-radius: 1rem;
+      padding: 0.1rem 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .tool-ref:hover { background: var(--primary); color: #fff; transform: scale(1.03); }
+
+    /* Typing indicator */
+    #typing-indicator {
+      display: none;
+      align-self: flex-start;
+      padding: 0.6rem 0.875rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      border-bottom-left-radius: 0.25rem;
+    }
+    #typing-indicator.visible { display: flex; gap: 4px; align-items: center; }
+
+    .typing-dot {
+      width: 7px; height: 7px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%,60%,100% { transform: translateY(0); }
+      30%          { transform: translateY(-5px); }
+    }
+
+    #chat-input-wrap {
+      padding: 0.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    #chat-textarea {
+      flex: 1;
+      resize: none;
+      border: 1.5px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.55rem 0.75rem;
+      font-family: var(--font);
+      font-size: 0.82rem;
+      color: var(--text);
+      line-height: 1.5;
+      outline: none;
+      max-height: 120px;
+      overflow-y: auto;
+      transition: border-color 0.2s;
+    }
+    #chat-textarea:focus { border-color: var(--primary); }
+    #chat-textarea::placeholder { color: var(--muted); }
+
+    #send-btn {
+      width: 36px; height: 36px; flex-shrink: 0;
+      background: var(--primary);
+      border: none; border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+    #send-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
+    #send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+
+    /* ── Tool Panel ────────────────────────────────────────────────── */
+    #tool-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #category-tabs-wrap {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    #category-tabs-wrap::-webkit-scrollbar { height: 3px; }
+    #category-tabs-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    #category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .cat-tab {
+      padding: 0.35rem 0.875rem;
+      border-radius: 2rem;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-family: var(--font);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .cat-tab:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .cat-tab.active {
+      color: #fff;
+      border-color: transparent;
+      background: var(--primary);
+    }
+    /* Category-specific active gradients */
+    .cat-tab.active[data-cat="production"]   { background: var(--grad-production); }
+    .cat-tab.active[data-cat="time-studies"] { background: var(--grad-time-studies); }
+    .cat-tab.active[data-cat="quality"]      { background: var(--grad-quality); }
+    .cat-tab.active[data-cat="lean"]         { background: var(--grad-lean); }
+    .cat-tab.active[data-cat="capacity"]     { background: var(--grad-capacity); }
+    .cat-tab.active[data-cat="labor"]        { background: var(--grad-labor); }
+    .cat-tab.active[data-cat="inventory"]    { background: var(--grad-inventory); }
+    .cat-tab.active[data-cat="six-sigma"]    { background: var(--grad-six-sigma); }
+
+    #tool-grid-wrap {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+
+    #tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      padding: 3rem;
+      font-size: 0.9rem;
+    }
+
+    /* ── Tool Card ─────────────────────────────────────────────────── */
+    .tool-card {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: box-shadow 0.25s, border-color 0.25s, transform 0.2s;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .tool-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+    .tool-card.highlighted {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(110,87,224,.25), var(--shadow-hover);
+      animation: pulse-glow 0.5s ease;
+    }
+
+    @keyframes pulse-glow {
+      0%   { box-shadow: 0 0 0 0 rgba(110,87,224,.5); }
+      50%  { box-shadow: 0 0 0 8px rgba(110,87,224,.2); }
+      100% { box-shadow: 0 0 0 3px rgba(110,87,224,.25), var(--shadow-hover); }
+    }
+
+    .card-header {
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.08);
+    }
+
+    .card-emoji {
+      font-size: 2.2rem;
+      z-index: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.15));
+    }
+
+    .card-cat-label {
+      z-index: 1;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,.92);
+      background: rgba(0,0,0,.18);
+      padding: 0.25rem 0.6rem;
+      border-radius: 1rem;
+    }
+
+    .card-body { padding: 0.875rem 1rem 1rem; flex: 1; display: flex; flex-direction: column; }
+
+    .card-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 0.77rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 0.65rem;
+    }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+    .tag-pill {
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 0.15rem 0.55rem;
+      border-radius: 1rem;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .card-open-hint {
+      font-size: 0.7rem;
+      color: var(--primary);
+      font-weight: 500;
+      margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* ── Tool Modal ────────────────────────────────────────────────── */
+    #tool-modal {
+      position: fixed; inset: 0;
+      background: rgba(20,10,50,.5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    #tool-modal.open { display: flex; }
+
+    #modal-box {
+      background: var(--surface);
+      border-radius: 1rem;
+      box-shadow: 0 24px 60px rgba(0,0,0,.25);
+      width: 100%;
+      max-width: 860px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    #modal-emoji { font-size: 2rem; }
+
+    #modal-title-wrap { flex: 1; }
+    #modal-tool-name { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    #modal-cat-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fff;
+      padding: 0.2rem 0.65rem;
+      border-radius: 1rem;
+      margin-top: 0.2rem;
+    }
+
+    #modal-close {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    #modal-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+
+    #modal-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Left: Calculator */
+    #modal-calc {
+      width: 42%;
+      padding: 1.25rem 1.5rem;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .calc-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .input-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .input-label {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .input-tooltip {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .calc-input {
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-btn);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    .calc-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(110,87,224,.15); }
+
+    #results-section { margin-top: 0.5rem; }
+
+    .result-card {
+      background: var(--bg);
+      border-radius: var(--radius-btn);
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid var(--primary);
+    }
+    .result-card.warning { border-left-color: #f59e0b; background: #fffbeb; }
+    .result-card.good    { border-left-color: #22c55e; background: #f0fdf4; }
+    .result-card.bad     { border-left-color: #ef4444; background: #fef2f2; }
+
+    .result-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .result-value { font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .result-unit  { font-size: 0.82rem; color: var(--muted); margin-top: 0.1rem; }
+    .result-note  { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; font-style: italic; }
+
+    /* Right: Info */
+    #modal-info {
+      flex: 1;
+      padding: 1.25rem 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .info-block h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .info-block p, .info-block li {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .info-block ul { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+
+    .formula-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.02em;
+    }
+
+    .example-box {
+      background: #f8f7ff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-btn);
+      padding: 0.875rem 1rem;
+    }
+    .example-box .scenario {
+      font-size: 0.8rem;
+      color: var(--text);
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+    .example-row {
+      display: flex; justify-content: space-between;
+      font-size: 0.78rem; color: var(--muted);
+      padding: 0.15rem 0;
+    }
+    .example-row.result-row { color: var(--primary); font-weight: 600; border-top: 1px solid var(--border); margin-top: 0.35rem; padding-top: 0.35rem; }
+
+    .btn-primary {
+      flex: 1; padding: 0.6rem 1rem;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: var(--radius-btn);
+      font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-ghost {
+      padding: 0.6rem 1rem;
+      background: transparent; color: var(--muted);
+      border: 1.5px solid var(--border); border-radius: var(--radius-btn);
+      font-family: var(--font); font-size: 0.85rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* ── Toast ─────────────────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(2rem);
+      background: #1a1535; color: #fff;
+      padding: 0.6rem 1.25rem;
+      border-radius: 2rem;
+      font-size: 0.82rem; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      z-index: 500;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Decision Support Tools ────────────────────────────────────── */
+    #modal-box.wide { max-width: 1060px; }
+
+    #modal-ds {
+      display: none; flex: 1; overflow-y: auto;
+      flex-direction: column;
+    }
+
+    .ds-body {
+      display: flex; flex-direction: column;
+      gap: 1.1rem; padding: 1.25rem 1.5rem;
+    }
+
+    .ds-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .ds-section { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .ds-label {
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary);
+    }
+    .ds-sublabel { font-size: 0.73rem; color: var(--muted); }
+
+    .ds-textarea {
+      width: 100%; padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius-btn);
+      font-family: var(--font); font-size: 0.82rem; color: var(--text);
+      resize: vertical; min-height: 62px; outline: none;
+      transition: border-color 0.2s; line-height: 1.55;
+    }
+    .ds-textarea:focus { border-color: var(--primary); }
+    .ds-textarea.tall  { min-height: 90px; }
+
+    /* 5 Whys chain */
+    .why-chain { display: flex; flex-direction: column; }
+    .why-step  { display: flex; gap: 0.75rem; align-items: flex-start; }
+    .why-connector { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-top: 0.35rem; }
+    .why-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .why-line { width: 2px; background: var(--border); flex: 1; min-height: 10px; margin: 2px 0; }
+    .why-step-body { flex: 1; padding-bottom: 0.6rem; }
+    .why-step-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); margin-bottom: 0.25rem; }
+    .why-arrow {
+      text-align: center; font-size: 1rem; color: var(--border);
+      line-height: 1; padding: 0.1rem 0 0.1rem 12px;
+    }
+
+    /* Fishbone categories */
+    .fishbone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .fishbone-cat {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-btn); padding: 0.65rem 0.75rem;
+    }
+    .fishbone-cat-label {
+      display: flex; align-items: center; gap: 0.35rem;
+      font-size: 0.73rem; font-weight: 700; color: var(--text); margin-bottom: 0.35rem;
+    }
+
+    /* Before / After */
+    .ba-table { width: 100%; border-collapse: collapse; }
+    .ba-table th {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--muted);
+      padding: 0.3rem 0.4rem; text-align: left;
+      border-bottom: 2px solid var(--border);
+    }
+    .ba-table td { padding: 0.3rem 0.25rem; vertical-align: middle; }
+    .ba-input {
+      width: 100%; padding: 0.38rem 0.5rem;
+      border: 1.5px solid var(--border); border-radius: var(--radius-btn);
+      font-family: var(--font); font-size: 0.8rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .ba-input:focus { border-color: var(--primary); }
+    .ba-delta {
+      font-size: 0.78rem; font-weight: 600;
+      padding: 0.2rem 0.45rem; border-radius: var(--radius-btn); white-space: nowrap;
+    }
+    .ba-delta.up      { background: #f0fdf4; color: #16a34a; }
+    .ba-delta.down    { background: #fef2f2; color: #dc2626; }
+    .ba-delta.neutral { background: var(--bg); color: var(--muted); }
+    .ba-remove {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 0.95rem; padding: 0.2rem 0.3rem;
+      border-radius: 4px; transition: color 0.2s, background 0.2s;
+    }
+    .ba-remove:hover { color: #dc2626; background: #fef2f2; }
+    .ba-add-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.875rem; border: 1.5px dashed var(--border);
+      border-radius: var(--radius-btn); background: transparent;
+      cursor: pointer; font-family: var(--font); font-size: 0.78rem;
+      color: var(--muted); transition: all 0.2s; margin-top: 0.5rem;
+    }
+    .ba-add-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .ba-summary {
+      display: flex; gap: 0.75rem; margin-top: 0.75rem;
+      padding: 0.75rem; background: var(--bg); border-radius: var(--radius-btn);
+    }
+    .ba-summary-item { flex: 1; text-align: center; }
+    .ba-summary-item .val { font-size: 1.3rem; font-weight: 700; }
+    .ba-summary-item .lbl { font-size: 0.68rem; color: var(--muted); margin-top: 0.1rem; }
+
+    /* ── Scrollbars ────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ── Responsive ────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      body { overflow: auto; }
+      #app { height: auto; min-height: 100vh; overflow: auto; }
+      #main-layout { flex-direction: column; overflow: visible; }
+      #chat-panel { width: 100%; min-width: unset; height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+      #tool-panel { height: auto; }
+      #tool-grid-wrap { overflow-y: visible; }
+      #modal-body { flex-direction: column; }
+      #modal-calc { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Tool Modal ─────────────────────────────────────────────────── -->
+<div id="tool-modal">
+  <div id="modal-box">
+    <div id="modal-header">
+      <div id="modal-emoji"></div>
+      <div id="modal-title-wrap">
+        <div id="modal-tool-name"></div>
+        <div id="modal-cat-badge"></div>
+      </div>
+      <button id="modal-close" title="Close">✕</button>
+    </div>
+    <div id="modal-body">
+      <!-- Calculator -->
+      <div id="modal-calc">
+        <div>
+          <div class="calc-section-title">Inputs</div>
+          <div id="calc-inputs"></div>
+        </div>
+        <div id="results-section">
+          <div class="calc-section-title">Results</div>
+          <div id="calc-results">
+            <div style="font-size:0.8rem;color:var(--muted);font-style:italic;padding:0.5rem 0;">
+              Enter values above to see results.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Info -->
+      <div id="modal-info">
+        <div class="info-block">
+          <h4>About this Tool</h4>
+          <p id="info-description"></p>
+        </div>
+        <div class="info-block">
+          <h4>Formula</h4>
+          <div class="formula-box" id="info-formula"></div>
+        </div>
+        <div class="info-block">
+          <h4>How to Use</h4>
+          <div id="info-howto"></div>
+        </div>
+        <div class="info-block">
+          <h4>Example</h4>
+          <div class="example-box" id="info-example"></div>
+        </div>
+      </div>
+      <!-- Decision Support (replaces calc+info for DS tools) -->
+      <div id="modal-ds"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── App ───────────────────────────────────────────────────────── -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div id="logo">
+      <div class="logo-icon">⚙️</div>
+      <div class="logo-text">IE <strong>Workbench</strong></div>
+    </div>
+
+    <div id="search-bar-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search tools by name, keyword, or category…">
+    </div>
+
+    <div id="top-bar-right"></div>
+  </div>
+
+  <!-- Main -->
+  <div id="main-layout">
+
+    <!-- Chat Panel -->
+    <div id="chat-panel">
+      <div id="chat-header">
+        <div class="chat-avatar">🤖</div>
+        <div class="chat-header-info">
+          <h3>IE Assistant</h3>
+          <p>Powered by Industrial Engineering tools</p>
+        </div>
+        <div class="status-dot" id="status-dot"></div>
+      </div>
+
+      <div id="chat-messages">
+        <!-- Messages render here -->
+      </div>
+
+      <div id="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+
+      <div id="chat-input-wrap">
+        <textarea id="chat-textarea" rows="1" placeholder="Ask me which tool to use…"></textarea>
+        <button id="send-btn" title="Send">➤</button>
+      </div>
+    </div>
+
+    <!-- Tool Panel -->
+    <div id="tool-panel">
+      <div id="category-tabs-wrap">
+        <div id="category-tabs">
+          <button class="cat-tab active" data-cat="all">All Tools</button>
+          <button class="cat-tab" data-cat="production">🏭 Production</button>
+          <button class="cat-tab" data-cat="time-studies">⏱ Time Studies</button>
+          <button class="cat-tab" data-cat="quality">✅ Quality</button>
+          <button class="cat-tab" data-cat="lean">♻️ Lean</button>
+          <button class="cat-tab" data-cat="capacity">📊 Capacity</button>
+          <button class="cat-tab" data-cat="labor">👷 Labor</button>
+          <button class="cat-tab" data-cat="inventory">📦 Inventory</button>
+          <button class="cat-tab" data-cat="six-sigma">📐 Six Sigma</button>
+        </div>
+      </div>
+
+      <div id="tool-grid-wrap">
+        <div id="tool-grid"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   TOOL REGISTRY
+   Each tool is a plain object. Adding a tool = appending one object.
+═══════════════════════════════════════════════════════════════════ */
+const CATEGORIES = {
+  'production':   { label: 'Production',          gradient: 'var(--grad-production)',   emoji: '🏭' },
+  'time-studies': { label: 'Time Studies',         gradient: 'var(--grad-time-studies)', emoji: '⏱️' },
+  'quality':      { label: 'Quality',              gradient: 'var(--grad-quality)',      emoji: '✅' },
+  'lean':         { label: 'Lean Manufacturing',   gradient: 'var(--grad-lean)',         emoji: '♻️' },
+  'capacity':     { label: 'Capacity Planning',    gradient: 'var(--grad-capacity)',     emoji: '📊' },
+  'labor':        { label: 'Labor',                gradient: 'var(--grad-labor)',        emoji: '👷' },
+  'inventory':    { label: 'Inventory / Ops',      gradient: 'var(--grad-inventory)',    emoji: '📦' },
+  'six-sigma':    { label: 'Six Sigma',            gradient: 'var(--grad-six-sigma)',    emoji: '📐' },
+};
+
+const TOOL_REGISTRY = [
+
+  /* ── 1. Takt Time ─────────────────────────────────────────────── */
+  {
+    id: 'takt-time',
+    name: 'Takt Time Calculator',
+    category: 'production',
+    emoji: '⏱️',
+    description: 'Determines the production rate required to satisfy customer demand within available time.',
+    tags: ['takt', 'rate', 'demand', 'pacing', 'rhythm'],
+    formula: 'Takt Time = Available Production Time ÷ Customer Demand',
+    howToUse: [
+      'Determine the net available production time per shift (subtract breaks, maintenance, and planned downtime).',
+      'Identify the customer demand for the same period (e.g., units per shift).',
+      'Divide available time by demand — the result is your takt time.',
+      'Compare each work station\'s cycle time against takt time to spot bottlenecks.'
+    ],
+    example: {
+      scenario: 'A factory runs an 8-hour shift with 30 min for breaks. Customers require 90 units per shift.',
+      inputs: { 'Available Time': '450 min', 'Demand': '90 units' },
+      output: '5.00 min/unit'
+    },
+    inputs: [
+      { id: 'availTime', label: 'Available Production Time (min)', type: 'number', placeholder: '450', tooltip: 'Net time after subtracting breaks and downtime' },
+      { id: 'demand',    label: 'Customer Demand (units/period)',  type: 'number', placeholder: '90',  tooltip: 'Units required in the same time period' }
+    ],
+    calculate(v) {
+      if (!v.availTime || !v.demand) return [];
+      const takt = v.availTime / v.demand;
+      return [
+        { label: 'Takt Time', value: takt.toFixed(2), unit: 'min / unit',
+          note: `You must produce one unit every ${takt.toFixed(2)} minutes to meet demand.` }
+      ];
+    }
+  },
+
+  /* ── 2. Cycle Time ────────────────────────────────────────────── */
+  {
+    id: 'cycle-time',
+    name: 'Cycle Time Calculator',
+    category: 'time-studies',
+    emoji: '🔄',
+    description: 'Calculates the average actual time to complete one production cycle from a time study.',
+    tags: ['cycle', 'time study', 'average', 'observation', 'stopwatch'],
+    formula: 'Cycle Time = Total Observed Time ÷ Number of Observations',
+    howToUse: [
+      'Conduct a time study by observing and timing the process for multiple cycles.',
+      'Record each cycle time and sum them for the total observed time.',
+      'Divide the total by the number of observations to get average cycle time.',
+      'Optionally enter a takt time to see if the process is keeping pace with demand.'
+    ],
+    example: {
+      scenario: 'A time study of 10 cycles yields a total observed time of 52 minutes.',
+      inputs: { 'Total Observed Time': '52 min', 'Observations': '10' },
+      output: '5.20 min/unit'
+    },
+    inputs: [
+      { id: 'totalTime', label: 'Total Observed Time (min)', type: 'number', placeholder: '52',  tooltip: 'Sum of all individual cycle times recorded' },
+      { id: 'numObs',    label: 'Number of Observations',    type: 'number', placeholder: '10',  tooltip: 'How many cycles you timed' },
+      { id: 'taktTime',  label: 'Takt Time (min) — optional', type: 'number', placeholder: '5.0', tooltip: 'Enter takt time to check if cycle time is within target' }
+    ],
+    calculate(v) {
+      if (!v.totalTime || !v.numObs) return [];
+      const ct = v.totalTime / v.numObs;
+      const results = [
+        { label: 'Average Cycle Time', value: ct.toFixed(2), unit: 'min / unit' }
+      ];
+      if (v.taktTime > 0) {
+        const diff = ct - v.taktTime;
+        if (diff > 0) {
+          results.push({ label: 'vs. Takt Time', value: `+${diff.toFixed(2)}`, unit: 'min over takt', type: 'warning',
+            note: '⚠️ Cycle time exceeds takt time — this station may be a bottleneck.' });
+        } else {
+          results.push({ label: 'vs. Takt Time', value: diff.toFixed(2), unit: 'min under takt', type: 'good',
+            note: '✅ Cycle time is within takt time — this station is on pace.' });
+        }
+      }
+      return results;
+    }
+  },
+
+  /* ── 3. First Pass Yield ──────────────────────────────────────── */
+  {
+    id: 'first-pass-yield',
+    name: 'First Pass Yield (FPY)',
+    category: 'quality',
+    emoji: '✅',
+    description: 'Measures the percentage of units that pass through a process without defects on the first attempt.',
+    tags: ['FPY', 'quality', 'yield', 'defect', 'inspection', 'first pass'],
+    formula: 'FPY = (Units Passing First Inspection ÷ Total Units Started) × 100',
+    howToUse: [
+      'Count all units that entered the process during the period (Total Units Started).',
+      'Count only units that passed inspection without any rework or scrap (Passing Units).',
+      'Divide and multiply by 100 to get the FPY percentage.',
+      'World-class FPY is typically ≥ 99%. FPY below 90% signals a critical quality problem.'
+    ],
+    example: {
+      scenario: '500 units were started. 462 passed first inspection without defects.',
+      inputs: { 'Units Passing': '462', 'Total Units Started': '500' },
+      output: '92.40%'
+    },
+    inputs: [
+      { id: 'passing', label: 'Units Passing First Inspection', type: 'number', placeholder: '462', tooltip: 'Units that passed without rework or scrap' },
+      { id: 'total',   label: 'Total Units Started',           type: 'number', placeholder: '500', tooltip: 'All units that entered the process' }
+    ],
+    calculate(v) {
+      if (!v.total) return [];
+      const fpy = (v.passing / v.total) * 100;
+      const defects = v.total - v.passing;
+      let type = 'good';
+      if (fpy < 80) type = 'bad';
+      else if (fpy < 95) type = 'warning';
+      return [
+        { label: 'First Pass Yield', value: fpy.toFixed(2), unit: '%', type,
+          note: fpy >= 95 ? '✅ Excellent quality level.' : fpy >= 80 ? '⚠️ Below world-class target of 95%.' : '🚨 Critical — major quality intervention needed.' },
+        { label: 'Defective Units', value: defects, unit: 'units', note: `${((defects/v.total)*100).toFixed(1)}% defect rate` }
+      ];
+    }
+  },
+
+  /* ── 4. Lead Time ────────────────────────────────────────────── */
+  {
+    id: 'lead-time',
+    name: 'Lead Time Calculator',
+    category: 'production',
+    emoji: '📅',
+    description: 'Calculates total lead time by summing all components: process, wait, transport, and inspection time.',
+    tags: ['lead time', 'delivery', 'wait', 'transport', 'process time'],
+    formula: 'Lead Time = Process Time + Wait Time + Transport Time + Inspection Time',
+    howToUse: [
+      'Process Time: the actual time spent working on the product (value-added time).',
+      'Wait Time: time the product sits idle between operations.',
+      'Transport Time: time spent moving the product between locations.',
+      'Inspection Time: time spent checking quality at various stages.',
+      'The ratio of Process Time to Lead Time gives your Process Cycle Efficiency.'
+    ],
+    example: {
+      scenario: 'A machined part has: 45 min process, 120 min wait, 15 min transport, 10 min inspection.',
+      inputs: { 'Process': '45 min', 'Wait': '120 min', 'Transport': '15 min', 'Inspection': '10 min' },
+      output: '190 min (3.17 hrs)'
+    },
+    inputs: [
+      { id: 'processTime',  label: 'Process Time (min)',     type: 'number', placeholder: '45',  tooltip: 'Value-added time actually spent working' },
+      { id: 'waitTime',     label: 'Wait / Queue Time (min)',type: 'number', placeholder: '120', tooltip: 'Idle time between operations' },
+      { id: 'transportTime',label: 'Transport Time (min)',   type: 'number', placeholder: '15',  tooltip: 'Time spent moving the product' },
+      { id: 'inspectTime',  label: 'Inspection Time (min)',  type: 'number', placeholder: '10',  tooltip: 'Time for quality checks' }
+    ],
+    calculate(v) {
+      const total = (v.processTime||0) + (v.waitTime||0) + (v.transportTime||0) + (v.inspectTime||0);
+      if (!total) return [];
+      const pce = v.processTime ? (v.processTime / total * 100) : 0;
+      let pceType = 'bad';
+      if (pce >= 25) pceType = 'good';
+      else if (pce >= 10) pceType = 'warning';
+      return [
+        { label: 'Total Lead Time', value: total.toFixed(1), unit: 'min', note: `${(total/60).toFixed(2)} hours` },
+        { label: 'Process Cycle Efficiency', value: pce.toFixed(1), unit: '%', type: pceType,
+          note: pce >= 25 ? '✅ Good efficiency (>25%).' : '⚠️ Lean target is >25% — reduce non-value-added time.' }
+      ];
+    }
+  },
+
+  /* ── 5. Throughput ───────────────────────────────────────────── */
+  {
+    id: 'throughput',
+    name: 'Throughput Calculator',
+    category: 'capacity',
+    emoji: '🚀',
+    description: 'Calculates the rate of units produced per unit of time, and projects capacity across different periods.',
+    tags: ['throughput', 'rate', 'output', 'capacity', 'production rate', 'units per hour'],
+    formula: 'Throughput = Units Produced ÷ Time Period',
+    howToUse: [
+      'Count the total units produced (or shipped) during the observed time period.',
+      'Enter the time period in minutes.',
+      'The calculator shows throughput per minute, per hour, and per 8-hour shift.',
+      'Compare against required demand (takt rate) to assess capacity.'
+    ],
+    example: {
+      scenario: 'A packaging line produces 240 units during a 60-minute observation.',
+      inputs: { 'Units Produced': '240', 'Time Period': '60 min' },
+      output: '4 units/min | 240 units/hr | 1,920 units/shift'
+    },
+    inputs: [
+      { id: 'units',   label: 'Units Produced',       type: 'number', placeholder: '240', tooltip: 'Total good units completed in the period' },
+      { id: 'timePer', label: 'Time Period (min)',     type: 'number', placeholder: '60',  tooltip: 'Duration of the observation or production run' },
+      { id: 'demand',  label: 'Required Demand (units/hr) — optional', type: 'number', placeholder: '', tooltip: 'Your target output per hour for comparison' }
+    ],
+    calculate(v) {
+      if (!v.units || !v.timePer) return [];
+      const perMin = v.units / v.timePer;
+      const perHr  = perMin * 60;
+      const perShift = perMin * 480;
+      const results = [
+        { label: 'Throughput Rate', value: perMin.toFixed(2), unit: 'units / min' },
+        { label: 'Per Hour',        value: Math.round(perHr), unit: 'units / hr',
+          note: `${Math.round(perShift).toLocaleString()} units per 8-hr shift` }
+      ];
+      if (v.demand > 0) {
+        const gap = perHr - v.demand;
+        results.push({
+          label: 'vs. Required Demand',
+          value: gap >= 0 ? `+${Math.round(gap)}` : `${Math.round(gap)}`,
+          unit: 'units/hr surplus' + (gap < 0 ? ' (shortfall)' : ''),
+          type: gap >= 0 ? 'good' : 'bad',
+          note: gap >= 0 ? '✅ Current throughput meets demand.' : '🚨 Capacity shortfall — throughput below required demand.'
+        });
+      }
+      return results;
+    }
+  },
+
+  /* ── 6. Rolled Throughput Yield (RTY) ────────────────────────── */
+  {
+    id: 'rty',
+    name: 'Rolled Throughput Yield (RTY)',
+    category: 'quality',
+    emoji: '🔗',
+    description: 'Calculates the probability that a unit passes through an entire multi-step process without a defect.',
+    tags: ['RTY', 'rolled throughput yield', 'multi-step', 'process yield', 'quality chain'],
+    formula: 'RTY = FPY₁ × FPY₂ × FPY₃ × … × FPYₙ',
+    howToUse: [
+      'Enter the First Pass Yield (as a decimal, e.g. 0.97 for 97%) for each process step.',
+      'Leave a step blank if it doesn\'t apply — blank steps are ignored.',
+      'RTY is the product of all step yields: it compounds quickly, so even small defect rates matter.',
+      'A 6-step process with 97% yield at each step has RTY = 0.97⁶ ≈ 83.2%.'
+    ],
+    example: {
+      scenario: 'A 4-step assembly process has step yields of 98%, 97%, 99%, and 95%.',
+      inputs: { 'Step 1 FPY': '0.98', 'Step 2 FPY': '0.97', 'Step 3 FPY': '0.99', 'Step 4 FPY': '0.95' },
+      output: 'RTY = 89.31%'
+    },
+    inputs: [
+      { id: 's1', label: 'Step 1 FPY (decimal, e.g. 0.97)', type: 'number', placeholder: '0.98', tooltip: '1.0 = 100%, 0.95 = 95%' },
+      { id: 's2', label: 'Step 2 FPY', type: 'number', placeholder: '0.97' },
+      { id: 's3', label: 'Step 3 FPY', type: 'number', placeholder: '0.99' },
+      { id: 's4', label: 'Step 4 FPY', type: 'number', placeholder: '0.95' },
+      { id: 's5', label: 'Step 5 FPY (optional)', type: 'number', placeholder: '' },
+      { id: 's6', label: 'Step 6 FPY (optional)', type: 'number', placeholder: '' },
+    ],
+    calculate(v) {
+      const steps = [v.s1, v.s2, v.s3, v.s4, v.s5, v.s6].filter(x => x > 0);
+      if (steps.length < 2) return [];
+      const rty = steps.reduce((acc, x) => acc * x, 1);
+      const rtyPct = rty * 100;
+      let type = 'good';
+      if (rtyPct < 70) type = 'bad';
+      else if (rtyPct < 90) type = 'warning';
+      return [
+        { label: 'Rolled Throughput Yield', value: rtyPct.toFixed(2), unit: '%', type,
+          note: `Across ${steps.length} steps. ${(100 - rtyPct).toFixed(2)}% of units will have at least one defect.` },
+        { label: 'Defect Opportunity Loss', value: (100 - rtyPct).toFixed(2), unit: '% defective' }
+      ];
+    }
+  },
+
+  /* ── 7. Defect Rate Calculator ───────────────────────────────── */
+  {
+    id: 'defect-rate',
+    name: 'Defect Rate Calculator',
+    category: 'quality',
+    emoji: '🔎',
+    description: 'Computes Defects Per Unit (DPU), Defects Per Million Opportunities (DPMO), and estimated Sigma level.',
+    tags: ['defect rate', 'DPU', 'DPMO', 'sigma', 'PPM', 'six sigma', 'quality'],
+    formula: 'DPU = Defects ÷ Units  |  DPMO = (Defects ÷ (Units × Opportunities)) × 1,000,000',
+    howToUse: [
+      'Enter the total number of defects found (not defective units — one unit can have multiple defects).',
+      'Enter total units inspected.',
+      'Enter the number of defect opportunities per unit (distinct ways a defect could occur).',
+      'DPMO maps to a Sigma level — 3.4 DPMO = Six Sigma performance.'
+    ],
+    example: {
+      scenario: '35 defects found in 500 units, each with 8 opportunities for defects.',
+      inputs: { 'Defects': '35', 'Units': '500', 'Opportunities/Unit': '8' },
+      output: 'DPU = 0.07 | DPMO = 8,750 | ~3.9σ'
+    },
+    inputs: [
+      { id: 'defects', label: 'Total Defects Found',            type: 'number', placeholder: '35',  tooltip: 'Count every defect, not just defective units' },
+      { id: 'units',   label: 'Total Units Inspected',          type: 'number', placeholder: '500' },
+      { id: 'opps',    label: 'Defect Opportunities per Unit',  type: 'number', placeholder: '8',   tooltip: 'Number of distinct ways a defect can occur on one unit' }
+    ],
+    calculate(v) {
+      if (!v.units) return [];
+      const dpu   = v.defects / v.units;
+      const dpmo  = v.opps > 0 ? (v.defects / (v.units * v.opps)) * 1e6 : null;
+      // Approximate sigma level from DPMO (simplified lookup)
+      function dpmoToSigma(d) {
+        if (d <= 3.4)   return 6.0;
+        if (d <= 233)   return 5.0;
+        if (d <= 6210)  return 4.0;
+        if (d <= 66807) return 3.0;
+        if (d <= 308537)return 2.0;
+        return 1.0;
+      }
+      const results = [
+        { label: 'Defects Per Unit (DPU)', value: dpu.toFixed(4), unit: 'defects/unit',
+          note: `${(dpu * 100).toFixed(2)}% chance of a defect on any given unit.` }
+      ];
+      if (dpmo !== null) {
+        const sigma = dpmoToSigma(dpmo);
+        let type = 'good';
+        if (dpmo > 66807) type = 'bad';
+        else if (dpmo > 6210) type = 'warning';
+        results.push(
+          { label: 'DPMO', value: Math.round(dpmo).toLocaleString(), unit: 'defects per million opportunities', type },
+          { label: 'Estimated Sigma Level', value: `~${sigma.toFixed(1)}σ`, unit: '', type,
+            note: 'Six Sigma target = 3.4 DPMO (6.0σ)' }
+        );
+      }
+      return results;
+    }
+  },
+
+  /* ── 8. OEE Calculator ───────────────────────────────────────── */
+  {
+    id: 'oee',
+    name: 'OEE Calculator',
+    category: 'lean',
+    emoji: '⚙️',
+    description: 'Calculates Overall Equipment Effectiveness — the gold standard for measuring manufacturing productivity.',
+    tags: ['OEE', 'availability', 'performance', 'quality rate', 'lean', 'equipment effectiveness'],
+    formula: 'OEE = Availability × Performance × Quality',
+    howToUse: [
+      'Availability = Run Time ÷ Planned Production Time (accounts for unplanned downtime).',
+      'Performance = (Ideal Cycle Time × Total Count) ÷ Run Time (accounts for slow cycles and minor stops).',
+      'Quality = Good Count ÷ Total Count (accounts for defects and rework).',
+      'World-class OEE is 85% or higher. Most manufacturers average around 60%.'
+    ],
+    example: {
+      scenario: 'Planned time: 480 min. Downtime: 60 min. Ideal cycle: 1 min/unit. Total output: 380 units. Good units: 368.',
+      inputs: { 'Planned Time': '480 min', 'Downtime': '60 min', 'Ideal Cycle': '1 min', 'Total Count': '380', 'Good Count': '368' },
+      output: 'OEE = 72.0%'
+    },
+    inputs: [
+      { id: 'plannedTime',  label: 'Planned Production Time (min)', type: 'number', placeholder: '480', tooltip: 'Total scheduled run time for the shift' },
+      { id: 'downtime',     label: 'Unplanned Downtime (min)',       type: 'number', placeholder: '60',  tooltip: 'Breakdowns, material shortages, unplanned stops' },
+      { id: 'idealCycle',   label: 'Ideal Cycle Time (min/unit)',    type: 'number', placeholder: '1',   tooltip: 'The theoretical fastest cycle time possible' },
+      { id: 'totalCount',   label: 'Total Units Produced',           type: 'number', placeholder: '380' },
+      { id: 'goodCount',    label: 'Good Units (no defects)',         type: 'number', placeholder: '368' }
+    ],
+    calculate(v) {
+      if (!v.plannedTime || !v.totalCount) return [];
+      const runTime     = v.plannedTime - (v.downtime || 0);
+      const avail       = runTime / v.plannedTime;
+      const perf        = v.idealCycle > 0 ? (v.idealCycle * v.totalCount) / runTime : 1;
+      const qual        = v.goodCount > 0 ? v.goodCount / v.totalCount : 1;
+      const oee         = avail * perf * qual * 100;
+      let type = 'bad';
+      if (oee >= 85) type = 'good';
+      else if (oee >= 65) type = 'warning';
+      return [
+        { label: 'OEE', value: oee.toFixed(1), unit: '%', type,
+          note: oee >= 85 ? '✅ World-class (≥85%).' : oee >= 65 ? '⚠️ Typical — target 85%+.' : '🚨 Below average — significant losses present.' },
+        { label: 'Availability',  value: (avail * 100).toFixed(1), unit: '%' },
+        { label: 'Performance',   value: (Math.min(perf, 1) * 100).toFixed(1), unit: '%' },
+        { label: 'Quality Rate',  value: (qual * 100).toFixed(1),  unit: '%' }
+      ];
+    }
+  },
+
+  /* ── 9. Labor Utilization Calculator ────────────────────────── */
+  {
+    id: 'labor-utilization',
+    name: 'Labor Utilization Calculator',
+    category: 'labor',
+    emoji: '👷',
+    description: 'Measures how effectively labor hours are being used versus available capacity.',
+    tags: ['labor', 'utilization', 'efficiency', 'headcount', 'workforce', 'productivity'],
+    formula: 'Utilization = (Direct Labor Hours ÷ Available Labor Hours) × 100',
+    howToUse: [
+      'Direct Labor Hours: hours actually spent on productive, value-added work.',
+      'Available Labor Hours: total paid hours on the clock (including indirect time).',
+      'Utilization above 85% is generally considered effective; sustained >95% risks burnout and quality issues.',
+      'Use alongside efficiency metrics to get a complete labor picture.'
+    ],
+    example: {
+      scenario: '10 operators work an 8-hour shift. 6.5 hours per operator are spent on direct work.',
+      inputs: { 'Direct Hours': '65', 'Available Hours': '80' },
+      output: '81.25% Utilization'
+    },
+    inputs: [
+      { id: 'directHrs',    label: 'Direct Labor Hours',     type: 'number', placeholder: '65',  tooltip: 'Value-added productive hours worked' },
+      { id: 'availableHrs', label: 'Available Labor Hours',  type: 'number', placeholder: '80',  tooltip: 'Total paid hours (headcount × shift length)' },
+      { id: 'headcount',    label: 'Headcount (optional)',    type: 'number', placeholder: '',    tooltip: 'Number of workers — used to compute hours per person' },
+      { id: 'shiftLen',     label: 'Shift Length (hr, optional)', type: 'number', placeholder: '', tooltip: 'Used with headcount to auto-fill available hours' }
+    ],
+    calculate(v) {
+      // Auto-compute available hours if headcount + shift provided and availableHrs blank
+      let avail = v.availableHrs;
+      if (!avail && v.headcount && v.shiftLen) avail = v.headcount * v.shiftLen;
+      if (!avail || !v.directHrs) return [];
+      const util = (v.directHrs / avail) * 100;
+      let type = 'warning';
+      if (util >= 80 && util <= 95) type = 'good';
+      else if (util > 95) type = 'warning';
+      else if (util < 60) type = 'bad';
+      const indirectHrs = avail - v.directHrs;
+      return [
+        { label: 'Labor Utilization', value: util.toFixed(1), unit: '%', type,
+          note: util > 95 ? '⚠️ Very high — monitor for fatigue and errors.' : util >= 80 ? '✅ Effective utilization range.' : '⚠️ Below target — investigate indirect time.' },
+        { label: 'Indirect / Lost Hours', value: indirectHrs.toFixed(1), unit: 'hrs',
+          note: `${((indirectHrs / avail) * 100).toFixed(1)}% of available time` }
+      ];
+    }
+  },
+
+  /* ── 10. Capacity Calculator ─────────────────────────────────── */
+  {
+    id: 'capacity',
+    name: 'Capacity Calculator',
+    category: 'capacity',
+    emoji: '📦',
+    description: 'Determines the theoretical and effective production capacity of a workstation or line.',
+    tags: ['capacity', 'max output', 'utilization', 'efficiency', 'workstation', 'bottleneck'],
+    formula: 'Effective Capacity = (Available Time × Efficiency) ÷ Cycle Time',
+    howToUse: [
+      'Available Time: net production time per shift (after breaks and downtime).',
+      'Efficiency Factor: accounts for operator pace, minor stoppages, and learning (typically 80–90%).',
+      'Cycle Time: actual time to complete one unit at this workstation.',
+      'Compare effective capacity against demand to identify if the station is a bottleneck.'
+    ],
+    example: {
+      scenario: 'A workstation has 450 min available, 85% efficiency, and a 4.5 min cycle time.',
+      inputs: { 'Available Time': '450 min', 'Efficiency': '0.85', 'Cycle Time': '4.5 min' },
+      output: 'Effective Capacity = 85 units/shift'
+    },
+    inputs: [
+      { id: 'availTime',   label: 'Available Time (min/shift)',       type: 'number', placeholder: '450', tooltip: 'Net time after breaks and planned downtime' },
+      { id: 'efficiency',  label: 'Efficiency Factor (0–1)',          type: 'number', placeholder: '0.85', tooltip: 'e.g. 0.85 = 85% efficient' },
+      { id: 'cycleTime',   label: 'Cycle Time (min/unit)',            type: 'number', placeholder: '4.5' },
+      { id: 'demandUnits', label: 'Demand (units/shift, optional)',   type: 'number', placeholder: '',    tooltip: 'Enter to see capacity vs. demand gap' }
+    ],
+    calculate(v) {
+      if (!v.availTime || !v.cycleTime) return [];
+      const eff = v.efficiency > 0 ? v.efficiency : 1;
+      const theoretical = v.availTime / v.cycleTime;
+      const effective   = (v.availTime * eff) / v.cycleTime;
+      const results = [
+        { label: 'Theoretical Capacity', value: Math.floor(theoretical), unit: 'units / shift' },
+        { label: 'Effective Capacity',   value: Math.floor(effective),   unit: 'units / shift',
+          note: `At ${(eff * 100).toFixed(0)}% efficiency` }
+      ];
+      if (v.demandUnits > 0) {
+        const gap = Math.floor(effective) - v.demandUnits;
+        results.push({
+          label: 'Capacity vs. Demand',
+          value: gap >= 0 ? `+${gap}` : `${gap}`,
+          unit: 'units surplus' + (gap < 0 ? ' (shortfall)' : ''),
+          type: gap >= 0 ? 'good' : 'bad',
+          note: gap >= 0 ? '✅ Capacity exceeds demand.' : '🚨 Bottleneck — effective capacity below demand.'
+        });
+      }
+      return results;
+    }
+  },
+
+  /* ── 11. Line Balancing Helper ───────────────────────────────── */
+  {
+    id: 'line-balancing',
+    name: 'Line Balancing Helper',
+    category: 'lean',
+    emoji: '⚖️',
+    description: 'Evaluates workstation cycle times against takt time and calculates line efficiency and balance loss.',
+    tags: ['line balancing', 'takt time', 'bottleneck', 'workstation', 'efficiency', 'lean', 'balance'],
+    formula: 'Line Efficiency = Σ Task Times ÷ (# Stations × Takt Time) × 100',
+    howToUse: [
+      'Enter the takt time (from the Takt Time Calculator) to set your production pace.',
+      'Enter the cycle time of each workstation (up to 6 stations).',
+      'Any station with a cycle time > takt time is a bottleneck — highlighted in red.',
+      'Line efficiency shows how well work is balanced. Target 85–95%.',
+      'Balance delay = 100% − Line Efficiency, indicating wasted capacity.'
+    ],
+    example: {
+      scenario: 'Takt = 5 min. Station times: 4.2, 5.1, 3.8, 4.7, 4.5 min.',
+      inputs: { 'Takt Time': '5.0 min', 'Stations': '4.2 / 5.1 / 3.8 / 4.7 / 4.5' },
+      output: 'Line Efficiency = 90.6% | Station 2 is bottleneck (5.1 > 5.0)'
+    },
+    inputs: [
+      { id: 'takt',  label: 'Takt Time (min/unit)', type: 'number', placeholder: '5.0', tooltip: 'From your Takt Time Calculator result' },
+      { id: 'ws1',   label: 'Station 1 Cycle Time (min)', type: 'number', placeholder: '4.2' },
+      { id: 'ws2',   label: 'Station 2 Cycle Time (min)', type: 'number', placeholder: '5.1' },
+      { id: 'ws3',   label: 'Station 3 Cycle Time (min)', type: 'number', placeholder: '3.8' },
+      { id: 'ws4',   label: 'Station 4 Cycle Time (min)', type: 'number', placeholder: '4.7' },
+      { id: 'ws5',   label: 'Station 5 Cycle Time (optional)', type: 'number', placeholder: '' },
+      { id: 'ws6',   label: 'Station 6 Cycle Time (optional)', type: 'number', placeholder: '' },
+    ],
+    calculate(v) {
+      if (!v.takt) return [];
+      const stations = [v.ws1, v.ws2, v.ws3, v.ws4, v.ws5, v.ws6].filter(x => x > 0);
+      if (!stations.length) return [];
+      const sum       = stations.reduce((a, b) => a + b, 0);
+      const n         = stations.length;
+      const lineEff   = (sum / (n * v.takt)) * 100;
+      const balDelay  = 100 - lineEff;
+      const bottleneck= Math.max(...stations);
+      const bottleIdx = stations.indexOf(bottleneck) + 1;
+      const hasBottle = bottleneck > v.takt;
+      let type = 'good';
+      if (lineEff < 75) type = 'bad';
+      else if (lineEff < 85) type = 'warning';
+      const results = [
+        { label: 'Line Efficiency', value: lineEff.toFixed(1), unit: '%', type,
+          note: lineEff >= 85 ? '✅ Well balanced.' : '⚠️ Rebalance work elements to improve efficiency.' },
+        { label: 'Balance Delay',   value: balDelay.toFixed(1), unit: '%',
+          note: `${(balDelay / 100 * n * v.takt).toFixed(1)} min of idle capacity per cycle` },
+        { label: 'Bottleneck Station', value: `Station ${bottleIdx}`, unit: `${bottleneck.toFixed(2)} min/unit`,
+          type: hasBottle ? 'bad' : 'good',
+          note: hasBottle
+            ? `🚨 Exceeds takt by ${(bottleneck - v.takt).toFixed(2)} min — this station limits throughput.`
+            : '✅ All stations within takt time.' }
+      ];
+      return results;
+    }
+  },
+
+  /* ── 12. 5 Whys Helper ──────────────────────────────────────────── */
+  {
+    id: 'five-whys',
+    name: '5 Whys Helper',
+    category: 'lean',
+    emoji: '❓',
+    type: 'decision-support',
+    description: 'Guides you through the 5 Whys root cause technique by chaining each answer into the next question.',
+    tags: ['5 whys', 'root cause', 'problem solving', 'lean', 'kaizen'],
+    renderTool(container) {
+      container.innerHTML = `<div class="ds-body">
+        <div class="ds-section">
+          <div class="ds-label">Problem Statement</div>
+          <div class="ds-sublabel">Be specific — describe what happened, where, and when.</div>
+          <textarea class="ds-textarea" id="ds-problem" placeholder="e.g. The welding machine on Line 3 stopped unexpectedly at 2:15pm on Tuesday, causing a 45-minute delay." rows="2"></textarea>
+        </div>
+
+        <div class="ds-section">
+          <div class="ds-label">Why Chain</div>
+          <div class="ds-sublabel">Answer each "why" — each answer becomes the subject of the next question.</div>
+          <div class="why-chain">
+            ${[1,2,3,4,5].map((n, i) => `
+              <div class="why-step">
+                <div class="why-connector">
+                  <div class="why-num">${n}</div>
+                  ${i < 4 ? '<div class="why-line"></div>' : ''}
+                </div>
+                <div class="why-step-body">
+                  <div class="why-step-label">Why ${n}${n === 1 ? ' — Why did this happen?' : n === 5 ? ' — This is your root cause.' : ''}</div>
+                  <textarea class="ds-textarea" id="ds-why${n}" placeholder="${n === 1 ? 'Because...' : 'Because...'}" rows="2"></textarea>
+                </div>
+              </div>
+              ${i < 4 ? '<div class="why-arrow">↓</div>' : ''}`).join('')}
+          </div>
+        </div>
+
+        <div class="ds-grid-2">
+          <div class="ds-section">
+            <div class="ds-label">Root Cause Statement</div>
+            <div class="ds-sublabel">Summarize the true underlying cause (usually Why 4 or 5).</div>
+            <textarea class="ds-textarea tall" id="ds-rootcause" placeholder="The root cause is..."></textarea>
+          </div>
+          <div class="ds-section">
+            <div class="ds-label">Proposed Countermeasure</div>
+            <div class="ds-sublabel">What systemic action will prevent recurrence?</div>
+            <textarea class="ds-textarea tall" id="ds-countermeasure" placeholder="To address this root cause, we will..."></textarea>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+
+  /* ── 13. Root Cause Tracker (Ishikawa / 6M) ─────────────────────── */
+  {
+    id: 'root-cause-tracker',
+    name: 'Root Cause Tracker',
+    category: 'quality',
+    emoji: '🐟',
+    type: 'decision-support',
+    description: 'Structured Ishikawa (fishbone) analysis across the 6M categories: Man, Machine, Method, Material, Measurement, and Environment.',
+    tags: ['fishbone', 'Ishikawa', '6M', 'root cause', 'cause and effect', 'quality'],
+    renderTool(container) {
+      const cats = [
+        { id: 'man',         icon: '👷', label: 'Man / People',         hint: 'Training gaps, fatigue, skill, staffing...' },
+        { id: 'machine',     icon: '⚙️', label: 'Machine / Equipment',  hint: 'Wear, calibration, maintenance, tooling...' },
+        { id: 'method',      icon: '📋', label: 'Method / Process',      hint: 'SOP gaps, sequencing, setup, design...' },
+        { id: 'material',    icon: '📦', label: 'Material',              hint: 'Supplier quality, specs, incoming variation...' },
+        { id: 'measurement', icon: '📐', label: 'Measurement',           hint: 'Gage error, calibration, sampling plan...' },
+        { id: 'environment', icon: '🌡️', label: 'Environment',           hint: 'Temperature, humidity, noise, housekeeping...' },
+      ];
+      container.innerHTML = `<div class="ds-body">
+        <div class="ds-section">
+          <div class="ds-label">Problem / Effect</div>
+          <div class="ds-sublabel">Write the problem statement clearly — this is the "head" of the fishbone.</div>
+          <textarea class="ds-textarea" id="ds-rct-problem" placeholder="e.g. Weld defect rate on Line 3 increased from 1.2% to 4.7% in the past two weeks." rows="2"></textarea>
+        </div>
+
+        <div class="ds-section">
+          <div class="ds-label">Potential Causes by Category</div>
+          <div class="ds-sublabel">List contributing causes in each category. Brainstorm freely — evaluate later.</div>
+          <div class="fishbone-grid">
+            ${cats.map(c => `
+              <div class="fishbone-cat">
+                <div class="fishbone-cat-label">${c.icon} ${c.label}</div>
+                <textarea class="ds-textarea" id="ds-rct-${c.id}" placeholder="${c.hint}" rows="3"></textarea>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="ds-grid-2">
+          <div class="ds-section">
+            <div class="ds-label">Most Likely Root Cause(s)</div>
+            <div class="ds-sublabel">Circle the 1–3 causes with the strongest evidence. What data supports this?</div>
+            <textarea class="ds-textarea tall" id="ds-rct-rootcause" placeholder="The most probable root cause is..."></textarea>
+          </div>
+          <div class="ds-section">
+            <div class="ds-label">Verification Plan</div>
+            <div class="ds-sublabel">How will you confirm this is the root cause before acting?</div>
+            <textarea class="ds-textarea tall" id="ds-rct-verify" placeholder="To verify, we will... (e.g. run a designed experiment, review gage R&R data, audit SOPs...)"></textarea>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+
+  /* ── 14. A3 Template Helper ──────────────────────────────────────── */
+  {
+    id: 'a3-template',
+    name: 'A3 Template Helper',
+    category: 'lean',
+    emoji: '📄',
+    type: 'decision-support',
+    description: 'Guides you through all 8 sections of the Toyota A3 problem-solving report on a single structured page.',
+    tags: ['A3', 'PDCA', 'problem solving', 'lean', 'Toyota', 'report', 'countermeasure'],
+    renderTool(container) {
+      const today = new Date().toISOString().slice(0,10);
+      container.innerHTML = `<div class="ds-body">
+        <div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
+          <div class="ds-section" style="flex:2;min-width:200px">
+            <div class="ds-label">A3 Title</div>
+            <input class="ds-textarea" style="min-height:unset;padding:0.5rem 0.75rem;resize:none"
+              placeholder="e.g. Reduce Weld Defect Rate on Line 3">
+          </div>
+          <div class="ds-section" style="flex:1;min-width:120px">
+            <div class="ds-label">Owner</div>
+            <input class="ds-textarea" style="min-height:unset;padding:0.5rem 0.75rem;resize:none" placeholder="Name">
+          </div>
+          <div class="ds-section" style="flex:1;min-width:120px">
+            <div class="ds-label">Date</div>
+            <input class="ds-textarea" style="min-height:unset;padding:0.5rem 0.75rem;resize:none" value="${today}">
+          </div>
+        </div>
+
+        <div class="ds-grid-2">
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div class="ds-section">
+              <div class="ds-label">① Background / Business Case</div>
+              <div class="ds-sublabel">Why does this matter? What is the strategic context?</div>
+              <textarea class="ds-textarea" placeholder="e.g. Weld defects are the #1 cause of customer returns, costing ~$18k/month in rework..." rows="3"></textarea>
+            </div>
+            <div class="ds-section">
+              <div class="ds-label">② Current Condition</div>
+              <div class="ds-sublabel">Describe the actual state with data — what is happening now?</div>
+              <textarea class="ds-textarea" placeholder="e.g. Defect rate = 4.7% (target ≤ 1.5%). Highest on 2nd shift. 78% of defects are porosity type..." rows="3"></textarea>
+            </div>
+            <div class="ds-section">
+              <div class="ds-label">③ Goal / Target Condition</div>
+              <div class="ds-sublabel">What specific, measurable outcome are you trying to achieve?</div>
+              <textarea class="ds-textarea" placeholder="e.g. Reduce weld defect rate to ≤ 1.5% by end of Q2. Zero customer returns related to porosity." rows="3"></textarea>
+            </div>
+            <div class="ds-section">
+              <div class="ds-label">④ Root Cause Analysis</div>
+              <div class="ds-sublabel">Summarize your 5 Whys or fishbone findings. What is the verified root cause?</div>
+              <textarea class="ds-textarea" placeholder="e.g. Root cause: shielding gas flow rate drops 30% at shift change because regulator O-ring degrades above 140°F..." rows="4"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div class="ds-section">
+              <div class="ds-label">⑤ Countermeasures</div>
+              <div class="ds-sublabel">List the specific actions that address the root cause (not just symptoms).</div>
+              <textarea class="ds-textarea" placeholder="e.g. 1. Replace O-ring with high-temp PTFE (Week 1)\n2. Add flow meter alarm to PLC\n3. Update PM checklist..." rows="4"></textarea>
+            </div>
+            <div class="ds-section">
+              <div class="ds-label">⑥ Implementation Plan</div>
+              <div class="ds-sublabel">Who does what by when? Keep it action-oriented.</div>
+              <textarea class="ds-textarea" placeholder="Action | Owner | Due\nReplace O-rings | J. Smith | Mar 28\nUpdate SOP | K. Lee | Apr 1\n..." rows="4"></textarea>
+            </div>
+            <div class="ds-section">
+              <div class="ds-label">⑦ Results / Follow-up</div>
+              <div class="ds-sublabel">What happened after countermeasures were implemented? Did the metric improve?</div>
+              <textarea class="ds-textarea" placeholder="e.g. Defect rate dropped to 1.1% in Week 1 post-implementation. Sustained for 3 weeks..." rows="3"></textarea>
+            </div>
+            <div class="ds-section">
+              <div class="ds-label">⑧ Lessons Learned & Horizontal Deployment</div>
+              <div class="ds-sublabel">What should be shared with other lines, shifts, or plants?</div>
+              <textarea class="ds-textarea" placeholder="e.g. PTFE O-ring upgrade to be applied on all 6 welding stations. PM interval updated in CMMS..." rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+
+  /* ── 15. Before & After Comparison ──────────────────────────────── */
+  {
+    id: 'before-after',
+    name: 'Before & After Comparison',
+    category: 'lean',
+    emoji: '📊',
+    type: 'decision-support',
+    description: 'Side-by-side metric comparison to quantify the impact of a process improvement or kaizen event.',
+    tags: ['before after', 'improvement', 'kaizen', 'comparison', 'metrics', 'impact'],
+    renderTool(container) {
+      let rowId = 0;
+
+      function makeRow(id) {
+        return `<tr data-row="${id}">
+          <td><input class="ba-input" data-field="metric" placeholder="e.g. Defect Rate"></td>
+          <td><input class="ba-input" data-field="before" type="number" placeholder="0" style="width:80px"></td>
+          <td><input class="ba-input" data-field="after"  type="number" placeholder="0" style="width:80px"></td>
+          <td><input class="ba-input" data-field="unit"   placeholder="%" style="width:60px"></td>
+          <td><span class="ba-delta neutral" data-delta="${id}">—</span></td>
+          <td><button class="ba-remove" data-remove="${id}" title="Remove">✕</button></td>
+        </tr>`;
+      }
+
+      function calcDelta(row) {
+        const b = parseFloat(row.querySelector('[data-field="before"]').value);
+        const a = parseFloat(row.querySelector('[data-field="after"]').value);
+        const unit = row.querySelector('[data-field="unit"]').value.trim();
+        const span = row.querySelector('[data-delta]');
+        if (isNaN(b) || isNaN(a) || b === 0) { span.textContent = '—'; span.className = 'ba-delta neutral'; return; }
+        const pct = ((a - b) / Math.abs(b)) * 100;
+        const sign = pct > 0 ? '+' : '';
+        span.textContent = `${sign}${pct.toFixed(1)}%`;
+        // Improvement direction: lower is better for defects/time, higher is better for yield/output
+        // We let the user interpret — green = changed, red = no change isn't right
+        // Better heuristic: just show direction with neutral color, user reads the numbers
+        span.className = 'ba-delta ' + (pct < 0 ? 'down' : pct > 0 ? 'up' : 'neutral');
+      }
+
+      function updateSummary() {
+        const rows = table.querySelectorAll('tbody tr');
+        let improved = 0, worsened = 0, unchanged = 0;
+        rows.forEach(row => {
+          const b = parseFloat(row.querySelector('[data-field="before"]').value);
+          const a = parseFloat(row.querySelector('[data-field="after"]').value);
+          if (isNaN(b) || isNaN(a)) return;
+          if (a < b) improved++;
+          else if (a > b) worsened++;
+          else unchanged++;
+        });
+        document.getElementById('ba-sum-improved').textContent  = improved;
+        document.getElementById('ba-sum-worsened').textContent  = worsened;
+        document.getElementById('ba-sum-unchanged').textContent = unchanged;
+      }
+
+      container.innerHTML = `<div class="ds-body">
+        <div class="ds-section">
+          <div class="ds-label">Improvement / Event Title</div>
+          <div class="ds-grid-2" style="align-items:start">
+            <input class="ds-textarea" style="min-height:unset;padding:0.5rem 0.75rem;resize:none"
+              placeholder="e.g. Line 3 Welding Kaizen — March 2026">
+            <div style="display:flex;gap:0.75rem">
+              <div class="ds-section" style="flex:1">
+                <div class="ds-sublabel">Before Date</div>
+                <input class="ds-textarea" style="min-height:unset;padding:0.5rem 0.75rem;resize:none" placeholder="e.g. Feb 2026">
+              </div>
+              <div class="ds-section" style="flex:1">
+                <div class="ds-sublabel">After Date</div>
+                <input class="ds-textarea" style="min-height:unset;padding:0.5rem 0.75rem;resize:none" placeholder="e.g. Mar 2026">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-section">
+          <div class="ds-label">Metrics</div>
+          <div class="ds-sublabel">Enter before and after values. % change is calculated automatically. ↑ = increased, ↓ = decreased.</div>
+          <table class="ba-table" id="ba-table">
+            <thead>
+              <tr>
+                <th style="width:35%">Metric</th>
+                <th style="width:13%">Before</th>
+                <th style="width:13%">After</th>
+                <th style="width:11%">Unit</th>
+                <th style="width:13%">Change</th>
+                <th style="width:5%"></th>
+              </tr>
+            </thead>
+            <tbody id="ba-body">
+              ${[0,1,2].map(i => { rowId = i; return makeRow(i); }).join('')}
+            </tbody>
+          </table>
+          <button class="ba-add-btn" id="ba-add">+ Add Metric</button>
+        </div>
+
+        <div class="ds-section">
+          <div class="ds-label">Summary</div>
+          <div class="ba-summary">
+            <div class="ba-summary-item">
+              <div class="val" id="ba-sum-improved" style="color:#16a34a">0</div>
+              <div class="lbl">Metrics Decreased</div>
+            </div>
+            <div class="ba-summary-item">
+              <div class="val" id="ba-sum-worsened" style="color:#dc2626">0</div>
+              <div class="lbl">Metrics Increased</div>
+            </div>
+            <div class="ba-summary-item">
+              <div class="val" id="ba-sum-unchanged" style="color:var(--muted)">0</div>
+              <div class="lbl">Unchanged</div>
+            </div>
+          </div>
+          <div class="ds-section" style="margin-top:0.75rem">
+            <div class="ds-label">Observations / Notes</div>
+            <textarea class="ds-textarea" placeholder="Interpret the results here — what drove the improvements? What still needs work?"></textarea>
+          </div>
+        </div>
+      </div>`;
+
+      const table = container.querySelector('#ba-table');
+      rowId = 2;
+
+      table.addEventListener('input', e => {
+        const row = e.target.closest('tr');
+        if (row) { calcDelta(row); updateSummary(); }
+      });
+
+      table.addEventListener('click', e => {
+        const btn = e.target.closest('[data-remove]');
+        if (btn) {
+          const tbody = document.getElementById('ba-body');
+          if (tbody.rows.length > 1) { btn.closest('tr').remove(); updateSummary(); }
+        }
+      });
+
+      document.getElementById('ba-add').addEventListener('click', () => {
+        rowId++;
+        const tbody = document.getElementById('ba-body');
+        tbody.insertAdjacentHTML('beforeend', makeRow(rowId));
+      });
+    }
+  },
+
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════════ */
+let activeCategory = 'all';
+let searchQuery    = '';
+let chatHistory    = [];
+const MAX_CONTEXT  = 15;
+
+/* ═══════════════════════════════════════════════════════════════════
+   DOM REFS
+═══════════════════════════════════════════════════════════════════ */
+const toolGrid       = document.getElementById('tool-grid');
+const searchInput    = document.getElementById('search-input');
+const chatMessages   = document.getElementById('chat-messages');
+const chatTextarea   = document.getElementById('chat-textarea');
+const sendBtn        = document.getElementById('send-btn');
+const typingIndicator= document.getElementById('typing-indicator');
+const toolModal      = document.getElementById('tool-modal');
+const toast          = document.getElementById('toast');
+
+/* ═══════════════════════════════════════════════════════════════════
+   CATEGORY TABS
+═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.cat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeCategory = tab.dataset.cat;
+    renderGrid();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   SEARCH
+═══════════════════════════════════════════════════════════════════ */
+let searchDebounce;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    renderGrid();
+  }, 180);
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   FILTER & RENDER GRID
+═══════════════════════════════════════════════════════════════════ */
+function filterTools() {
+  return TOOL_REGISTRY.filter(tool => {
+    const matchCat = activeCategory === 'all' || tool.category === activeCategory;
+    const q = searchQuery;
+    const matchSearch = !q
+      || tool.name.toLowerCase().includes(q)
+      || tool.description.toLowerCase().includes(q)
+      || tool.tags.some(t => t.toLowerCase().includes(q))
+      || (CATEGORIES[tool.category]?.label || '').toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+}
+
+function renderGrid() {
+  const tools = filterTools();
+  if (!tools.length) {
+    toolGrid.innerHTML = '<p class="no-results">No tools found. Try a different search or category.</p>';
+    return;
+  }
+  toolGrid.innerHTML = tools.map(renderCard).join('');
+  toolGrid.querySelectorAll('.tool-card').forEach(card => {
+    card.addEventListener('click', () => openTool(card.dataset.toolId));
+  });
+}
+
+function renderCard(tool) {
+  const cat = CATEGORIES[tool.category] || {};
+  const tags = tool.tags.slice(0, 4).map(t => `<span class="tag-pill">${t}</span>`).join('');
+  return `
+    <div class="tool-card" data-tool-id="${tool.id}">
+      <div class="card-header" style="background:${cat.gradient||'var(--primary)'}">
+        <span class="card-emoji">${tool.emoji}</span>
+        <span class="card-cat-label">${cat.label || tool.category}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${tool.name}</div>
+        <div class="card-desc">${tool.description}</div>
+        <div class="card-tags">${tags}</div>
+        <div class="card-open-hint">${tool.type === 'decision-support' ? 'Open Tool →' : 'Open Calculator →'}</div>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOOL MODAL
+═══════════════════════════════════════════════════════════════════ */
+let activeTool = null;
+
+function openTool(toolId) {
+  const tool = TOOL_REGISTRY.find(t => t.id === toolId);
+  if (!tool) return;
+  activeTool = tool;
+
+  const cat = CATEGORIES[tool.category] || {};
+  const isDS = tool.type === 'decision-support';
+
+  // Header (always the same)
+  document.getElementById('modal-emoji').textContent = tool.emoji;
+  document.getElementById('modal-tool-name').textContent = tool.name;
+  const badge = document.getElementById('modal-cat-badge');
+  badge.textContent = cat.label || tool.category;
+  badge.style.background = cat.gradient || 'var(--primary)';
+
+  // Wide modal for DS tools
+  document.getElementById('modal-box').classList.toggle('wide', isDS);
+
+  // Show/hide panels
+  const calcEl = document.getElementById('modal-calc');
+  const infoEl = document.getElementById('modal-info');
+  const dsEl   = document.getElementById('modal-ds');
+  calcEl.style.display = isDS ? 'none' : '';
+  infoEl.style.display = isDS ? 'none' : 'flex';
+  dsEl.style.display   = isDS ? 'flex' : 'none';
+
+  if (isDS) {
+    dsEl.innerHTML = '';
+    tool.renderTool(dsEl);
+  } else {
+    // Standard calculator layout
+    document.getElementById('info-description').textContent = tool.description;
+    document.getElementById('info-formula').textContent = tool.formula;
+
+    const howToEl = document.getElementById('info-howto');
+    if (Array.isArray(tool.howToUse)) {
+      howToEl.innerHTML = '<ul>' + tool.howToUse.map(s => `<li>${s}</li>`).join('') + '</ul>';
+    } else {
+      howToEl.innerHTML = `<p>${tool.howToUse}</p>`;
+    }
+
+    const exEl = document.getElementById('info-example');
+    const ex = tool.example;
+    const inputRows = Object.entries(ex.inputs)
+      .map(([k,v]) => `<div class="example-row"><span>${k}</span><span>${v}</span></div>`).join('');
+    exEl.innerHTML = `
+      <div class="scenario">${ex.scenario}</div>
+      ${inputRows}
+      <div class="example-row result-row"><span>Result</span><span>${ex.output}</span></div>`;
+
+    const inputsEl = document.getElementById('calc-inputs');
+    inputsEl.innerHTML = tool.inputs.map(inp => `
+      <div class="input-group" style="margin-bottom:0.75rem">
+        <label class="input-label" for="inp-${inp.id}">${inp.label}</label>
+        ${inp.tooltip ? `<span class="input-tooltip">${inp.tooltip}</span>` : ''}
+        <input class="calc-input" type="${inp.type}" id="inp-${inp.id}"
+          placeholder="${inp.placeholder || ''}" autocomplete="off">
+      </div>`).join('');
+
+    tool.inputs.forEach(inp => {
+      document.getElementById('inp-' + inp.id)
+        .addEventListener('input', () => runCalculation(tool));
+    });
+
+    document.getElementById('calc-results').innerHTML =
+      '<div style="font-size:0.8rem;color:var(--muted);font-style:italic;padding:0.5rem 0;">Enter values above to see results.</div>';
+
+    document.getElementById('inp-' + tool.inputs[0].id).focus();
+  }
+
+  toolModal.classList.add('open');
+}
+
+function closeToolModal() {
+  toolModal.classList.remove('open');
+  activeTool = null;
+}
+
+function runCalculation(tool) {
+  const vals = {};
+  tool.inputs.forEach(inp => {
+    vals[inp.id] = parseFloat(document.getElementById('inp-' + inp.id).value) || 0;
+  });
+  const results = tool.calculate(vals);
+  const el = document.getElementById('calc-results');
+  if (!results.length) {
+    el.innerHTML = '<div style="font-size:0.8rem;color:var(--muted);font-style:italic;padding:0.5rem 0;">Enter values above to see results.</div>';
+    return;
+  }
+  el.innerHTML = results.map(r => `
+    <div class="result-card ${r.type || ''}">
+      <div class="result-label">${r.label}</div>
+      <div class="result-value">${r.value}</div>
+      <div class="result-unit">${r.unit}</div>
+      ${r.note ? `<div class="result-note">${r.note}</div>` : ''}
+    </div>`).join('');
+}
+
+// Close modal
+document.getElementById('modal-close').addEventListener('click', closeToolModal);
+toolModal.addEventListener('click', e => { if (e.target === toolModal) closeToolModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && toolModal.classList.contains('open')) closeToolModal(); });
+
+/* ═══════════════════════════════════════════════════════════════════
+   HIGHLIGHT TOOL
+═══════════════════════════════════════════════════════════════════ */
+function highlightTool(toolId) {
+  // If a category filter is active that hides this tool, reset to all
+  const tool = TOOL_REGISTRY.find(t => t.id === toolId);
+  if (tool && activeCategory !== 'all' && activeCategory !== tool.category) {
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.cat-tab[data-cat="all"]').classList.add('active');
+    activeCategory = 'all';
+    renderGrid();
+  }
+
+  // Remove existing highlights
+  document.querySelectorAll('.tool-card.highlighted').forEach(c => c.classList.remove('highlighted'));
+
+  const card = document.querySelector(`.tool-card[data-tool-id="${toolId}"]`);
+  if (card) {
+    card.classList.add('highlighted');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(() => card.classList.remove('highlighted'), 8000);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PROXY CONFIG
+═══════════════════════════════════════════════════════════════════ */
+const PROXY_URL = 'https://chucky-proxy.dtuckerdev.workers.dev';
+
+window.addEventListener('load', () => {
+  renderGrid();
+  appendBotMessage(
+    "Hi! I'm your IE Workbench assistant — here to help you find the right tool and understand the formulas behind it.\n\nTry asking: *\"What tool should I use to pace my production line?\"* or *\"Explain First Pass Yield.\"*"
+  );
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHAT
+═══════════════════════════════════════════════════════════════════ */
+function buildSystemPrompt() {
+  const toolList = TOOL_REGISTRY.map(t =>
+    `- [[${t.name}]] (${CATEGORIES[t.category]?.label || t.category}): ${t.description}\n  Formula: ${t.formula}`
+  ).join('\n');
+
+  return `You are an expert Industrial Engineering assistant embedded in IE Workbench, a browser-based toolbox for IE calculations.
+
+Your role is to help users:
+- Understand which tool to use for their situation
+- Explain IE concepts and formulas clearly
+- Interpret calculation results
+- Suggest best practices
+
+Available tools:
+${toolList}
+
+CRITICAL RULE: When recommending or referencing a tool, you MUST use the exact format [[Tool Name]] (double brackets, exact name). Example: [[Takt Time Calculator]]. This makes the tool clickable in the UI.
+
+Be concise, practical, and enthusiastic. When a user describes a production problem, guide them to the right tool. If they give you numbers, walk them through the math. Keep responses under 200 words unless the user asks for detail.`;
+}
+
+function appendUserMessage(text) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap user';
+  wrap.innerHTML = `
+    <div class="msg-bubble">${escapeHtml(text)}</div>
+    <div class="msg-time">${timeNow()}</div>`;
+  chatMessages.appendChild(wrap);
+  scrollChat();
+}
+
+function appendBotMessage(text) {
+  // Parse [[Tool Name]] references
+  const html = text
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')   // *italic*
+    .replace(/\[\[([^\]]+)\]\]/g, (_, name) => {
+      const tool = TOOL_REGISTRY.find(t => t.name === name);
+      if (!tool) return `<strong>${escapeHtml(name)}</strong>`;
+      return `<span class="tool-ref" onclick="highlightTool('${tool.id}')">${escapeHtml(name)}</span>`;
+    })
+    .replace(/\n/g, '<br>');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap bot';
+  wrap.innerHTML = `
+    <div class="msg-bubble">${html}</div>
+    <div class="msg-time">${timeNow()}</div>`;
+  chatMessages.appendChild(wrap);
+  scrollChat();
+}
+
+function scrollChat() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function timeNow() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function sendMessage() {
+  const text = chatTextarea.value.trim();
+  if (!text) return;
+
+  chatTextarea.value = '';
+  chatTextarea.style.height = 'auto';
+  appendUserMessage(text);
+
+  chatHistory.push({ role: 'user', content: text });
+  if (chatHistory.length > MAX_CONTEXT) chatHistory.splice(0, 2);
+
+  typingIndicator.classList.add('visible');
+  scrollChat();
+  sendBtn.disabled = true;
+
+  try {
+    const messages = [
+      { role: 'system', content: buildSystemPrompt() },
+      ...chatHistory
+    ];
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const errMsg = data?.error?.message || `API error ${res.status}`;
+      appendBotMessage(`Sorry, I ran into an error: ${errMsg}`);
+      return;
+    }
+
+    const botText = data.choices?.[0]?.message?.content || 'No response received.';
+    chatHistory.push({ role: 'assistant', content: botText });
+    appendBotMessage(botText);
+
+    const refs = [...botText.matchAll(/\[\[([^\]]+)\]\]/g)];
+    refs.forEach(([, name], i) => {
+      const tool = TOOL_REGISTRY.find(t => t.name === name);
+      if (tool) setTimeout(() => highlightTool(tool.id), 300 + i * 250);
+    });
+
+  } catch (err) {
+    appendBotMessage(`Connection error: ${err.message}. Check your network connection.`);
+  } finally {
+    typingIndicator.classList.remove('visible');
+    sendBtn.disabled = false;
+    scrollChat();
+  }
+}
+
+// Send on button click or Enter (Shift+Enter = newline)
+sendBtn.addEventListener('click', sendMessage);
+chatTextarea.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// Auto-resize textarea
+chatTextarea.addEventListener('input', () => {
+  chatTextarea.style.height = 'auto';
+  chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 120) + 'px';
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, duration = 2800) {
+  clearTimeout(toastTimer);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+}
+</script>
+</body>
+</html>
