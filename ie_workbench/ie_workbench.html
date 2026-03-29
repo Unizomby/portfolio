@@ -795,6 +795,263 @@
     .ba-summary-item .val { font-size: 1.3rem; font-weight: 700; }
     .ba-summary-item .lbl { font-size: 0.68rem; color: var(--muted); margin-top: 0.1rem; }
 
+    /* ── Builder Mode ───────────────────────────────────────────────── */
+    #builder-layout { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    #builder-layout.active { display: flex; }
+
+    #builder-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 1.25rem;
+      background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    #builder-scenario-name {
+      font-family: var(--font); font-size: 0.95rem; font-weight: 600; color: var(--text);
+      border: 1.5px solid transparent; border-radius: var(--radius-btn);
+      padding: 0.3rem 0.6rem; background: transparent; outline: none;
+      transition: border-color 0.2s; min-width: 180px; max-width: 300px;
+    }
+    #builder-scenario-name:focus { border-color: var(--primary); background: var(--bg); }
+    #builder-chain-badge {
+      font-size: 0.75rem; font-weight: 600; color: var(--primary);
+      background: var(--primary-light); border-radius: 1rem; padding: 0.25rem 0.75rem; white-space: nowrap;
+    }
+    #builder-header-actions { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+    .builder-btn {
+      padding: 0.4rem 0.875rem; border-radius: var(--radius-btn);
+      border: 1.5px solid var(--border); background: transparent;
+      font-family: var(--font); font-size: 0.78rem; font-weight: 500;
+      color: var(--muted); cursor: pointer; transition: all 0.2s;
+    }
+    .builder-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .builder-btn.primary { background: var(--primary); color: #fff; border-color: transparent; }
+    .builder-btn.primary:hover { background: var(--primary-dark); }
+
+    #builder-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* Steps column */
+    #builder-steps-col {
+      width: 220px; flex-shrink: 0; background: var(--surface);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;
+    }
+    #builder-steps-col-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .bsteps-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    #builder-add-tool-btn {
+      font-size: 0.72rem; font-weight: 600; color: var(--primary);
+      background: var(--primary-light); border: none; border-radius: 1rem;
+      padding: 0.2rem 0.6rem; cursor: pointer; transition: background 0.2s;
+    }
+    #builder-add-tool-btn:hover { background: var(--primary); color: #fff; }
+    #builder-steps-list {
+      flex: 1; overflow-y: auto; padding: 0.5rem;
+      display: flex; flex-direction: column; gap: 0.25rem;
+    }
+    .bstep-item {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0.65rem;
+      border-radius: var(--radius-btn); cursor: pointer; transition: background 0.15s;
+      border: 1.5px solid transparent;
+    }
+    .bstep-item:hover { background: var(--bg); }
+    .bstep-item.active { background: var(--primary-light); border-color: rgba(110,87,224,.3); }
+    .bstep-item.done .bstep-num { background: #22c55e; color: #fff; }
+    .bstep-num {
+      width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%;
+      background: var(--border); color: var(--muted);
+      font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    }
+    .bstep-item.active .bstep-num { background: var(--primary); color: #fff; }
+    .bstep-info { flex: 1; min-width: 0; }
+    .bstep-name { font-size: 0.75rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bstep-item.active .bstep-name { color: var(--primary); font-weight: 600; }
+    .bstep-result-preview { font-size: 0.65rem; color: var(--muted); margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bstep-remove {
+      background: none; border: none; cursor: pointer; color: transparent;
+      font-size: 0.7rem; padding: 0 0.1rem; border-radius: 3px; transition: color 0.15s, background 0.15s; flex-shrink: 0;
+    }
+    .bstep-item:hover .bstep-remove { color: var(--muted); }
+    .bstep-remove:hover { color: #dc2626 !important; background: #fef2f2; }
+
+    /* Calculator column */
+    #builder-calc-col {
+      flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg);
+    }
+    #builder-calc-col-header {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1.25rem;
+      background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    #builder-calc-step-emoji { font-size: 1.5rem; }
+    #builder-calc-step-info { flex: 1; }
+    #builder-calc-step-name { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+    #builder-calc-step-num  { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+    #builder-calc-body { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+    #builder-calc-body .empty-state { text-align: center; color: var(--muted); font-size: 0.88rem; padding: 3rem 1rem; }
+    .bcalc-section-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.6rem;
+    }
+    #builder-calc-nav {
+      display: flex; gap: 0.75rem; padding: 0.875rem 1.25rem;
+      border-top: 1px solid var(--border); background: var(--surface); flex-shrink: 0;
+    }
+
+    /* Summary column */
+    #builder-summary-col {
+      width: 280px; flex-shrink: 0; background: var(--surface);
+      border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden;
+    }
+    #builder-summary-col-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .bsummary-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    #builder-summary-body { flex: 1; overflow-y: auto; padding: 0.875rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .bsummary-meta { background: var(--bg); border-radius: var(--radius-btn); padding: 0.75rem; margin-bottom: 0.25rem; }
+    .bsummary-meta-name { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+    .bsummary-meta-date { font-size: 0.72rem; color: var(--muted); }
+    .bsummary-step {
+      background: var(--bg); border-radius: var(--radius-btn);
+      padding: 0.65rem 0.75rem; border-left: 3px solid var(--border); transition: border-color 0.2s;
+    }
+    .bsummary-step.has-result { border-left-color: var(--primary); }
+    .bsummary-step-name { font-size: 0.75rem; font-weight: 600; color: var(--text); margin-bottom: 0.25rem; }
+    .bsummary-step-results { display: flex; flex-direction: column; gap: 0.2rem; }
+    .bsummary-result-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.72rem; }
+    .bsummary-result-label { color: var(--muted); }
+    .bsummary-result-value { font-weight: 700; color: var(--primary); text-align: right; padding-left: 0.5rem; }
+    .bsummary-step-pending { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+
+    /* Scenario toggle */
+    #scenario-toggle {
+      display: flex; background: var(--bg); border-radius: var(--radius-btn);
+      border: 1.5px solid var(--border); overflow: hidden; flex-shrink: 0;
+    }
+    .scenario-btn {
+      padding: 0.32rem 0.875rem; border: none; background: transparent;
+      font-family: var(--font); font-size: 0.75rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    }
+    .scenario-btn.active { background: var(--primary); color: #fff; border-radius: calc(var(--radius-btn) - 1px); }
+    .scenario-btn.proposed.active { background: #16a34a; }
+
+    /* Comparison rows in summary */
+    #builder-summary-col { width: 320px; }
+    .bcomp-row {
+      display: flex; align-items: baseline; gap: 0.3rem;
+      font-size: 0.71rem; margin-top: 0.18rem;
+    }
+    .bcomp-label { color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bcomp-curr  { color: var(--muted); white-space: nowrap; }
+    .bcomp-arrow { color: var(--border); font-size: 0.65rem; }
+    .bcomp-prop  { color: var(--primary); font-weight: 700; white-space: nowrap; }
+    .bdelta {
+      font-size: 0.63rem; font-weight: 700; padding: 0.08rem 0.35rem;
+      border-radius: 1rem; white-space: nowrap; flex-shrink: 0;
+    }
+    .bdelta.up      { background: #f0fdf4; color: #16a34a; }
+    .bdelta.down    { background: #fef2f2; color: #dc2626; }
+    .bdelta.neutral { background: var(--bg); color: var(--muted); }
+
+    /* Overlays (chain picker, sessions, tool picker) */
+    #chain-picker-overlay, #sessions-overlay, #tool-picker-overlay {
+      position: fixed; inset: 0; background: rgba(20,10,50,.5);
+      backdrop-filter: blur(4px); z-index: 300;
+      display: none; align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    #chain-picker-overlay.open, #sessions-overlay.open, #tool-picker-overlay.open { display: flex; }
+    .overlay-box {
+      background: var(--surface); border-radius: 1rem;
+      box-shadow: 0 24px 60px rgba(0,0,0,.25);
+      width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+    }
+    #chain-picker-box { max-width: 740px; }
+    #sessions-box     { max-width: 560px; }
+    #tool-picker-box  { max-width: 480px; }
+    .overlay-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .overlay-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .overlay-close {
+      width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border);
+      background: transparent; cursor: pointer; font-size: 1rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .overlay-close:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+    .overlay-body { padding: 1.25rem 1.5rem; overflow-y: auto; flex: 1; }
+
+    /* Chain picker */
+    .chain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 0.875rem; }
+    .chain-card {
+      background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-card);
+      padding: 1rem; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    }
+    .chain-card:hover { border-color: var(--primary); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+    .chain-card-emoji { font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .chain-card-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+    .chain-card-desc  { font-size: 0.73rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.5rem; }
+    .chain-card-steps { font-size: 0.65rem; font-weight: 600; color: var(--primary); background: var(--primary-light); border-radius: 1rem; padding: 0.15rem 0.55rem; display: inline-block; }
+    .chain-custom-row { margin-top: 0.875rem; padding-top: 0.875rem; border-top: 1px solid var(--border); text-align: center; }
+
+    /* Sessions */
+    .sessions-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .session-item {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+      background: var(--bg); border-radius: var(--radius-btn); border: 1.5px solid var(--border);
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .session-item:hover { border-color: var(--primary); }
+    .session-item-info { flex: 1; min-width: 0; }
+    .session-item-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .session-item-meta { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+    .session-delete {
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      font-size: 0.9rem; padding: 0.25rem; border-radius: 4px; transition: color 0.2s, background 0.2s;
+    }
+    .session-delete:hover { color: #dc2626; background: #fef2f2; }
+    .sessions-empty { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 0.88rem; }
+
+    /* Tool picker */
+    #tool-picker-search-wrap { margin-bottom: 0.875rem; position: relative; }
+    #tool-picker-search {
+      width: 100%; padding: 0.5rem 1rem 0.5rem 2.2rem;
+      border: 1.5px solid var(--border); border-radius: 2rem;
+      font-family: var(--font); font-size: 0.85rem; color: var(--text);
+      outline: none; transition: border-color 0.2s;
+    }
+    #tool-picker-search:focus { border-color: var(--primary); }
+    #tool-picker-search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.9rem; pointer-events: none; }
+    #tool-picker-list { display: flex; flex-direction: column; gap: 0.25rem; max-height: 360px; overflow-y: auto; }
+    .tool-picker-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.75rem; border-radius: var(--radius-btn); cursor: pointer; transition: background 0.15s; }
+    .tool-picker-item:hover { background: var(--primary-light); }
+    .tool-picker-item-emoji { font-size: 1.1rem; flex-shrink: 0; }
+    .tool-picker-item-info { flex: 1; min-width: 0; }
+    .tool-picker-item-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .tool-picker-item-cat  { font-size: 0.68rem; color: var(--muted); }
+
+    /* Mode toggle */
+    .mode-toggle-btn {
+      padding: 0.4rem 1rem; border-radius: var(--radius-btn); border: 1.5px solid var(--border);
+      background: transparent; font-family: var(--font); font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .mode-toggle-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .mode-toggle-btn.active { background: var(--primary); color: #fff; border-color: transparent; }
+
+    /* Print */
+    @media print {
+      #top-bar, #main-layout, #builder-steps-col, #builder-calc-col,
+      #builder-header, #tool-modal, #chain-picker-overlay,
+      #sessions-overlay, #tool-picker-overlay, #toast { display: none !important; }
+      #builder-layout { display: block !important; overflow: visible !important; }
+      #builder-body { display: block !important; }
+      #builder-summary-col { width: 100% !important; border: none !important; display: block !important; }
+      #builder-summary-body { overflow: visible !important; }
+      .bsummary-step { break-inside: avoid; }
+      .bsummary-meta-name { font-size: 1.2rem !important; }
+    }
+
     /* ── Scrollbars ────────────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -883,7 +1140,9 @@
       <input type="text" id="search-input" placeholder="Search tools by name, keyword, or category…">
     </div>
 
-    <div id="top-bar-right"></div>
+    <div id="top-bar-right">
+      <button class="mode-toggle-btn" id="builder-toggle-btn">📋 Builder</button>
+    </div>
   </div>
 
   <!-- Main -->
@@ -937,6 +1196,108 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Builder Layout -->
+  <div id="builder-layout">
+    <div id="builder-header">
+      <input id="builder-scenario-name" type="text" value="New Scenario" maxlength="80">
+      <div id="builder-chain-badge"></div>
+      <div id="scenario-toggle">
+        <button class="scenario-btn active" id="scenario-btn-current" onclick="setBuilderScenario('current')">Current State</button>
+        <button class="scenario-btn proposed" id="scenario-btn-proposed" onclick="setBuilderScenario('proposed')">Proposed State</button>
+      </div>
+      <div id="builder-header-actions">
+        <button class="builder-btn" id="builder-sessions-btn">📂 Sessions</button>
+        <button class="builder-btn primary" id="builder-save-btn">💾 Save</button>
+        <button class="builder-btn" id="builder-print-btn">🖨 Print</button>
+      </div>
+    </div>
+    <div id="builder-body">
+      <!-- Left: Steps -->
+      <div id="builder-steps-col">
+        <div id="builder-steps-col-header">
+          <div class="bsteps-title">Steps</div>
+          <button id="builder-add-tool-btn">+ Add</button>
+        </div>
+        <div id="builder-steps-list"></div>
+      </div>
+      <!-- Center: Calculator -->
+      <div id="builder-calc-col">
+        <div id="builder-calc-col-header">
+          <div id="builder-calc-step-emoji"></div>
+          <div id="builder-calc-step-info">
+            <div id="builder-calc-step-name">Select a step</div>
+            <div id="builder-calc-step-num"></div>
+          </div>
+        </div>
+        <div id="builder-calc-body">
+          <div class="empty-state">Choose a chain or add tools to get started.</div>
+        </div>
+        <div id="builder-calc-nav">
+          <button class="btn-ghost" id="builder-prev-btn">← Previous</button>
+          <button class="btn-primary" id="builder-next-btn" style="flex:1">Next Step →</button>
+        </div>
+      </div>
+      <!-- Right: Summary -->
+      <div id="builder-summary-col">
+        <div id="builder-summary-col-header">
+          <div class="bsummary-title">Live Summary</div>
+          <button class="builder-btn" id="builder-print-btn-2">🖨</button>
+        </div>
+        <div id="builder-summary-body"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Chain Picker Overlay -->
+<div id="chain-picker-overlay">
+  <div class="overlay-box" id="chain-picker-box">
+    <div class="overlay-header">
+      <div class="overlay-title">Choose a Chain</div>
+      <button class="overlay-close" id="chain-picker-close">✕</button>
+    </div>
+    <div class="overlay-body">
+      <div class="chain-grid" id="chain-grid"></div>
+      <div class="chain-custom-row">
+        <button class="btn-ghost" id="chain-custom-btn">Start with a blank scenario →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sessions Overlay -->
+<div id="sessions-overlay">
+  <div class="overlay-box" id="sessions-box">
+    <div class="overlay-header">
+      <div class="overlay-title">Saved Sessions</div>
+      <button class="overlay-close" id="sessions-close">✕</button>
+    </div>
+    <div class="overlay-body">
+      <div style="margin-bottom:0.875rem;">
+        <button class="btn-primary" id="sessions-new-btn" style="width:100%;padding:0.55rem 1rem;">+ New Scenario</button>
+      </div>
+      <div id="sessions-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Tool Picker Overlay -->
+<div id="tool-picker-overlay">
+  <div class="overlay-box" id="tool-picker-box">
+    <div class="overlay-header">
+      <div class="overlay-title">Add a Tool</div>
+      <button class="overlay-close" id="tool-picker-close">✕</button>
+    </div>
+    <div class="overlay-body">
+      <div id="tool-picker-search-wrap">
+        <span id="tool-picker-search-icon">🔍</span>
+        <input id="tool-picker-search" type="text" placeholder="Search tools…" autocomplete="off">
+      </div>
+      <div id="tool-picker-list"></div>
+    </div>
   </div>
 </div>
 
@@ -2833,6 +3194,541 @@ function showToast(msg, duration = 2800) {
   toast.classList.add('show');
   toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUILDER MODE
+═══════════════════════════════════════════════════════════════════ */
+const BUILDER_CHAINS = [
+  {
+    id: 'lean-line',
+    name: 'Lean Line Improvement',
+    emoji: '♻️',
+    description: 'Assess current state, balance the line, and quantify labor savings',
+    tools: ['takt-time', 'cycle-time', 'oee', 'line-balancing', 'labor-utilization', 'cost-savings']
+  },
+  {
+    id: 'new-product-quote',
+    name: 'New Product Quoting',
+    emoji: '📋',
+    description: 'Estimate production requirements and cost for a new product',
+    tools: ['takt-time', 'capacity', 'labor-utilization', 'cost-savings', 'productivity-roi']
+  },
+  {
+    id: 'automation-justification',
+    name: 'Automation Justification',
+    emoji: '🤖',
+    description: 'Build the financial case for an automation investment',
+    tools: ['cycle-time', 'labor-utilization', 'automation-payback']
+  },
+  {
+    id: 'quality-improvement',
+    name: 'Quality Improvement',
+    emoji: '✅',
+    description: 'Measure and improve yield, defects, and throughput',
+    tools: ['first-pass-yield', 'rty', 'defect-rate', 'productivity-roi']
+  },
+  {
+    id: 'throughput-analysis',
+    name: 'Throughput & Capacity',
+    emoji: '📊',
+    description: 'Analyze flow, system capacity, and financial break-even',
+    tools: ['throughput', 'littles-law', 'capacity', 'break-even']
+  }
+];
+
+// Only tools with inputs[] + calculate() are eligible in chains
+const BUILDER_ELIGIBLE_TOOLS = TOOL_REGISTRY.filter(t => t.inputs && t.calculate);
+
+let builderMode = false;
+let builderSession = {
+  id: null, name: 'New Scenario', chainId: null, createdAt: null, steps: []
+};
+let builderActiveStep = 0;
+let builderScenario = 'current'; // 'current' | 'proposed'
+
+/* ── Toggle ─────────────────────────────────────────────────────── */
+function toggleBuilderMode() {
+  builderMode = !builderMode;
+  const mainLayout    = document.getElementById('main-layout');
+  const builderLayout = document.getElementById('builder-layout');
+  const toggleBtn     = document.getElementById('builder-toggle-btn');
+  const searchWrap    = document.getElementById('search-bar-wrap');
+
+  if (builderMode) {
+    mainLayout.style.display = 'none';
+    builderLayout.classList.add('active');
+    searchWrap.style.display = 'none';
+    toggleBtn.classList.add('active');
+    toggleBtn.textContent = '← Tools';
+    const draft = loadBuilderDraft();
+    if (draft && draft.steps && draft.steps.length) {
+      applyBuilderSession(draft);
+    } else {
+      openChainPicker();
+    }
+  } else {
+    mainLayout.style.display = '';
+    builderLayout.classList.remove('active');
+    searchWrap.style.display = '';
+    toggleBtn.classList.remove('active');
+    toggleBtn.textContent = '📋 Builder';
+  }
+}
+
+/* ── Session persistence ────────────────────────────────────────── */
+function loadBuilderDraft() {
+  try { return JSON.parse(localStorage.getItem('ie-builder-draft') || 'null'); } catch { return null; }
+}
+function saveBuilderDraft() {
+  try { localStorage.setItem('ie-builder-draft', JSON.stringify(builderSession)); } catch {}
+}
+function loadBuilderSessions() {
+  try { return JSON.parse(localStorage.getItem('ie-builder-sessions') || '[]'); } catch { return []; }
+}
+function saveBuilderSessionToStore() {
+  const sessions = loadBuilderSessions();
+  const now = new Date().toISOString();
+  if (!builderSession.id) { builderSession.id = Date.now().toString(); builderSession.createdAt = now; }
+  builderSession.updatedAt = now;
+  const idx = sessions.findIndex(s => s.id === builderSession.id);
+  if (idx >= 0) sessions[idx] = { ...builderSession };
+  else sessions.unshift({ ...builderSession });
+  if (sessions.length > 20) sessions.splice(20);
+  try {
+    localStorage.setItem('ie-builder-sessions', JSON.stringify(sessions));
+    saveBuilderDraft();
+    showToast('Session saved ✓');
+  } catch { showToast('Could not save — storage full'); }
+}
+function deleteBuilderSession(id) {
+  const sessions = loadBuilderSessions().filter(s => s.id !== id);
+  try { localStorage.setItem('ie-builder-sessions', JSON.stringify(sessions)); } catch {}
+  renderSessionsList();
+}
+function migrateStep(step) {
+  if (step.current) return step; // already new format
+  return { toolId: step.toolId, current: { inputs: step.inputs || {}, results: step.results || [] }, proposed: { inputs: {}, results: [] } };
+}
+function applyBuilderSession(session) {
+  builderSession = JSON.parse(JSON.stringify(session));
+  builderSession.steps = builderSession.steps.map(migrateStep);
+  builderActiveStep = 0;
+  builderScenario = 'current';
+  refreshBuilderUI();
+}
+
+/* ── Init ───────────────────────────────────────────────────────── */
+function initBuilderFromChain(chainId) {
+  const chain = BUILDER_CHAINS.find(c => c.id === chainId) || null;
+  builderSession = {
+    id: null, name: chain ? chain.name : 'New Scenario', chainId,
+    createdAt: null,
+    steps: (chain ? chain.tools : []).map(toolId => ({ toolId, current: { inputs: {}, results: [] }, proposed: { inputs: {}, results: [] } }))
+  };
+  builderActiveStep = 0;
+  builderScenario = 'current';
+  saveBuilderDraft();
+  refreshBuilderUI();
+}
+function initBuilderBlank() {
+  builderSession = { id: null, name: 'New Scenario', chainId: null, createdAt: null, steps: [] };
+  builderActiveStep = 0;
+  builderScenario = 'current';
+  saveBuilderDraft();
+  refreshBuilderUI();
+}
+
+/* ── Scenario toggle ────────────────────────────────────────────── */
+function setBuilderScenario(s) {
+  builderScenario = s;
+  document.getElementById('scenario-btn-current').classList.toggle('active', s === 'current');
+  document.getElementById('scenario-btn-proposed').classList.toggle('active', s === 'proposed');
+  renderBuilderStepsList();
+  renderBuilderActiveStep();
+}
+
+/* ── Full refresh ───────────────────────────────────────────────── */
+function refreshBuilderUI() {
+  document.getElementById('builder-scenario-name').value = builderSession.name;
+  const chain = BUILDER_CHAINS.find(c => c.id === builderSession.chainId);
+  const badge = document.getElementById('builder-chain-badge');
+  badge.textContent = chain ? `${chain.emoji} ${chain.name}` : 'Custom';
+  setBuilderScenario(builderScenario);
+  renderBuilderSummary();
+}
+
+/* ── Steps list ─────────────────────────────────────────────────── */
+function renderBuilderStepsList() {
+  const list = document.getElementById('builder-steps-list');
+  if (!builderSession.steps.length) {
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.78rem;padding:1.5rem 0.5rem;">No steps yet.<br>Add a tool to begin.</div>';
+    return;
+  }
+  list.innerHTML = builderSession.steps.map((step, i) => {
+    const tool = TOOL_REGISTRY.find(t => t.id === step.toolId);
+    if (!tool) return '';
+    const slot     = step[builderScenario] || { inputs: {}, results: [] };
+    const isDone   = slot.results && slot.results.length > 0;
+    const isActive = i === builderActiveStep;
+    const preview  = isDone ? `${slot.results[0].value} ${slot.results[0].unit}` : '';
+    const shortName = tool.name.replace(/ Calculator$/, '').replace(/ Helper$/, '');
+    return `
+      <div class="bstep-item ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}" onclick="setBuilderStep(${i})">
+        <div class="bstep-num">${isDone && !isActive ? '✓' : i + 1}</div>
+        <div class="bstep-info">
+          <div class="bstep-name">${shortName}</div>
+          ${preview ? `<div class="bstep-result-preview">${preview}</div>` : ''}
+        </div>
+        <button class="bstep-remove" onclick="event.stopPropagation();removeBuilderStep(${i})" title="Remove">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function setBuilderStep(index) {
+  builderActiveStep = index;
+  renderBuilderStepsList();
+  renderBuilderActiveStep();
+}
+
+function removeBuilderStep(index) {
+  builderSession.steps.splice(index, 1);
+  if (builderActiveStep >= builderSession.steps.length) {
+    builderActiveStep = Math.max(0, builderSession.steps.length - 1);
+  }
+  saveBuilderDraft();
+  renderBuilderStepsList();
+  renderBuilderActiveStep();
+  renderBuilderSummary();
+}
+
+/* ── Active step calculator ─────────────────────────────────────── */
+function renderBuilderActiveStep() {
+  const calcBody = document.getElementById('builder-calc-body');
+  const stepEmoji = document.getElementById('builder-calc-step-emoji');
+  const stepName  = document.getElementById('builder-calc-step-name');
+  const stepNum   = document.getElementById('builder-calc-step-num');
+  const prevBtn   = document.getElementById('builder-prev-btn');
+  const nextBtn   = document.getElementById('builder-next-btn');
+
+  if (!builderSession.steps.length) {
+    calcBody.innerHTML = '<div class="empty-state">Choose a chain or add tools from the left panel.</div>';
+    stepEmoji.textContent = ''; stepName.textContent = 'No steps yet'; stepNum.textContent = '';
+    prevBtn.disabled = true; nextBtn.disabled = true;
+    return;
+  }
+  prevBtn.disabled = false; nextBtn.disabled = false;
+
+  const step = builderSession.steps[builderActiveStep];
+  if (!step) return;
+  const tool = TOOL_REGISTRY.find(t => t.id === step.toolId);
+  if (!tool) { calcBody.innerHTML = '<div class="empty-state">Tool not found.</div>'; return; }
+
+  // Ensure slot exists
+  if (!step.current)  step.current  = { inputs: {}, results: [] };
+  if (!step.proposed) step.proposed = { inputs: {}, results: [] };
+  const slot = step[builderScenario];
+
+  stepEmoji.textContent = tool.emoji;
+  stepName.textContent  = tool.name;
+  stepNum.textContent   = `Step ${builderActiveStep + 1} of ${builderSession.steps.length} — ${builderScenario === 'current' ? 'Current State' : 'Proposed State'}`;
+  prevBtn.disabled = builderActiveStep === 0;
+  nextBtn.textContent = builderActiveStep === builderSession.steps.length - 1 ? 'Finish ✓' : 'Next Step →';
+
+  calcBody.innerHTML = `
+    <div>
+      <div class="bcalc-section-label">Inputs</div>
+      ${tool.inputs.map(inp => `
+        <div class="input-group" style="margin-bottom:0.75rem">
+          <label class="input-label" for="binp-${inp.id}">${inp.label}</label>
+          ${inp.tooltip ? `<span class="input-tooltip">${inp.tooltip}</span>` : ''}
+          <input class="calc-input" type="${inp.type}" id="binp-${inp.id}"
+            placeholder="${inp.placeholder || ''}" autocomplete="off"
+            value="${slot.inputs[inp.id] !== undefined && slot.inputs[inp.id] !== 0 ? slot.inputs[inp.id] : ''}">
+        </div>`).join('')}
+    </div>
+    <div>
+      <div class="bcalc-section-label">Results</div>
+      <div id="builder-calc-results">
+        ${slot.results && slot.results.length
+          ? builderResultsHTML(slot.results)
+          : '<div style="font-size:0.8rem;color:var(--muted);font-style:italic;">Enter values above to see results.</div>'}
+      </div>
+    </div>`;
+
+  tool.inputs.forEach(inp => {
+    const el = document.getElementById('binp-' + inp.id);
+    if (el) el.addEventListener('input', () => runBuilderCalc(tool, builderActiveStep));
+  });
+  const first = document.getElementById('binp-' + tool.inputs[0].id);
+  if (first) setTimeout(() => first.focus(), 30);
+}
+
+function builderResultsHTML(results) {
+  return results.map(r => `
+    <div class="result-card ${r.type || ''}">
+      <div class="result-label">${r.label}</div>
+      <div class="result-value">${r.value}</div>
+      <div class="result-unit">${r.unit}</div>
+      ${r.note ? `<div class="result-note">${r.note}</div>` : ''}
+    </div>`).join('');
+}
+
+function runBuilderCalc(tool, stepIndex) {
+  const step = builderSession.steps[stepIndex];
+  if (!step) return;
+  if (!step.current)  step.current  = { inputs: {}, results: [] };
+  if (!step.proposed) step.proposed = { inputs: {}, results: [] };
+  const slot = step[builderScenario];
+  const vals = {};
+  tool.inputs.forEach(inp => {
+    const el = document.getElementById('binp-' + inp.id);
+    const val = el ? (parseFloat(el.value) || 0) : 0;
+    vals[inp.id] = val;
+    slot.inputs[inp.id] = val;
+  });
+  slot.results = tool.calculate(vals);
+  const el = document.getElementById('builder-calc-results');
+  if (el) {
+    el.innerHTML = slot.results.length
+      ? builderResultsHTML(slot.results)
+      : '<div style="font-size:0.8rem;color:var(--muted);font-style:italic;">Enter values above to see results.</div>';
+  }
+  renderBuilderStepsList();
+  renderBuilderSummary();
+  saveBuilderDraft();
+}
+
+/* ── Delta helpers ──────────────────────────────────────────────── */
+function parseNum(str) {
+  const n = parseFloat(String(str).replace(/[^0-9.-]/g, ''));
+  return isNaN(n) ? null : n;
+}
+function deltaChip(currVal, propVal) {
+  const c = parseNum(currVal), p = parseNum(propVal);
+  if (c === null || p === null || c === 0) return '';
+  const pct = ((p - c) / Math.abs(c)) * 100;
+  const cls  = pct > 0.5 ? 'up' : pct < -0.5 ? 'down' : 'neutral';
+  const sign = pct >= 0 ? '+' : '';
+  return `<span class="bdelta ${cls}">${sign}${pct.toFixed(1)}%</span>`;
+}
+
+/* ── Summary panel ──────────────────────────────────────────────── */
+function renderBuilderSummary() {
+  const body = document.getElementById('builder-summary-body');
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+  // Check if any step has proposed results
+  const hasProposed = builderSession.steps.some(s => s.proposed && s.proposed.results && s.proposed.results.length);
+
+  let html = `
+    <div class="bsummary-meta">
+      <div class="bsummary-meta-name">${escapeHtml(builderSession.name)}</div>
+      <div class="bsummary-meta-date">${date}${hasProposed ? ' &middot; Current vs. Proposed' : ''}</div>
+    </div>`;
+
+  if (!builderSession.steps.length) {
+    html += '<div style="text-align:center;color:var(--muted);font-size:0.78rem;padding:1rem 0;">No steps yet.</div>';
+    body.innerHTML = html;
+    return;
+  }
+
+  builderSession.steps.forEach((step) => {
+    const tool = TOOL_REGISTRY.find(t => t.id === step.toolId);
+    if (!tool) return;
+
+    const curr = (step.current  || {});
+    const prop = (step.proposed || {});
+    const hasCurr = curr.results && curr.results.length > 0;
+    const hasProp = prop.results && prop.results.length > 0;
+    const hasAny  = hasCurr || hasProp;
+
+    html += `<div class="bsummary-step ${hasAny ? 'has-result' : ''}">
+      <div class="bsummary-step-name">${tool.emoji} ${tool.name.replace(/ Calculator$/, '').replace(/ Helper$/, '')}</div>`;
+
+    if (hasCurr && hasProp) {
+      // Comparison mode: match results by label
+      html += '<div class="bsummary-step-results">';
+      curr.results.forEach((r, i) => {
+        const pr = prop.results[i];
+        const chip = pr ? deltaChip(r.value, pr.value) : '';
+        html += `<div class="bcomp-row">
+          <span class="bcomp-label">${r.label}</span>
+          <span class="bcomp-curr">${r.value}</span>
+          <span class="bcomp-arrow">→</span>
+          <span class="bcomp-prop">${pr ? pr.value : '—'}</span>
+          ${chip}
+        </div>`;
+      });
+      html += '</div>';
+    } else if (hasCurr) {
+      html += '<div class="bsummary-step-results">';
+      curr.results.forEach(r => {
+        html += `<div class="bsummary-result-row">
+          <span class="bsummary-result-label">${r.label}</span>
+          <span class="bsummary-result-value">${r.value} ${r.unit}</span>
+        </div>`;
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="bsummary-step-pending">Not yet calculated</div>';
+    }
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+}
+
+/* ── Chain picker ───────────────────────────────────────────────── */
+function openChainPicker() {
+  const grid = document.getElementById('chain-grid');
+  grid.innerHTML = BUILDER_CHAINS.map(c => `
+    <div class="chain-card" onclick="selectChain('${c.id}')">
+      <div class="chain-card-emoji">${c.emoji}</div>
+      <div class="chain-card-name">${c.name}</div>
+      <div class="chain-card-desc">${c.description}</div>
+      <span class="chain-card-steps">${c.tools.length} steps</span>
+    </div>`).join('');
+  document.getElementById('chain-picker-overlay').classList.add('open');
+}
+function selectChain(chainId) {
+  document.getElementById('chain-picker-overlay').classList.remove('open');
+  initBuilderFromChain(chainId);
+}
+
+/* ── Sessions drawer ────────────────────────────────────────────── */
+function openSessionsDrawer() {
+  document.getElementById('sessions-overlay').classList.add('open');
+  renderSessionsList();
+}
+function renderSessionsList() {
+  const sessions = loadBuilderSessions();
+  const listEl = document.getElementById('sessions-list');
+  if (!sessions.length) {
+    listEl.innerHTML = '<div class="sessions-empty">No saved sessions yet.<br>Complete a scenario and click Save.</div>';
+    return;
+  }
+  listEl.innerHTML = sessions.map(s => {
+    const chain = BUILDER_CHAINS.find(c => c.id === s.chainId);
+    const d = s.updatedAt || s.createdAt;
+    const dateStr = d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const done = (s.steps || []).filter(st => (st.current && st.current.results && st.current.results.length) || (st.results && st.results.length)).length;
+    return `
+      <div class="session-item" onclick="loadSession('${s.id}')">
+        <div class="session-item-info">
+          <div class="session-item-name">${escapeHtml(s.name)}</div>
+          <div class="session-item-meta">${chain ? chain.emoji + ' ' + chain.name : 'Custom'} &middot; ${done}/${(s.steps||[]).length} steps &middot; ${dateStr}</div>
+        </div>
+        <button class="session-delete" onclick="event.stopPropagation();deleteBuilderSession('${s.id}')" title="Delete">🗑</button>
+      </div>`;
+  }).join('');
+}
+function loadSession(id) {
+  const session = loadBuilderSessions().find(s => s.id === id);
+  if (!session) return;
+  document.getElementById('sessions-overlay').classList.remove('open');
+  applyBuilderSession(session);
+  showToast('Session loaded');
+}
+
+/* ── Tool picker ────────────────────────────────────────────────── */
+function openToolPicker() {
+  document.getElementById('tool-picker-overlay').classList.add('open');
+  const searchEl = document.getElementById('tool-picker-search');
+  searchEl.value = '';
+  renderToolPickerList('');
+  setTimeout(() => searchEl.focus(), 50);
+}
+function renderToolPickerList(query) {
+  const q = query.toLowerCase();
+  const filtered = BUILDER_ELIGIBLE_TOOLS.filter(t =>
+    !q || t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
+      || (t.tags || []).some(tag => tag.toLowerCase().includes(q))
+  );
+  const listEl = document.getElementById('tool-picker-list');
+  if (!filtered.length) {
+    listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:0.82rem;">No tools found.</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(t => `
+    <div class="tool-picker-item" onclick="addToolToBuilder('${t.id}')">
+      <div class="tool-picker-item-emoji">${t.emoji}</div>
+      <div class="tool-picker-item-info">
+        <div class="tool-picker-item-name">${t.name}</div>
+        <div class="tool-picker-item-cat">${CATEGORIES[t.category]?.label || t.category}</div>
+      </div>
+    </div>`).join('');
+}
+function addToolToBuilder(toolId) {
+  document.getElementById('tool-picker-overlay').classList.remove('open');
+  builderSession.steps.push({ toolId, current: { inputs: {}, results: [] }, proposed: { inputs: {}, results: [] } });
+  builderActiveStep = builderSession.steps.length - 1;
+  saveBuilderDraft();
+  renderBuilderStepsList();
+  renderBuilderActiveStep();
+  renderBuilderSummary();
+}
+
+/* ── Wire up events ─────────────────────────────────────────────── */
+document.getElementById('builder-toggle-btn').addEventListener('click', toggleBuilderMode);
+
+document.getElementById('builder-scenario-name').addEventListener('input', e => {
+  builderSession.name = e.target.value;
+  renderBuilderSummary();
+  saveBuilderDraft();
+});
+document.getElementById('builder-prev-btn').addEventListener('click', () => {
+  if (builderActiveStep > 0) setBuilderStep(builderActiveStep - 1);
+});
+document.getElementById('builder-next-btn').addEventListener('click', () => {
+  if (builderActiveStep < builderSession.steps.length - 1) setBuilderStep(builderActiveStep + 1);
+  else showToast('All steps complete — save your session!');
+});
+document.getElementById('builder-save-btn').addEventListener('click', saveBuilderSessionToStore);
+document.getElementById('builder-sessions-btn').addEventListener('click', openSessionsDrawer);
+document.getElementById('builder-add-tool-btn').addEventListener('click', openToolPicker);
+document.getElementById('builder-print-btn').addEventListener('click', () => window.print());
+document.getElementById('builder-print-btn-2').addEventListener('click', () => window.print());
+
+// Chain picker events
+document.getElementById('chain-picker-close').addEventListener('click', () => {
+  document.getElementById('chain-picker-overlay').classList.remove('open');
+  if (!builderSession.steps.length) initBuilderBlank();
+});
+document.getElementById('chain-custom-btn').addEventListener('click', () => {
+  document.getElementById('chain-picker-overlay').classList.remove('open');
+  initBuilderBlank();
+});
+document.getElementById('chain-picker-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('chain-picker-overlay')) {
+    document.getElementById('chain-picker-overlay').classList.remove('open');
+    if (!builderSession.steps.length) initBuilderBlank();
+  }
+});
+
+// Sessions events
+document.getElementById('sessions-close').addEventListener('click', () => {
+  document.getElementById('sessions-overlay').classList.remove('open');
+});
+document.getElementById('sessions-new-btn').addEventListener('click', () => {
+  document.getElementById('sessions-overlay').classList.remove('open');
+  localStorage.removeItem('ie-builder-draft');
+  builderSession = { id: null, name: 'New Scenario', chainId: null, createdAt: null, steps: [] };
+  openChainPicker();
+});
+document.getElementById('sessions-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('sessions-overlay'))
+    document.getElementById('sessions-overlay').classList.remove('open');
+});
+
+// Tool picker events
+document.getElementById('tool-picker-search').addEventListener('input', e => renderToolPickerList(e.target.value));
+document.getElementById('tool-picker-close').addEventListener('click', () => {
+  document.getElementById('tool-picker-overlay').classList.remove('open');
+});
+document.getElementById('tool-picker-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('tool-picker-overlay'))
+    document.getElementById('tool-picker-overlay').classList.remove('open');
+});
 </script>
 </body>
 </html>
