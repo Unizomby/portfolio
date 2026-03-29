@@ -1798,6 +1798,664 @@ const TOOL_REGISTRY = [
     }
   },
 
+  /* ── 16. Production Rate Calculator ─────────────────────────────── */
+  {
+    id: 'production-rate',
+    name: 'Production Rate Calculator',
+    category: 'production',
+    emoji: '🏃',
+    description: 'Converts a production count over any time period into rates per hour, per shift, per day, and per week.',
+    tags: ['production rate', 'output', 'units per hour', 'throughput', 'daily output'],
+    formula: 'Rate = Units Produced ÷ Time  →  scaled to hr / shift / day / week',
+    howToUse: [
+      'Enter the number of units produced and the time period observed.',
+      'Set your shift length, shifts per day, and working days per week.',
+      'All rate conversions update instantly.',
+      'Compare the daily rate against customer demand to spot gaps.'
+    ],
+    example: {
+      scenario: '340 units produced in 4 hours. Two 8-hr shifts, 5-day week.',
+      inputs: { 'Units': '340', 'Obs. Time (hr)': '4', 'Shift (hr)': '8', 'Shifts/Day': '2', 'Days/Week': '5' },
+      output: '85 u/hr | 680 u/shift | 1,360 u/day | 6,800 u/week'
+    },
+    inputs: [
+      { id: 'units',      label: 'Units Produced',              type: 'number', placeholder: '340' },
+      { id: 'obsTime',    label: 'Observation Time (hr)',        type: 'number', placeholder: '4',   tooltip: 'The time window over which units were counted' },
+      { id: 'shiftLen',   label: 'Shift Length (hr)',            type: 'number', placeholder: '8' },
+      { id: 'shiftsDay',  label: 'Shifts per Day',               type: 'number', placeholder: '2' },
+      { id: 'daysWeek',   label: 'Working Days per Week',        type: 'number', placeholder: '5' },
+      { id: 'demandDay',  label: 'Daily Demand (units, optional)', type: 'number', placeholder: '', tooltip: 'Enter to compare capacity vs. demand' }
+    ],
+    calculate(v) {
+      if (!v.units || !v.obsTime) return [];
+      const perHr    = v.units / v.obsTime;
+      const perShift = perHr * (v.shiftLen  || 8);
+      const perDay   = perShift * (v.shiftsDay || 1);
+      const perWeek  = perDay  * (v.daysWeek  || 5);
+      const results = [
+        { label: 'Rate per Hour',  value: perHr.toFixed(1),                unit: 'units / hr' },
+        { label: 'Rate per Shift', value: Math.round(perShift).toLocaleString(), unit: `units / ${v.shiftLen||8}-hr shift` },
+        { label: 'Rate per Day',   value: Math.round(perDay).toLocaleString(),   unit: `units / day (${v.shiftsDay||1} shift${(v.shiftsDay||1)>1?'s':''})` },
+        { label: 'Rate per Week',  value: Math.round(perWeek).toLocaleString(),  unit: `units / week (${v.daysWeek||5} days)` }
+      ];
+      if (v.demandDay > 0) {
+        const gap = Math.round(perDay) - v.demandDay;
+        results.push({
+          label: 'Capacity vs. Daily Demand',
+          value: gap >= 0 ? `+${gap.toLocaleString()}` : gap.toLocaleString(),
+          unit: 'units / day',
+          type: gap >= 0 ? 'good' : 'bad',
+          note: gap >= 0 ? '✅ Daily output meets demand.' : '🚨 Output below daily demand.'
+        });
+      }
+      return results;
+    }
+  },
+
+  /* ── 17. Little's Law Calculator ─────────────────────────────────── */
+  {
+    id: 'littles-law',
+    name: "Little's Law Calculator",
+    category: 'capacity',
+    emoji: '🔁',
+    description: "Applies Little's Law (L = λW) to relate WIP, throughput rate, and average cycle time — solve for any one given the other two.",
+    tags: ["little's law", 'WIP', 'throughput', 'cycle time', 'queuing', 'flow'],
+    formula: 'L = λ × W   (WIP = Throughput Rate × Avg. Time in System)',
+    howToUse: [
+      'L = average number of items in the system (WIP).',
+      'λ (lambda) = average throughput rate (units per hour).',
+      'W = average time each unit spends in the system (hours).',
+      'Fill in any two values — the calculator solves for the third.',
+      'Use this to size WIP limits, predict lead times, or validate flow assumptions.'
+    ],
+    example: {
+      scenario: 'A work cell processes 20 units/hr and each unit spends an average of 2.5 hours in the cell.',
+      inputs: { 'λ (Rate)': '20 u/hr', 'W (Time)': '2.5 hr', 'L (WIP)': 'solve' },
+      output: 'L = 50 units in system'
+    },
+    inputs: [
+      { id: 'L',      label: 'L — Avg. WIP / Items in System',     type: 'number', placeholder: '', tooltip: 'Leave blank to solve for WIP' },
+      { id: 'lambda', label: 'λ — Throughput Rate (units / hr)',    type: 'number', placeholder: '', tooltip: 'Leave blank to solve for throughput rate' },
+      { id: 'W',      label: 'W — Avg. Time in System (hr)',        type: 'number', placeholder: '', tooltip: 'Leave blank to solve for avg. time in system' }
+    ],
+    calculate(v) {
+      const filled = [v.L > 0, v.lambda > 0, v.W > 0].filter(Boolean).length;
+      if (filled < 2) return [];
+      let L = v.L, lambda = v.lambda, W = v.W;
+      if (!L && lambda && W)      { L      = lambda * W;      return [{ label: 'L — Avg. WIP',            value: L.toFixed(2),      unit: 'items in system',    note: `At ${lambda} u/hr throughput with ${W} hr avg time, expect ${L.toFixed(1)} items in the system.` }]; }
+      if (!lambda && L && W)      { lambda = L / W;           return [{ label: 'λ — Throughput Rate',     value: lambda.toFixed(2),  unit: 'units / hr',         note: `To keep WIP at ${L} items with ${W} hr avg time, throughput must be ${lambda.toFixed(2)} u/hr.` }]; }
+      if (!W && L && lambda)      { W      = L / lambda;      return [{ label: 'W — Avg. Time in System', value: W.toFixed(3),       unit: 'hr',                 note: `${(W*60).toFixed(1)} minutes avg time per unit. ${W.toFixed(2)} hr × ${lambda} u/hr = ${L} WIP.` }]; }
+      // All three filled — verify consistency
+      const LCheck = lambda * W;
+      const err = Math.abs(LCheck - L) / L * 100;
+      return [{ label: "Little's Law Check", value: LCheck.toFixed(2), unit: 'expected WIP', type: err < 5 ? 'good' : 'warning',
+        note: err < 5 ? `✅ Consistent — L = λW holds (${err.toFixed(1)}% error).` : `⚠️ Inconsistent — expected L = ${LCheck.toFixed(2)}, entered L = ${L}. Check your inputs.` }];
+    }
+  },
+
+  /* ── 18. Kanban Card Calculator ──────────────────────────────────── */
+  {
+    id: 'kanban-cards',
+    name: 'Kanban Card Calculator',
+    category: 'inventory',
+    emoji: '🃏',
+    description: 'Calculates the number of kanban cards (or bins) needed to sustain flow given demand, lead time, and safety stock.',
+    tags: ['kanban', 'cards', 'bins', 'pull system', 'WIP', 'inventory', 'lean'],
+    formula: 'Cards = ⌈ (Daily Demand × Lead Time × (1 + Safety Factor)) ÷ Container Size ⌉',
+    howToUse: [
+      'Daily Demand: average units consumed per day at the downstream process.',
+      'Replenishment Lead Time: days from signal to replenishment arriving.',
+      'Safety Factor: buffer for demand variation (10–20% is typical).',
+      'Container Size: units per kanban card / bin.',
+      'The result is always rounded up — never short-change the pull system.'
+    ],
+    example: {
+      scenario: 'Daily demand = 200 units, lead time = 2 days, 15% safety stock, 50 units per bin.',
+      inputs: { 'Daily Demand': '200', 'Lead Time': '2 days', 'Safety Factor': '0.15', 'Container Size': '50' },
+      output: '10 kanban cards'
+    },
+    inputs: [
+      { id: 'demand',       label: 'Daily Demand (units / day)',       type: 'number', placeholder: '200' },
+      { id: 'leadTime',     label: 'Replenishment Lead Time (days)',    type: 'number', placeholder: '2',   tooltip: 'Time from kanban signal to stock arriving' },
+      { id: 'safetyFactor', label: 'Safety Factor (decimal, e.g. 0.15)', type: 'number', placeholder: '0.15', tooltip: '0.10 = 10% buffer for demand variation' },
+      { id: 'containerSize',label: 'Container / Bin Size (units)',      type: 'number', placeholder: '50',  tooltip: 'Units authorized by one kanban card' }
+    ],
+    calculate(v) {
+      if (!v.demand || !v.leadTime || !v.containerSize) return [];
+      const sf    = v.safetyFactor >= 0 ? v.safetyFactor : 0.1;
+      const raw   = (v.demand * v.leadTime * (1 + sf)) / v.containerSize;
+      const cards = Math.ceil(raw);
+      const maxWIP = cards * v.containerSize;
+      return [
+        { label: 'Kanban Cards Required', value: cards, unit: 'cards',
+          note: `Authorizes up to ${maxWIP.toLocaleString()} units of WIP (${cards} bins × ${v.containerSize} units).` },
+        { label: 'Max Authorized WIP',    value: maxWIP.toLocaleString(), unit: 'units',
+          note: `${(v.demand * v.leadTime).toFixed(0)} cycle stock + ${(v.demand * v.leadTime * sf).toFixed(0)} safety stock` }
+      ];
+    }
+  },
+
+  /* ── 19. Cost Savings Calculator ─────────────────────────────────── */
+  {
+    id: 'cost-savings',
+    name: 'Cost Savings Calculator',
+    category: 'labor',
+    emoji: '💰',
+    description: 'Quantifies annual cost savings from process improvements combining labor time, material, and overhead reductions.',
+    tags: ['cost savings', 'labor cost', 'material savings', 'annual savings', 'ROI', 'improvement'],
+    formula: 'Annual Savings = (Time Saved/Unit × Volume × Labor Rate) + (Material Savings/Unit × Volume)',
+    howToUse: [
+      'Enter the time saved per unit (in minutes) after the improvement.',
+      'Enter the annual production volume.',
+      'Enter the fully-loaded labor rate (wages + benefits + overhead).',
+      'Add material or consumable savings per unit if applicable.',
+      'The result shows 1-, 3-, and 5-year cumulative savings projections.'
+    ],
+    example: {
+      scenario: 'A process improvement saves 2.5 min/unit. Volume = 50,000 units/yr. Labor rate = $28/hr. Material savings = $0.45/unit.',
+      inputs: { 'Time Saved': '2.5 min', 'Volume': '50,000', 'Rate': '$28/hr', 'Material': '$0.45' },
+      output: '$23,750 labor + $22,500 material = $46,250 / yr'
+    },
+    inputs: [
+      { id: 'timeSaved',    label: 'Time Saved per Unit (min)',          type: 'number', placeholder: '2.5',    tooltip: 'Cycle time reduction per unit after improvement' },
+      { id: 'volume',       label: 'Annual Production Volume (units)',    type: 'number', placeholder: '50000' },
+      { id: 'laborRate',    label: 'Fully-Loaded Labor Rate ($/hr)',      type: 'number', placeholder: '28',     tooltip: 'Include wages, benefits, and overhead burden' },
+      { id: 'materialSavings', label: 'Material Savings per Unit ($)',   type: 'number', placeholder: '0.45',   tooltip: 'Scrap reduction, consumable savings, etc.' },
+      { id: 'otherAnnual',  label: 'Other Annual Savings ($, optional)', type: 'number', placeholder: '',        tooltip: 'Energy, floor space, quality costs, etc.' }
+    ],
+    calculate(v) {
+      if (!v.volume) return [];
+      const laborAnnual    = v.timeSaved && v.laborRate ? (v.timeSaved / 60) * v.volume * v.laborRate : 0;
+      const materialAnnual = (v.materialSavings || 0) * v.volume;
+      const otherAnnual    = v.otherAnnual || 0;
+      const totalAnnual    = laborAnnual + materialAnnual + otherAnnual;
+      if (!totalAnnual) return [];
+      return [
+        { label: 'Annual Labor Savings',    value: `$${Math.round(laborAnnual).toLocaleString()}`,    unit: '/ year' },
+        { label: 'Annual Material Savings', value: `$${Math.round(materialAnnual).toLocaleString()}`, unit: '/ year' },
+        { label: 'Total Annual Savings',    value: `$${Math.round(totalAnnual).toLocaleString()}`,    unit: '/ year', type: 'good',
+          note: `3-yr: $${Math.round(totalAnnual*3).toLocaleString()}  |  5-yr: $${Math.round(totalAnnual*5).toLocaleString()}` }
+      ];
+    }
+  },
+
+  /* ── 20. Break-Even Calculator ───────────────────────────────────── */
+  {
+    id: 'break-even',
+    name: 'Break-Even Calculator',
+    category: 'capacity',
+    emoji: '⚖️',
+    description: 'Calculates the break-even volume and time for a process change or capital investment given fixed costs and per-unit economics.',
+    tags: ['break-even', 'fixed cost', 'variable cost', 'investment', 'payback', 'volume'],
+    formula: 'Break-Even Units = Fixed Cost ÷ (Revenue/Unit − Variable Cost/Unit)',
+    howToUse: [
+      'Fixed Cost: the one-time or annual investment that does not change with volume.',
+      'Revenue or Value per Unit: selling price, or savings per unit for internal improvements.',
+      'Variable Cost per Unit: direct materials, labor, etc. that scale with output.',
+      'Annual Volume: optional — used to convert break-even units into calendar time.',
+    ],
+    example: {
+      scenario: 'New fixture costs $12,000. Each unit saves $1.80 in labor. Variable costs unchanged.',
+      inputs: { 'Fixed Cost': '$12,000', 'Value/Unit': '$1.80', 'Variable Cost': '$0', 'Annual Volume': '10,000' },
+      output: '6,667 units | ~8 months'
+    },
+    inputs: [
+      { id: 'fixedCost',   label: 'Fixed Cost / Investment ($)',         type: 'number', placeholder: '12000' },
+      { id: 'revenueUnit', label: 'Revenue or Savings per Unit ($)',      type: 'number', placeholder: '1.80' },
+      { id: 'varCostUnit', label: 'Variable Cost per Unit ($)',           type: 'number', placeholder: '0',    tooltip: 'Direct cost per unit that changes with volume' },
+      { id: 'annualVol',   label: 'Annual Volume (units, optional)',      type: 'number', placeholder: '10000', tooltip: 'Used to express break-even as calendar time' }
+    ],
+    calculate(v) {
+      if (!v.fixedCost || !v.revenueUnit) return [];
+      const margin = v.revenueUnit - (v.varCostUnit || 0);
+      if (margin <= 0) return [{ label: 'Break-Even', value: '∞', unit: '', type: 'bad', note: '🚨 Contribution margin is zero or negative — break-even is unreachable at this pricing.' }];
+      const beu = v.fixedCost / margin;
+      const results = [
+        { label: 'Break-Even Volume', value: Math.ceil(beu).toLocaleString(), unit: 'units',
+          note: `Contribution margin = $${margin.toFixed(2)}/unit` }
+      ];
+      if (v.annualVol > 0) {
+        const months = (beu / v.annualVol) * 12;
+        results.push({
+          label: 'Break-Even Time',
+          value: months < 12 ? `${months.toFixed(1)} months` : `${(months/12).toFixed(1)} years`,
+          unit: `at ${v.annualVol.toLocaleString()} units/yr`,
+          type: months <= 18 ? 'good' : months <= 36 ? 'warning' : 'bad',
+          note: months <= 18 ? '✅ Strong payback (≤18 months).' : months <= 36 ? '⚠️ Moderate payback.' : '🔴 Long payback — scrutinize the investment case.'
+        });
+      }
+      return results;
+    }
+  },
+
+  /* ── 21. Productivity Improvement ROI ───────────────────────────── */
+  {
+    id: 'productivity-roi',
+    name: 'Productivity Improvement ROI',
+    category: 'labor',
+    emoji: '📈',
+    description: 'Calculates the financial return on investment for a productivity improvement initiative based on output gain and implementation cost.',
+    tags: ['ROI', 'productivity', 'improvement', 'return on investment', 'labor', 'efficiency', 'kaizen'],
+    formula: 'ROI = (Annual Net Savings ÷ Investment) × 100  |  Payback = Investment ÷ Annual Savings',
+    howToUse: [
+      'Enter current and improved productivity rates (units per hour).',
+      'Enter the hourly labor cost and annual operating hours.',
+      'Enter the total implementation cost (training, tooling, downtime, etc.).',
+      'ROI shows the annualized return; payback period shows how fast you recover the investment.'
+    ],
+    example: {
+      scenario: 'Current: 18 u/hr → Improved: 24 u/hr. Labor cost: $32/hr. 4,000 hrs/yr. Investment: $15,000.',
+      inputs: { 'Current Rate': '18 u/hr', 'New Rate': '24 u/hr', 'Labor Cost': '$32/hr', 'Hrs/Yr': '4,000', 'Investment': '$15,000' },
+      output: 'ROI = 51% | Payback = 23 months'
+    },
+    inputs: [
+      { id: 'currentRate', label: 'Current Productivity (units / hr)',    type: 'number', placeholder: '18' },
+      { id: 'newRate',     label: 'Improved Productivity (units / hr)',   type: 'number', placeholder: '24' },
+      { id: 'laborCost',   label: 'Hourly Labor Cost ($/hr)',             type: 'number', placeholder: '32',   tooltip: 'Fully-loaded: wages + benefits + overhead' },
+      { id: 'annualHrs',   label: 'Annual Operating Hours',               type: 'number', placeholder: '4000' },
+      { id: 'investment',  label: 'Total Implementation Cost ($)',         type: 'number', placeholder: '15000', tooltip: 'Training, tooling, downtime, consulting, etc.' }
+    ],
+    calculate(v) {
+      if (!v.currentRate || !v.newRate || !v.laborCost || !v.annualHrs || !v.investment) return [];
+      if (v.newRate <= v.currentRate) return [{ label: 'Productivity Change', value: '0%', unit: '', type: 'warning', note: '⚠️ Improved rate must be greater than current rate.' }];
+      const gainPct        = ((v.newRate - v.currentRate) / v.currentRate) * 100;
+      // Annual savings = value of extra units × equivalent labor cost
+      // Equivalently: same output achieved with fewer hours → savings = labor_cost × hrs_saved
+      const hrsSaved       = v.annualHrs * (1 - v.currentRate / v.newRate);
+      const annualSavings  = hrsSaved * v.laborCost;
+      const roi            = (annualSavings / v.investment) * 100;
+      const paybackMonths  = (v.investment / annualSavings) * 12;
+      return [
+        { label: 'Productivity Gain',    value: `${gainPct.toFixed(1)}%`,  unit: 'improvement',
+          note: `+${(v.newRate - v.currentRate).toFixed(1)} units/hr → ${hrsSaved.toFixed(0)} labor hours saved per year` },
+        { label: 'Annual Labor Savings', value: `$${Math.round(annualSavings).toLocaleString()}`, unit: '/ year' },
+        { label: 'ROI',                  value: `${roi.toFixed(0)}%`,       unit: 'annual return', type: roi >= 50 ? 'good' : roi >= 20 ? 'warning' : 'bad',
+          note: roi >= 50 ? '✅ Strong ROI.' : roi >= 20 ? '⚠️ Moderate ROI — verify assumptions.' : '🔴 Low ROI — revisit scope or cost.' },
+        { label: 'Payback Period',       value: paybackMonths < 12 ? `${paybackMonths.toFixed(1)} months` : `${(paybackMonths/12).toFixed(1)} years`,
+          unit: '', type: paybackMonths <= 18 ? 'good' : paybackMonths <= 36 ? 'warning' : 'bad' }
+      ];
+    }
+  },
+
+  /* ── 22. Automation Payback Calculator ───────────────────────────── */
+  {
+    id: 'automation-payback',
+    name: 'Automation Payback Calculator',
+    category: 'capacity',
+    emoji: '🤖',
+    description: 'Evaluates the financial case for an automation investment by comparing capital cost against annual labor and quality savings.',
+    tags: ['automation', 'payback', 'ROI', 'capital', 'robot', 'investment', 'labor savings'],
+    formula: 'Payback = Total Investment ÷ Annual Net Savings  |  Annual Net Savings = Savings − New Annual Costs',
+    howToUse: [
+      'Equipment + Installation Cost: total capital outlay for the automation.',
+      'Current Annual Labor Cost: wages + benefits for headcount being displaced or redeployed.',
+      'New Annual Costs: maintenance contracts, energy, consumables for the automated system.',
+      'Quality / Scrap Savings: annual reduction in defect-related costs (optional but often significant).',
+      'A payback under 3 years is generally considered acceptable for industrial automation.'
+    ],
+    example: {
+      scenario: 'Robot cell: $180k equipment + $40k install. Displaces $95k labor/yr. Maintenance: $12k/yr. Scrap savings: $8k/yr.',
+      inputs: { 'Equipment': '$180k', 'Install': '$40k', 'Labor Saved': '$95k', 'New Costs': '$12k', 'Quality Savings': '$8k' },
+      output: 'Net savings $91k/yr | Payback 2.4 years | 5-yr ROI 156%'
+    },
+    inputs: [
+      { id: 'equipCost',      label: 'Equipment Cost ($)',                  type: 'number', placeholder: '180000' },
+      { id: 'installCost',    label: 'Installation & Integration Cost ($)', type: 'number', placeholder: '40000' },
+      { id: 'laborSaved',     label: 'Current Annual Labor Cost ($)',       type: 'number', placeholder: '95000', tooltip: 'Annual wages + benefits for displaced/redeployed headcount' },
+      { id: 'newAnnualCosts', label: 'New Annual Operating Costs ($)',      type: 'number', placeholder: '12000', tooltip: 'Maintenance, energy, consumables, programming support' },
+      { id: 'qualitySavings', label: 'Annual Quality / Scrap Savings ($)',  type: 'number', placeholder: '8000',  tooltip: 'Scrap reduction, rework elimination, warranty costs' },
+      { id: 'otherSavings',   label: 'Other Annual Savings ($, optional)',  type: 'number', placeholder: '' }
+    ],
+    calculate(v) {
+      if (!v.equipCost) return [];
+      const totalInvestment = (v.equipCost || 0) + (v.installCost || 0);
+      const annualSavings   = (v.laborSaved || 0) + (v.qualitySavings || 0) + (v.otherSavings || 0);
+      const annualCosts     = v.newAnnualCosts || 0;
+      const netSavings      = annualSavings - annualCosts;
+      if (netSavings <= 0) return [
+        { label: 'Net Annual Savings', value: `$${Math.round(netSavings).toLocaleString()}`, unit: '/ yr', type: 'bad',
+          note: '🚨 New operating costs exceed savings — automation is not financially justified at these inputs.' }
+      ];
+      const paybackYrs  = totalInvestment / netSavings;
+      const roi5yr      = ((netSavings * 5 - totalInvestment) / totalInvestment) * 100;
+      return [
+        { label: 'Total Investment',       value: `$${Math.round(totalInvestment).toLocaleString()}`,  unit: 'capital outlay' },
+        { label: 'Annual Net Savings',     value: `$${Math.round(netSavings).toLocaleString()}`,       unit: '/ year',
+          note: `$${Math.round(annualSavings).toLocaleString()} savings − $${Math.round(annualCosts).toLocaleString()} new costs` },
+        { label: 'Payback Period',         value: `${paybackYrs.toFixed(1)} years`,                   unit: '',
+          type: paybackYrs <= 3 ? 'good' : paybackYrs <= 5 ? 'warning' : 'bad',
+          note: paybackYrs <= 3 ? '✅ Strong case (≤3 yrs).' : paybackYrs <= 5 ? '⚠️ Acceptable — verify assumptions.' : '🔴 Long payback — consider phased approach.' },
+        { label: '5-Year ROI',             value: `${roi5yr.toFixed(0)}%`,                            unit: 'over 5 years',
+          type: roi5yr >= 100 ? 'good' : roi5yr >= 50 ? 'warning' : 'bad' }
+      ];
+    }
+  },
+
+  /* ── 23. Hypothesis Test Selector ───────────────────────────────── */
+  {
+    id: 'hypothesis-test-selector',
+    name: 'Hypothesis Test Selector',
+    category: 'six-sigma',
+    emoji: '🧪',
+    type: 'decision-support',
+    description: 'Guides you to the correct hypothesis test by walking through data type, number of groups, pairing, and normality.',
+    tags: ['hypothesis test', 'statistical test', 't-test', 'ANOVA', 'chi-square', 'six sigma', 'statistics'],
+    renderTool(container) {
+
+      // ── Test definitions ────────────────────────────────────────
+      const TESTS = {
+        '1t': {
+          name: '1-Sample t-Test',
+          symbol: 'H₀: μ = μ₀',
+          when: 'Compare the mean of one group to a known target or specification.',
+          assumptions: ['Continuous data', 'Approximately normal (or n ≥ 30)', 'Random sample'],
+          minitab: 'Stat → Basic Statistics → 1-Sample t',
+          color: '#667eea'
+        },
+        '1w': {
+          name: '1-Sample Wilcoxon / Sign Test',
+          symbol: 'H₀: median = target',
+          when: 'Compare the median of one group to a target when data is non-normal and sample is small.',
+          assumptions: ['Continuous or ordinal data', 'Non-normal or small sample (n < 30)', 'Symmetric distribution preferred for Wilcoxon'],
+          minitab: 'Stat → Nonparametrics → 1-Sample Wilcoxon',
+          color: '#764ba2'
+        },
+        'pt': {
+          name: 'Paired t-Test',
+          symbol: 'H₀: μ_diff = 0',
+          when: 'Compare two related measurements on the same units (before/after, two methods on same part).',
+          assumptions: ['Continuous data', 'Differences are approximately normal', 'Pairs are independent of each other'],
+          minitab: 'Stat → Basic Statistics → Paired t',
+          color: '#4facfe'
+        },
+        'wsr': {
+          name: 'Wilcoxon Signed-Rank Test',
+          symbol: 'H₀: median difference = 0',
+          when: 'Non-parametric alternative to the paired t-test when differences are not normally distributed.',
+          assumptions: ['Continuous or ordinal data', 'Paired observations', 'Distribution of differences is symmetric'],
+          minitab: 'Stat → Nonparametrics → 1-Sample Wilcoxon (on differences)',
+          color: '#30cfd0'
+        },
+        '2t': {
+          name: '2-Sample t-Test',
+          symbol: 'H₀: μ₁ = μ₂',
+          when: 'Compare the means of two independent groups (e.g. Machine A vs. Machine B).',
+          assumptions: ['Continuous data', 'Both groups approximately normal (or n ≥ 30 each)', 'Independent samples'],
+          minitab: 'Stat → Basic Statistics → 2-Sample t',
+          color: '#43e97b'
+        },
+        'mwu': {
+          name: 'Mann-Whitney U Test',
+          symbol: 'H₀: median₁ = median₂',
+          when: 'Non-parametric alternative to 2-sample t-test for non-normal or ordinal data.',
+          assumptions: ['Continuous or ordinal data', 'Independent samples', 'Similar distribution shapes'],
+          minitab: 'Stat → Nonparametrics → Mann-Whitney',
+          color: '#38ef7d'
+        },
+        'anova': {
+          name: 'One-Way ANOVA',
+          symbol: 'H₀: μ₁ = μ₂ = … = μₖ',
+          when: 'Compare the means of three or more independent groups simultaneously.',
+          assumptions: ['Continuous data', 'Each group approximately normal (or n ≥ 30)', 'Homogeneity of variances (Levene\'s test)', 'Independent observations'],
+          minitab: 'Stat → ANOVA → One-Way',
+          color: '#f7971e'
+        },
+        'kw': {
+          name: 'Kruskal-Wallis Test',
+          symbol: 'H₀: all medians equal',
+          when: 'Non-parametric alternative to one-way ANOVA for 3+ groups with non-normal data.',
+          assumptions: ['Continuous or ordinal data', 'Independent samples', 'Similar distribution shapes across groups'],
+          minitab: 'Stat → Nonparametrics → Kruskal-Wallis',
+          color: '#ffd200'
+        },
+        'ftest': {
+          name: "Levene's Test / F-Test for Equal Variances",
+          symbol: 'H₀: σ₁² = σ₂²',
+          when: 'Test whether the variance (spread) of two or more groups is the same.',
+          assumptions: ['Continuous data', 'F-test assumes normality; Levene\'s is more robust to non-normality', 'Independent samples'],
+          minitab: 'Stat → ANOVA → Test for Equal Variances',
+          color: '#fa709a'
+        },
+        '1p': {
+          name: '1-Proportion z-Test',
+          symbol: 'H₀: p = p₀',
+          when: 'Test whether a defect rate or pass/fail proportion equals a target value.',
+          assumptions: ['Attribute (pass/fail) data', 'np ≥ 5 and n(1-p) ≥ 5', 'Random sample'],
+          minitab: 'Stat → Basic Statistics → 1 Proportion',
+          color: '#f093fb'
+        },
+        '2p': {
+          name: '2-Proportion z-Test',
+          symbol: 'H₀: p₁ = p₂',
+          when: 'Compare defect rates or proportions from two independent groups.',
+          assumptions: ['Attribute data from two independent groups', 'np ≥ 5 for each group'],
+          minitab: 'Stat → Basic Statistics → 2 Proportions',
+          color: '#f5576c'
+        },
+        'chi_gof': {
+          name: 'Chi-Square Goodness-of-Fit',
+          symbol: 'H₀: observed = expected distribution',
+          when: 'Test if the observed frequency distribution matches an expected distribution across 3+ categories.',
+          assumptions: ['Count/frequency data', 'Expected frequency ≥ 5 in each cell', 'Independent observations'],
+          minitab: 'Stat → Tables → Chi-Square Goodness-of-Fit',
+          color: '#fee140'
+        },
+        'chi_ind': {
+          name: 'Chi-Square Test of Independence',
+          symbol: 'H₀: variables are independent',
+          when: 'Test whether two categorical variables are associated (e.g. shift vs. defect type).',
+          assumptions: ['Categorical / count data in a contingency table', 'Expected frequency ≥ 5 in each cell', 'Independent observations'],
+          minitab: 'Stat → Tables → Cross Tabulation and Chi-Square',
+          color: '#43e97b'
+        },
+      };
+
+      // ── Decision logic ──────────────────────────────────────────
+      function selectTest(dataType, testGoal, groups, paired, normal) {
+        if (!dataType) return null;
+
+        if (dataType === 'continuous') {
+          if (testGoal === 'variance') return TESTS['ftest'];
+          // Mean comparisons
+          if (groups === '1')  return normal === 'yes' ? TESTS['1t']   : TESTS['1w'];
+          if (groups === '2') {
+            if (paired === 'yes') return normal === 'yes' ? TESTS['pt']   : TESTS['wsr'];
+            else                  return normal === 'yes' ? TESTS['2t']   : TESTS['mwu'];
+          }
+          if (groups === '3+') return normal === 'yes' ? TESTS['anova'] : TESTS['kw'];
+        }
+
+        if (dataType === 'attribute') {
+          if (testGoal === 'association') return TESTS['chi_ind'];
+          if (groups === '1')  return TESTS['1p'];
+          if (groups === '2')  return TESTS['2p'];
+          if (groups === '3+') return TESTS['chi_gof'];
+        }
+        return null;
+      }
+
+      // ── Which questions to show ──────────────────────────────────
+      function visibleQuestions(dataType, testGoal, groups) {
+        const show = { testGoal: !!dataType, groups: false, paired: false, normal: false };
+        if (!dataType) return show;
+        if (dataType === 'attribute' && testGoal === 'association') return show;
+        show.groups = !!testGoal;
+        if (dataType === 'continuous' && testGoal !== 'variance' && groups === '2') show.paired = true;
+        if (dataType === 'continuous' && testGoal !== 'variance' && !!groups) show.normal = true;
+        return show;
+      }
+
+      // ── Render ───────────────────────────────────────────────────
+      function q(id, label, hint, options) {
+        return `
+          <div class="ht-question" id="wrap-${id}">
+            <div class="ht-q-label">${label}</div>
+            ${hint ? `<div class="ds-sublabel">${hint}</div>` : ''}
+            <div class="ht-options">
+              ${options.map(o => `
+                <label class="ht-option">
+                  <input type="radio" name="${id}" value="${o.value}">
+                  <span class="ht-option-text">
+                    <span class="ht-option-title">${o.label}</span>
+                    ${o.hint ? `<span class="ht-option-hint">${o.hint}</span>` : ''}
+                  </span>
+                </label>`).join('')}
+            </div>
+          </div>`;
+      }
+
+      container.innerHTML = `
+        <style>
+          .ht-body        { display:flex; gap:1.5rem; padding:1.25rem 1.5rem; flex:1; overflow-y:auto; }
+          .ht-questions   { flex:1; display:flex; flex-direction:column; gap:1rem; }
+          .ht-result-col  { width:320px; flex-shrink:0; }
+          .ht-question    { transition: opacity 0.2s; }
+          .ht-question.hidden { opacity:0.25; pointer-events:none; }
+          .ht-q-label     { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--primary); margin-bottom:0.3rem; }
+          .ht-options     { display:flex; flex-direction:column; gap:0.3rem; }
+          .ht-option      { display:flex; align-items:flex-start; gap:0.5rem; padding:0.45rem 0.65rem; border:1.5px solid var(--border); border-radius:var(--radius-btn); cursor:pointer; transition:border-color 0.2s, background 0.2s; }
+          .ht-option:hover { border-color:var(--primary); background:var(--primary-light); }
+          .ht-option input[type=radio] { margin-top:0.15rem; accent-color:var(--primary); flex-shrink:0; }
+          .ht-option input[type=radio]:checked ~ .ht-option-text { color:var(--primary); }
+          .ht-option:has(input:checked) { border-color:var(--primary); background:var(--primary-light); }
+          .ht-option-text  { display:flex; flex-direction:column; gap:0.1rem; }
+          .ht-option-title { font-size:0.82rem; font-weight:600; color:var(--text); }
+          .ht-option-hint  { font-size:0.72rem; color:var(--muted); }
+          .ht-result       { background:var(--bg); border-radius:var(--radius-card); padding:1.1rem; border:2px solid var(--border); transition:border-color 0.3s; position:sticky; top:0; }
+          .ht-result.active { border-color:var(--primary); }
+          .ht-result-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); margin-bottom:0.5rem; }
+          .ht-test-name    { font-size:1.05rem; font-weight:700; color:var(--text); margin-bottom:0.25rem; }
+          .ht-test-symbol  { font-size:0.85rem; font-family:monospace; color:var(--primary); font-weight:600; background:var(--primary-light); padding:0.25rem 0.6rem; border-radius:var(--radius-btn); display:inline-block; margin-bottom:0.75rem; }
+          .ht-detail-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-top:0.75rem; margin-bottom:0.25rem; }
+          .ht-detail-text  { font-size:0.8rem; color:var(--text); line-height:1.55; }
+          .ht-assumption   { font-size:0.76rem; color:var(--muted); padding:0.15rem 0; display:flex; gap:0.4rem; }
+          .ht-assumption::before { content:'✓'; color:var(--primary); font-weight:700; flex-shrink:0; }
+          .ht-minitab      { margin-top:0.75rem; padding:0.5rem 0.65rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:var(--radius-btn); font-size:0.73rem; color:#166534; font-family:monospace; }
+          .ht-placeholder  { text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.82rem; line-height:1.7; }
+          .ht-reset        { display:none; margin-top:0.75rem; padding:0.4rem 0.75rem; border:1.5px solid var(--border); border-radius:var(--radius-btn); background:transparent; font-family:var(--font); font-size:0.75rem; color:var(--muted); cursor:pointer; transition:all 0.2s; width:100%; }
+          .ht-reset:hover  { border-color:var(--primary); color:var(--primary); }
+          .ht-reset.visible { display:block; }
+          @media(max-width:700px) { .ht-body { flex-direction:column; } .ht-result-col { width:100%; } }
+        </style>
+        <div class="ht-body">
+          <div class="ht-questions">
+            ${q('dataType', '① What type of data do you have?', null, [
+              { value:'continuous', label:'Continuous (Variable)', hint:'Measurements: time, length, weight, temperature, cost…' },
+              { value:'attribute',  label:'Discrete / Attribute',  hint:'Counts, pass/fail, proportions, categories…' }
+            ])}
+            ${q('testGoal', '② What are you testing?', 'Select based on your question — not what you hope to prove.', [
+              { value:'mean',        label:'Location (Mean or Median)', hint:'Is the average shifting? Is one group higher than another?' },
+              { value:'variance',    label:'Spread (Variance)',          hint:'Is one process more consistent than another? (continuous only)' },
+              { value:'proportion',  label:'Proportion / Rate',          hint:'Is the defect rate different? (attribute only)' },
+              { value:'association', label:'Association / Independence',  hint:'Are two categorical variables related? (attribute only)' },
+            ])}
+            ${q('groups', '③ How many groups or samples?', null, [
+              { value:'1',  label:'1 group',          hint:'Compare one group to a target or specification' },
+              { value:'2',  label:'2 groups',          hint:'Compare two groups or conditions' },
+              { value:'3+', label:'3 or more groups',  hint:'Compare multiple levels of a factor' },
+            ])}
+            ${q('paired', '④ Are the two samples paired or independent?', 'Paired = same unit measured twice (before/after, two operators on same part).', [
+              { value:'yes', label:'Paired',      hint:'Same subjects / units measured under both conditions' },
+              { value:'no',  label:'Independent', hint:'Separate, unrelated groups' },
+            ])}
+            ${q('normal', '⑤ Is the data approximately normal?', 'Use normality test (Anderson-Darling) or apply CLT if n ≥ 30 per group.', [
+              { value:'yes', label:'Yes — normal or large sample (n ≥ 30)', hint:'Use parametric test' },
+              { value:'no',  label:'No — non-normal or small sample',        hint:'Use non-parametric test' },
+            ])}
+          </div>
+
+          <div class="ht-result-col">
+            <div class="ht-result" id="ht-result">
+              <div class="ht-placeholder">Answer the questions on the left to get your recommended hypothesis test.</div>
+            </div>
+            <button class="ht-reset" id="ht-reset">↺ Start Over</button>
+          </div>
+        </div>`;
+
+      // ── State & reactivity ───────────────────────────────────────
+      const state = { dataType: null, testGoal: null, groups: null, paired: null, normal: null };
+      const resultEl = container.querySelector('#ht-result');
+      const resetBtn = container.querySelector('#ht-reset');
+
+      function getVal(name) {
+        const el = container.querySelector(`input[name="${name}"]:checked`);
+        return el ? el.value : null;
+      }
+
+      function renderResult(test) {
+        if (!test) {
+          resultEl.innerHTML = '<div class="ht-placeholder">Keep answering — more context needed to make a recommendation.</div>';
+          resultEl.classList.remove('active');
+          return;
+        }
+        resultEl.classList.add('active');
+        resultEl.style.borderColor = test.color;
+        resultEl.innerHTML = `
+          <div class="ht-result-label">Recommended Test</div>
+          <div class="ht-test-name">${test.name}</div>
+          <div class="ht-test-symbol">${test.symbol}</div>
+          <div class="ht-detail-label">When to Use</div>
+          <div class="ht-detail-text">${test.when}</div>
+          <div class="ht-detail-label">Assumptions</div>
+          ${test.assumptions.map(a => `<div class="ht-assumption">${a}</div>`).join('')}
+          <div class="ht-detail-label">Minitab Path</div>
+          <div class="ht-minitab">${test.minitab}</div>`;
+      }
+
+      function updateVisibility() {
+        const vis = visibleQuestions(state.dataType, state.testGoal, state.groups);
+        const map = { testGoal:'wrap-testGoal', groups:'wrap-groups', paired:'wrap-paired', normal:'wrap-normal' };
+        Object.entries(map).forEach(([key, id]) => {
+          const el = container.querySelector('#' + id);
+          if (el) el.classList.toggle('hidden', !vis[key]);
+        });
+
+        // Filter out irrelevant options for testGoal based on dataType
+        const meanOpt = container.querySelector('.ht-option:has(input[value="mean"])');
+        const varOpt  = container.querySelector('.ht-option:has(input[value="variance"])');
+        const propOpt = container.querySelector('.ht-option:has(input[value="proportion"])');
+        const assocOpt= container.querySelector('.ht-option:has(input[value="association"])');
+        if (state.dataType === 'continuous') {
+          if (varOpt)   varOpt.style.display  = '';
+          if (propOpt)  propOpt.style.display  = 'none';
+          if (assocOpt) assocOpt.style.display = 'none';
+        } else if (state.dataType === 'attribute') {
+          if (varOpt)   varOpt.style.display   = 'none';
+          if (propOpt)  propOpt.style.display   = '';
+          if (assocOpt) assocOpt.style.display  = '';
+        }
+      }
+
+      function onChange() {
+        state.dataType = getVal('dataType');
+        state.testGoal = getVal('testGoal');
+        state.groups   = getVal('groups');
+        state.paired   = getVal('paired');
+        state.normal   = getVal('normal');
+
+        // Clear downstream answers when upstream changes
+        updateVisibility();
+
+        const test = selectTest(state.dataType, state.testGoal, state.groups, state.paired, state.normal);
+        renderResult(test);
+        resetBtn.classList.toggle('visible', !!state.dataType);
+      }
+
+      container.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', onChange));
+
+      resetBtn.addEventListener('click', () => {
+        container.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+        Object.keys(state).forEach(k => state[k] = null);
+        updateVisibility();
+        renderResult(null);
+        resetBtn.classList.remove('visible');
+      });
+
+      // Initial visibility pass
+      updateVisibility();
+    }
+  },
+
 ];
 
 /* ═══════════════════════════════════════════════════════════════════
