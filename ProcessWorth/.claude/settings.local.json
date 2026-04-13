@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ':*)",
+      "Bash(pandoc 'ProcessWorth specs.docx' -t plain)",
+      "Bash(textutil -convert txt 'ProcessWorth specs.docx' -stdout)",
+      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js\" -o \"/Users/dtuck/local python/ProcessWorth/lib/chart.min.js\")",
+      "Bash(node -e ':*)",
+      "Bash(node --check js/engine.js)",
+      "Bash(node --check js/simulation.js)",
+      "Bash(node --check js/storage.js)",
+      "Bash(node --check js/charts.js)",
+      "Bash(node --check js/app.js)",
+      "Bash(wc -l \"/Users/dtuck/local python/ProcessWorth/js/\"*.js \"/Users/dtuck/local python/ProcessWorth/css/styles.css\" \"/Users/dtuck/local python/ProcessWorth/index.html\")",
+      "Bash(open:*)",
+      "Bash(node --check \"/Users/dtuck/local python/ProcessWorth/js/app.js\")",
+      "Bash(node:*)"
+    ]
+  }
+}

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProcessWorth — ROI Calculator</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     APP HEADER
+════════════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-logo">PW</div>
+    <div>
+      <span class="brand-name">ProcessWorth</span>
+      <span class="brand-tagline">Process Improvement ROI Calculator</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button id="btn-save" class="btn-primary">Save JSON</button>
+    <button id="btn-load">Load JSON</button>
+    <button id="btn-print">Print</button>
+    <button id="btn-reset">Reset</button>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE NAVIGATION
+════════════════════════════════════════════════════════════ -->
+<nav class="phase-nav">
+  <button class="phase-tab" data-phase="3">Process Map</button>
+  <button class="phase-tab active" data-phase="1">Business Case</button>
+  <button class="phase-tab" data-phase="1.5">Scenarios</button>
+  <button class="phase-tab" data-phase="2">Risk Analysis</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 1 — BUSINESS CASE BUILDER
+════════════════════════════════════════════════════════════ -->
+<div class="phase-panel" data-phase="1">
+  <div class="two-col">
+
+    <!-- Left: Input Panel -->
+    <aside class="input-panel">
+
+      <div class="input-group">
+        <div class="input-group-title">Project</div>
+        <div class="field">
+          <label for="input-project-name">Project Name</label>
+          <input type="text" id="input-project-name" placeholder="e.g. Assembly Line Optimization">
+        </div>
+        <div class="field">
+          <label for="input-notes">Notes / Assumptions</label>
+          <textarea id="input-notes" placeholder="Key assumptions, constraints, or context…"></textarea>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-group-title">Labor &amp; Process</div>
+        <div class="field">
+          <label for="input-labor-rate">Annual Labor Rate <span class="help-icon" tabindex="0">?<span class="tooltip-text">Fully-loaded hourly cost per worker (wages + benefits + overhead). Converts hours saved into dollar savings.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-labor-rate" value="75" min="0" step="0.01">
+            <span class="input-unit">$/hr</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="input-current-hours">Current Process Hours / Unit <span class="help-icon" tabindex="0">?<span class="tooltip-text">Total labor hours to process one unit in the current state. Derived automatically from the process map when one is defined.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-current-hours" value="2" min="0" step="0.01">
+            <span class="input-unit">hrs</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="input-proposed-hours">Proposed Process Hours / Unit <span class="help-icon" tabindex="0">?<span class="tooltip-text">Expected hours per unit after the improvement. The gap between current and proposed hours drives projected savings.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-proposed-hours" value="1" min="0" step="0.01">
+            <span class="input-unit">hrs</span>
+          </div>
+          <div id="map-driven-notice" class="map-driven-badge hidden">
+            <span id="map-driven-text">Derived from process map.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="input-volume">Annual Production Volume <span class="help-icon" tabindex="0">?<span class="tooltip-text">Units, transactions, or cases processed per year. Multiplied by hours saved per unit to calculate total annual hours saved.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-volume" value="1000" min="0" step="1">
+            <span class="input-unit">units/yr</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-group-title">Investment</div>
+        <div class="field">
+          <label for="input-impl-cost">Implementation Cost (CapEx) <span class="help-icon" tabindex="0">?<span class="tooltip-text">One-time up-front spend to deliver the improvement (Year 0 cash flow). Includes project labor, software, and equipment.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-impl-cost" value="50000" min="0" step="100">
+            <span class="input-unit">$</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="input-annual-opex">Annual Maintenance / Software (OpEx) <span class="help-icon" tabindex="0">?<span class="tooltip-text">Recurring annual cost to sustain the improvement — licenses, maintenance, support. Deducted from gross savings each year.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-annual-opex" value="5000" min="0" step="100">
+            <span class="input-unit">$/yr</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-group-title">Financial Settings</div>
+        <div class="field">
+          <label for="input-discount-rate">Discount Rate / WACC <span class="help-icon" tabindex="0">?<span class="tooltip-text">Weighted Average Cost of Capital — the minimum acceptable return used to discount future cash flows to today's dollars. Higher rates make future savings worth less today.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-discount-rate" value="10" min="0" step="0.1">
+            <span class="input-unit">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="input-horizon">Project Horizon <span class="help-icon" tabindex="0">?<span class="tooltip-text">Number of years over which NPV is calculated. Longer horizons capture more cumulative benefit but increase forecast uncertainty.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-horizon" value="5" min="1" step="1">
+            <span class="input-unit">years</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="input-realization-rate">Savings Realization Rate
+            <span style="font-weight:400;color:var(--gray-400);font-size:0.72rem"> (steady-state)</span>
+            <span class="help-icon" tabindex="0">?<span class="tooltip-text">Fraction of theoretical savings actually captured in practice. Accounts for partial adoption, training gaps, and variability. 100% means all projected savings are realized.</span></span>
+          </label>
+          <div class="input-with-unit">
+            <input type="number" id="input-realization-rate" value="90" min="0" max="100" step="1">
+            <span class="input-unit">%</span>
+          </div>
+          <span class="field-hint">Percentage of theoretical savings realizable in practice.</span>
+        </div>
+        <div class="field">
+          <label for="input-year1-realization">Year 1 Benefit Realization <span class="help-icon" tabindex="0">?<span class="tooltip-text">Additional ramp-up factor applied to the first benefit year only. Learning curves typically mean Year 1 savings lag behind the steady-state realization rate.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-year1-realization" value="50" min="0" max="100" step="1">
+            <span class="input-unit">%</span>
+          </div>
+          <span class="field-hint">Ramp-up factor for the first benefit year.</span>
+        </div>
+        <div class="field">
+          <label for="input-benefit-start-year">Benefit Start Year <span class="help-icon" tabindex="0">?<span class="tooltip-text">Year in which savings begin accruing. Set to 2+ if implementation spans all of Year 1 with no benefits until rollout is complete.</span></span></label>
+          <div class="input-with-unit">
+            <input type="number" id="input-benefit-start-year" value="1" min="1" step="1">
+            <span class="input-unit">year</span>
+          </div>
+          <span class="field-hint">Year savings begin (use 2+ if implementation spans Year 1).</span>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Right: Results Panel -->
+    <div class="results-panel">
+
+      <!-- Validation -->
+      <div id="validation-msg" class="validation-msg hidden"></div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-state-icon">📊</div>
+        <p>Enter your inputs on the left to generate a financial summary.</p>
+      </div>
+
+      <!-- Negative savings warning -->
+      <div id="negative-savings-warning" class="warning-banner hidden">
+        ⚠ Proposed hours exceed current hours. This indicates negative savings — review your inputs.
+      </div>
+
+      <!-- Results -->
+      <div id="results-section">
+
+        <!-- Metric Cards -->
+        <div class="metric-cards">
+          <div class="metric-card primary" id="card-npv">
+            <div class="metric-label">Net Present Value <span class="help-icon" tabindex="0">?<span class="tooltip-text">Sum of all discounted cash flows over the project horizon. Positive NPV means the project returns more than the cost of capital. The primary go/no-go metric.</span></span></div>
+            <div class="metric-value" id="val-npv">—</div>
+          </div>
+          <div class="metric-card" id="card-roi">
+            <div class="metric-label">ROI (Simple) <span class="help-icon" tabindex="0">?<span class="tooltip-text">Undiscounted return: (Total Net Benefits − Implementation Cost) ÷ Implementation Cost. Ignores the time value of money — use NPV for time-adjusted decisions.</span></span></div>
+            <div class="metric-value" id="val-roi">—</div>
+          </div>
+          <div class="metric-card neutral">
+            <div class="metric-label">Payback Period <span class="help-icon" tabindex="0">?<span class="tooltip-text">First year when cumulative cash flow turns positive — the break-even point. Shorter payback reduces risk; longer means the project relies on later-year returns.</span></span></div>
+            <div class="metric-value" id="val-payback">—</div>
+          </div>
+          <div class="metric-card neutral">
+            <div class="metric-label">Annual Hours Saved</div>
+            <div class="metric-value" id="val-hours-saved">—</div>
+          </div>
+          <div class="metric-card neutral">
+            <div class="metric-label">Annual Gross Savings</div>
+            <div class="metric-value" id="val-gross-savings">—</div>
+          </div>
+        </div>
+
+        <!-- Cash Flow Chart -->
+        <div class="section-card">
+          <div class="section-card-title">Cumulative Cash Flow by Year</div>
+          <div class="chart-wrap">
+            <canvas id="cashflow-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Assumptions Summary -->
+        <div class="section-card">
+          <div class="section-card-title">Assumptions Summary</div>
+          <div id="assumptions-body"></div>
+        </div>
+
+        <!-- How It's Calculated -->
+        <div class="section-card">
+          <details class="formula-details">
+            <summary>How It's Calculated</summary>
+            <div class="formula-body">
+              <div class="formula-item">
+                <h4>Annual Hours Saved</h4>
+                <div class="formula-code">(Current Hrs/Unit − Proposed Hrs/Unit) × Annual Volume</div>
+              </div>
+              <div class="formula-item">
+                <h4>Annual Gross Savings</h4>
+                <div class="formula-code">Annual Hours Saved × Labor Rate</div>
+              </div>
+              <div class="formula-item">
+                <h4>Net Annual Cash Flow</h4>
+                <div class="formula-code">(Gross Savings × Realization Rate) − Annual OpEx</div>
+                <p>Year 1 applies the Year 1 Realization % as a ramp-up factor. Year 0 = −Implementation Cost.</p>
+              </div>
+              <div class="formula-item">
+                <h4>Net Present Value (NPV)</h4>
+                <div class="formula-code">Σ [ Cash Flow(yr) / (1 + Discount Rate)^yr ] for yr = 0 … Horizon</div>
+                <p>A positive NPV means the project returns more than the cost of capital over the horizon.</p>
+              </div>
+              <div class="formula-item">
+                <h4>ROI (Simple)</h4>
+                <div class="formula-code">(Total Net Benefits − Implementation Cost) / Implementation Cost</div>
+                <p>This is a simple, undiscounted ROI. For a time-value-adjusted measure, compare NPV to the initial investment.</p>
+              </div>
+              <div class="formula-item">
+                <h4>Payback Period</h4>
+                <div class="formula-code">First fractional year where Cumulative Cash Flow ≥ 0</div>
+                <p>Interpolated between years when the cumulative cash flow crosses zero.</p>
+              </div>
+            </div>
+          </details>
+        </div>
+
+      </div><!-- /results-section -->
+    </div><!-- /results-panel -->
+  </div><!-- /two-col -->
+</div><!-- /phase-panel 1 -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 1.5 — SCENARIO ANALYSIS
+════════════════════════════════════════════════════════════ -->
+<div class="phase-panel hidden" data-phase="1.5">
+  <div class="scenario-layout">
+
+    <!-- Left: Scenario Input -->
+    <aside class="scenario-input-col">
+
+      <div class="scenario-tabs">
+        <button class="scenario-tab" data-scenario="conservative">Conservative</button>
+        <button class="scenario-tab active" data-scenario="expected">Expected</button>
+        <button class="scenario-tab" data-scenario="aggressive">Aggressive</button>
+      </div>
+      <p class="field-hint" style="margin-top:8px;">
+        <strong>Conservative</strong> = least savings (current process already efficient, future gain modest).
+        <strong>Expected</strong> = base case from Business Case.
+        <strong>Aggressive</strong> = most savings (current process inefficient, future gain substantial).
+        <span class="help-icon" tabindex="0" style="vertical-align:middle;">?<span class="tooltip-text">When a process map is active, Conservative uses map Min times and Aggressive uses map Max times, automatically setting the range of outcomes from the cycle time uncertainty.</span></span>
+      </p>
+
+      <!-- Expected (read-only mirror of Phase 1 base) -->
+      <div id="scenario-expected-readonly">
+        <p class="hint-text">Expected scenario mirrors the Phase 1 base case.</p>
+      </div>
+
+      <!-- Conservative / Aggressive editable inputs -->
+      <div id="scenario-editable-panel" class="hidden">
+        <div class="field">
+          <label for="scen-current-hours">Current Hours / Unit</label>
+          <div class="input-with-unit">
+            <input type="number" id="scen-current-hours" min="0" step="0.01">
+            <span class="input-unit">hrs</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="scen-proposed-hours">Proposed Hours / Unit</label>
+          <div class="input-with-unit">
+            <input type="number" id="scen-proposed-hours" min="0" step="0.01">
+            <span class="input-unit">hrs</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="scen-volume">Annual Production Volume</label>
+          <div class="input-with-unit">
+            <input type="number" id="scen-volume" min="0" step="1">
+            <span class="input-unit">units</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="scen-realization-rate">Savings Realization Rate</label>
+          <div class="input-with-unit">
+            <input type="number" id="scen-realization-rate" min="0" max="100" step="1">
+            <span class="input-unit">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="scen-impl-cost">Implementation Cost</label>
+          <div class="input-with-unit">
+            <input type="number" id="scen-impl-cost" min="0" step="100">
+            <span class="input-unit">$</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="scen-annual-opex">Annual OpEx</label>
+          <div class="input-with-unit">
+            <input type="number" id="scen-annual-opex" min="0" step="100">
+            <span class="input-unit">$/yr</span>
+          </div>
+        </div>
+        <button id="btn-clone-to-scenario" class="icon-btn" style="width:100%;margin-top:8px;justify-content:center;">
+          Reset to Expected Base
+        </button>
+      </div>
+
+      <p class="field-hint" style="margin-top:12px;">
+        All other inputs (labor rate, discount rate, horizon, etc.) are shared from Phase 1.
+      </p>
+    </aside>
+
+    <!-- Right: Comparison -->
+    <div class="scenario-results-col">
+      <div class="section-card">
+        <div class="section-card-title">Scenario Comparison</div>
+        <table class="scenario-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Conservative</th>
+              <th>Expected</th>
+              <th>Aggressive</th>
+            </tr>
+          </thead>
+          <tbody id="scenario-table-body">
+            <tr><td class="metric-label-cell" colspan="4" style="text-align:center;color:var(--gray-400);">Switch to this tab to load scenarios.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="section-card">
+        <div class="section-card-title">NPV Comparison</div>
+        <div class="chart-wrap">
+          <canvas id="scenario-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /phase-panel 1.5 -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 2 — RISK ANALYTICS (MONTE CARLO)
+════════════════════════════════════════════════════════════ -->
+<div class="phase-panel hidden" data-phase="2">
+  <div class="sim-layout">
+
+    <!-- Left: Simulation Config -->
+    <aside class="sim-input-col">
+
+      <div class="input-group-title" style="margin-bottom:12px;">Simulation Mode <span class="help-icon" tabindex="0">?<span class="tooltip-text">Fixed: uses exact input values (deterministic). Uncertainty: samples from triangular distributions (Min / Most Likely / Max) to model the range of possible outcomes.</span></span></div>
+      <div class="mode-toggle">
+        <input type="radio" id="sim-mode-fixed" name="sim-mode" value="fixed" checked>
+        <label for="sim-mode-fixed">Fixed Value</label>
+        <input type="radio" id="sim-mode-uncertainty" name="sim-mode" value="uncertainty">
+        <label for="sim-mode-uncertainty">Uncertainty Mode</label>
+      </div>
+      <p id="sim-mode-description" style="font-size:0.78rem;color:var(--gray-500);margin-bottom:14px;">
+        Deterministic mode: uses exact input values.
+      </p>
+
+      <!-- Uncertainty Inputs -->
+      <div id="uncertainty-inputs" class="hidden">
+        <div class="input-group-title" style="margin-bottom:10px;">Distribution Inputs <span class="help-icon" tabindex="0">?<span class="tooltip-text">Triangular distribution: the simulation samples values between Min and Max, weighted toward Most Likely. Auto-populated from the process map when one exists.</span></span></div>
+
+        <div class="uncertainty-block">
+          <div class="uncertainty-block-header">
+            <input type="checkbox" id="unc-current-hours-enabled">
+            <label for="unc-current-hours-enabled">Current Process Hours / Unit</label>
+          </div>
+          <div id="unc-current-hours-fields" class="hidden">
+            <div class="triang-fields">
+              <div class="mini-field">
+                <label>Min</label>
+                <input type="number" id="unc-current-hours-min" min="0" step="0.01" placeholder="0">
+              </div>
+              <div class="mini-field">
+                <label>Most Likely</label>
+                <input type="number" id="unc-current-hours-mode" min="0" step="0.01" placeholder="0">
+              </div>
+              <div class="mini-field">
+                <label>Max</label>
+                <input type="number" id="unc-current-hours-max" min="0" step="0.01" placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="uncertainty-block">
+          <div class="uncertainty-block-header">
+            <input type="checkbox" id="unc-proposed-hours-enabled">
+            <label for="unc-proposed-hours-enabled">Proposed Process Hours / Unit</label>
+          </div>
+          <div id="unc-proposed-hours-fields" class="hidden">
+            <div class="triang-fields">
+              <div class="mini-field">
+                <label>Min</label>
+                <input type="number" id="unc-proposed-hours-min" min="0" step="0.01" placeholder="0">
+              </div>
+              <div class="mini-field">
+                <label>Most Likely</label>
+                <input type="number" id="unc-proposed-hours-mode" min="0" step="0.01" placeholder="0">
+              </div>
+              <div class="mini-field">
+                <label>Max</label>
+                <input type="number" id="unc-proposed-hours-max" min="0" step="0.01" placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /uncertainty-inputs -->
+
+      <!-- Simulation Settings -->
+      <div class="sim-settings">
+        <div class="input-group-title" style="margin-bottom:10px;">Simulation Settings</div>
+        <div class="field">
+          <label for="sim-iterations">Iterations <span class="help-icon" tabindex="0">?<span class="tooltip-text">Number of random scenarios simulated. More iterations produce smoother, more stable output. 5,000 is reliable for most analyses; use 10,000+ for high-stakes decisions.</span></span></label>
+          <input type="number" id="sim-iterations" value="5000" min="100" max="50000" step="100">
+          <span class="field-hint">Default: 5,000 iterations.</span>
+        </div>
+        <div class="field">
+          <label for="sim-seed">Random Seed <span style="font-weight:400;color:var(--gray-400)">(optional, for reproducibility)</span></label>
+          <input type="text" id="sim-seed" placeholder="e.g. 42">
+        </div>
+      </div>
+
+      <div id="sim-validation-msg" class="validation-msg hidden"></div>
+
+      <button id="btn-run-simulation" class="btn-run">Run Simulation</button>
+
+    </aside>
+
+    <!-- Right: Results -->
+    <div class="sim-results-col">
+
+      <!-- Running state -->
+      <div id="sim-running" class="sim-running-msg hidden">
+        <span class="spinner"></span> Running simulation…
+      </div>
+
+      <!-- Empty state -->
+      <div id="sim-empty" class="empty-state">
+        <div class="empty-state-icon">🎲</div>
+        <p>Configure your simulation settings and click <strong>Run Simulation</strong>.</p>
+        <p style="margin-top:6px;font-size:0.78rem;">Phase 1 inputs are used as the base case.</p>
+      </div>
+
+      <!-- Simulation Results -->
+      <div id="sim-result-panel" class="hidden">
+
+        <!-- Stat cards -->
+        <div class="sim-stats">
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">Deterministic NPV <span class="help-icon" tabindex="0">?<span class="tooltip-text">NPV calculated using the exact base-case input values — no randomness. Use as a reference to compare against the simulation mean and median.</span></span></div>
+            <div class="sim-stat-value" id="sim-deterministic-npv">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">Mean NPV <span class="help-icon" tabindex="0">?<span class="tooltip-text">Average NPV across all simulation iterations. In a symmetric model this should be close to the deterministic NPV and P50.</span></span></div>
+            <div class="sim-stat-value" id="sim-mean-npv">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">P50 NPV <span class="help-icon" tabindex="0">?<span class="tooltip-text">50th percentile (median) — half of simulated scenarios fall below this value. In a well-calibrated model, this should be close to the deterministic NPV.</span></span></div>
+            <div class="sim-stat-value" id="sim-p50-npv">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">P10 NPV <span class="help-icon" tabindex="0">?<span class="tooltip-text">10th percentile — 10% of scenarios produced an NPV below this value. Represents a pessimistic but plausible outcome for downside planning.</span></span></div>
+            <div class="sim-stat-value" id="sim-p10-npv">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">P90 NPV <span class="help-icon" tabindex="0">?<span class="tooltip-text">90th percentile — only 10% of scenarios produced a higher NPV. Represents an optimistic but plausible upside outcome.</span></span></div>
+            <div class="sim-stat-value" id="sim-p90-npv">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">Prob. Negative NPV <span class="help-icon" tabindex="0">?<span class="tooltip-text">Share of scenarios where NPV &lt; 0. Above 20–30% warrants careful review of key assumptions before committing to the investment.</span></span></div>
+            <div class="sim-stat-value" id="sim-prob-negative">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">Prob. Positive Return <span class="help-icon" tabindex="0">?<span class="tooltip-text">Percentage of scenarios where NPV ≥ 0 — the complement of Prob. Negative NPV. Higher is better; aim for 80%+ for a defensible business case.</span></span></div>
+            <div class="sim-stat-value" id="sim-prob-payback">—</div>
+          </div>
+          <div class="sim-stat-card">
+            <div class="sim-stat-label">Iterations Run</div>
+            <div class="sim-stat-value" id="sim-iterations-run">—</div>
+          </div>
+        </div>
+
+        <!-- Risk Summary -->
+        <div class="section-card">
+          <div class="section-card-title">Risk Summary</div>
+          <div class="risk-summary-box">
+            <p id="sim-risk-summary"></p>
+          </div>
+        </div>
+
+        <!-- NPV Histogram -->
+        <div class="section-card">
+          <div class="section-card-title">NPV Distribution (Histogram)</div>
+          <div class="chart-wrap" style="height:280px;">
+            <canvas id="histogram-chart"></canvas>
+          </div>
+          <p style="font-size:0.72rem;color:var(--gray-400);margin-top:8px;">
+            ▼ P10 (amber) · ▼ P50 (purple) · ▼ P90 (green) shown as dashed lines.
+            Red bars = negative NPV outcomes.
+          </p>
+        </div>
+
+      </div><!-- /sim-result-panel -->
+
+      <!-- Sensitivity Analysis / Tornado Chart -->
+      <div id="sensitivity-section" class="section-card" style="margin-top:16px;">
+        <div class="sensitivity-header">
+          <div class="section-card-title" style="margin-bottom:0;">Sensitivity Analysis <span class="help-icon" tabindex="0">?<span class="tooltip-text">Ranks variables by their influence on NPV. Each bar shows the NPV range when that variable is varied by ±swing from its base value. Wider bar = greater impact.</span></span></div>
+          <div class="sensitivity-controls">
+            <label for="tornado-swing" style="font-size:0.78rem;color:var(--gray-500);">Swing: <span class="help-icon" tabindex="0">?<span class="tooltip-text">How far each variable is adjusted above and below its base. ±20% means each variable is tested at 80% and 120% of its current value.</span></span></label>
+            <select id="tornado-swing" class="tornado-swing-select">
+              <option value="0.1">&#177;10%</option>
+              <option value="0.2" selected>&#177;20%</option>
+              <option value="0.3">&#177;30%</option>
+            </select>
+          </div>
+        </div>
+        <div id="tornado-empty" class="tornado-empty">
+          Complete the Business Case inputs to see which variables drive NPV the most.
+        </div>
+        <div id="tornado-chart-wrap" class="chart-wrap hidden" style="height:320px;">
+          <canvas id="tornado-chart"></canvas>
+        </div>
+        <p id="tornado-caption" class="tornado-caption hidden">
+          Each bar shows the NPV range when that variable is adjusted by &#177;swing from its base value.
+          Green = upside; Red = downside. Sorted by influence on NPV.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /phase-panel 2 -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 3 — VISUAL PROCESS MAPPER
+════════════════════════════════════════════════════════════ -->
+<div class="phase-panel hidden" data-phase="3">
+  <div class="mapper-layout">
+
+    <!-- Process Summary Bar -->
+    <div id="process-summary" class="process-summary-bar">
+      <span>Add process steps to see time estimates.</span>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="mapper-toolbar">
+      <!-- View toggle -->
+      <div class="mapper-toolbar-group">
+        <button id="btn-view-current" class="view-toggle-btn active" data-view="current">Current State</button>
+        <button id="btn-view-future"  class="view-toggle-btn"        data-view="future">Future State</button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <!-- Node actions -->
+      <div class="mapper-toolbar-group">
+        <button id="btn-add-node"    class="icon-btn primary-btn">+ Add Step</button>
+        <button id="btn-connect"     class="icon-btn">&#8594; Connect</button>
+        <button id="btn-delete-node" class="icon-btn danger">✕ Delete</button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <!-- Clone -->
+      <div class="mapper-toolbar-group">
+        <button id="btn-clone-to-future" class="icon-btn" title="Copy all steps and connections from Current State into Future State">
+          ⧉ Clone Current → Future
+        </button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <!-- Legend -->
+      <div class="node-legend">
+        <div class="legend-item"><div class="legend-dot unchanged"></div> Unchanged</div>
+        <div class="legend-item"><div class="legend-dot changed"></div> Changed</div>
+        <div class="legend-item"><div class="legend-dot added"></div> Added</div>
+        <div class="legend-item"><div class="legend-dot removed"></div> Removed</div>
+      </div>
+    </div>
+
+    <!-- Canvas + Properties Panel -->
+    <div class="mapper-body">
+
+      <!-- SVG Canvas -->
+      <div class="canvas-area" style="position:relative;">
+        <svg id="process-canvas" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+              <path d="M 0 0 L 10 3.5 L 0 7 z" fill="#9ca3af"/>
+            </marker>
+          </defs>
+          <g id="conn-layer"></g>
+          <g id="node-layer"></g>
+        </svg>
+        <div id="process-hint" class="process-hint-bar hidden"></div>
+      </div>
+
+      <!-- Node Properties Panel -->
+      <div class="props-panel">
+        <div class="props-panel-title">Step Properties</div>
+
+        <div id="node-props-panel" class="hidden">
+          <div class="props-field">
+            <label for="node-name">Step Name</label>
+            <input type="text" id="node-name" placeholder="Step name">
+          </div>
+          <div class="props-field">
+            <label>Cycle Time (minutes) <span class="help-icon" tabindex="0">?<span class="tooltip-text">Time to complete this step for one unit. Expected time uses the PERT formula: (Min + 4×Most Likely + Max) / 6 — weighted toward Most Likely.</span></span></label>
+            <div class="triang-mini">
+              <div class="triang-mini-item">
+                <label>Min</label>
+                <input type="number" id="node-cycle-min" min="0" step="0.1" placeholder="0">
+              </div>
+              <div class="triang-mini-item">
+                <label>Likely</label>
+                <input type="number" id="node-cycle-mode" min="0" step="0.1" placeholder="0">
+              </div>
+              <div class="triang-mini-item">
+                <label>Max</label>
+                <input type="number" id="node-cycle-max" min="0" step="0.1" placeholder="0">
+              </div>
+            </div>
+          </div>
+          <div class="props-field">
+            <label for="node-error-rate">Error / Rework Rate <span class="help-icon" tabindex="0">?<span class="tooltip-text">Percentage of units that fail this step and must be re-processed. Effective step time = Base time × (1 + Rate/100). A 20% rate adds 20% more time per unit on average.</span></span></label>
+            <div class="input-with-unit">
+              <input type="number" id="node-error-rate" min="0" max="100" step="0.1" placeholder="0">
+              <span class="input-unit">%</span>
+            </div>
+          </div>
+          <div class="props-field">
+            <label for="node-category">Category / Role Tag</label>
+            <input type="text" id="node-category" placeholder="e.g. Inspection, Assembly">
+          </div>
+          <div class="props-field">
+            <label for="node-notes">Notes</label>
+            <textarea id="node-notes" placeholder="Optional notes…"></textarea>
+          </div>
+          <button id="btn-save-node-props" class="btn-save-props">Save Properties</button>
+        </div>
+
+        <div id="node-props-empty" style="color:var(--gray-400);font-size:0.82rem;padding:10px 0;">
+          Select a step to edit its properties.
+        </div>
+      </div>
+
+    </div><!-- /mapper-body -->
+  </div><!-- /mapper-layout -->
+</div><!-- /phase-panel 3 -->
+
+
+<!-- ─── Scripts ──────────────────────────────────────────────── -->
+<script src="lib/chart.min.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
