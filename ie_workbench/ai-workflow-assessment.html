@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workflow Opportunity Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --primary:#6e57e0;
+    --primary-dark:#5340b8;
+    --primary-darker:#3e2f8f;
+    --primary-light:#f1eefc;
+    --primary-tint:#e4def9;
+    --primary-border:#cfc5f2;
+    --ink:#23202e;
+    --muted:#6b6580;
+    --line:#e2ddf0;
+    --bg:#faf9fd;
+    --card:#ffffff;
+    --gold-bg:#fff7dd;
+    --gold-border:#e8d89a;
+    --green:#1f8a5d;
+    --green-bg:#e8f6ef;
+    --amber:#b07a00;
+    --amber-bg:#fff4d6;
+    --red:#c23b4b;
+    --red-bg:#fdecee;
+    --radius:12px;
+    --shadow:0 1px 3px rgba(35,32,46,.07),0 6px 20px rgba(110,87,224,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  .awoa{
+    font-family:"Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.55;
+    min-height:100vh;font-size:16px;
+  }
+  .awoa-wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px}
+
+  /* ---------- header ---------- */
+  .awoa-header{text-align:center;padding:18px 0 6px}
+  .awoa-kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--primary);background:var(--primary-light);
+    border:1px solid var(--primary-border);padding:5px 14px;border-radius:999px;margin-bottom:14px}
+  .awoa-header h1{font-size:clamp(26px,4.5vw,36px);line-height:1.15;color:var(--primary-darker);margin-bottom:10px}
+  .awoa-header p{color:var(--muted);max-width:620px;margin:0 auto;font-size:16.5px}
+
+  /* ---------- progress ---------- */
+  .awoa-progress{position:sticky;top:0;z-index:20;background:var(--bg);padding:14px 0 10px;margin-bottom:6px}
+  .awoa-bar{height:8px;background:var(--primary-tint);border-radius:999px;overflow:hidden}
+  .awoa-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary-dark));
+    border-radius:999px;transition:width .35s ease}
+  .awoa-progress-label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  /* ---------- stepper ---------- */
+  .awoa-stepper{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 26px}
+  .awoa-step-dot{border:1px solid var(--line);background:var(--card);color:var(--muted);
+    font-size:12px;font-weight:600;padding:6px 11px;border-radius:999px;cursor:pointer;
+    transition:all .15s;font-family:inherit}
+  .awoa-step-dot:hover{border-color:var(--primary);color:var(--primary)}
+  .awoa-step-dot.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .awoa-step-dot.done{background:var(--primary-light);border-color:var(--primary-border);color:var(--primary-dark)}
+  .awoa-step-dot.done::before{content:"✓ ";font-size:11px}
+
+  /* ---------- cards / sections ---------- */
+  .awoa-section{display:none;animation:awoaFade .3s ease}
+  .awoa-section.active{display:block}
+  @keyframes awoaFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .awoa-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:30px;margin-bottom:18px}
+  @media(max-width:560px){.awoa-card{padding:20px 16px}}
+
+  .awoa-step-tag{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px}
+  .awoa-step-num{background:var(--primary);color:#fff;font-weight:700;font-size:13px;
+    width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center}
+  .awoa-step-tag span.lbl{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--primary)}
+  .awoa-card h2{font-size:23px;color:var(--primary-darker);margin-bottom:6px;line-height:1.25}
+  .awoa-outcome{color:var(--muted);margin-bottom:20px;font-size:15.5px}
+  .awoa-card h3{font-size:15px;color:var(--primary-dark);margin:22px 0 10px;text-transform:none}
+  .awoa-card h3:first-of-type{margin-top:0}
+
+  /* ---------- note boxes ---------- */
+  .awoa-note{border-radius:10px;padding:14px 16px;margin:16px 0;font-size:14.5px;border:1px solid}
+  .awoa-note b{display:block;margin-bottom:3px}
+  .awoa-note.purple{background:var(--primary-light);border-color:var(--primary-border);color:var(--primary-darker)}
+  .awoa-note.gold{background:var(--gold-bg);border-color:var(--gold-border);color:#5c4a08}
+
+  /* ---------- checklist pills ---------- */
+  .awoa-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:12px 0 4px}
+  .awoa-checks.wide{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .awoa-check{display:flex;align-items:flex-start;gap:9px;background:var(--bg);border:1px solid var(--line);
+    border-radius:9px;padding:9px 12px;font-size:14px;cursor:pointer;transition:all .15s;user-select:none}
+  .awoa-check:hover{border-color:var(--primary-border)}
+  .awoa-check input{accent-color:var(--primary);width:16px;height:16px;margin-top:3px;flex-shrink:0;cursor:pointer}
+  .awoa-check.checked{background:var(--primary-light);border-color:var(--primary-border);color:var(--primary-darker)}
+
+  /* ---------- fields ---------- */
+  .awoa-field{margin:14px 0}
+  .awoa-field label{display:block;font-weight:700;font-size:14px;margin-bottom:4px;color:var(--ink)}
+  .awoa-hint{font-size:13px;color:var(--muted);margin-bottom:7px}
+  .awoa input[type=text],.awoa input[type=date],.awoa textarea,.awoa select{
+    width:100%;font-family:inherit;font-size:14.5px;color:var(--ink);
+    border:1.5px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff;
+    transition:border-color .15s, box-shadow .15s}
+  .awoa textarea{resize:vertical;min-height:74px}
+  .awoa input:focus,.awoa textarea:focus,.awoa select:focus{
+    outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(110,87,224,.16)}
+  .awoa-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+  @media(max-width:640px){.awoa-grid2{grid-template-columns:1fr}}
+
+  /* ---------- tables ---------- */
+  .awoa-tablewrap{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px}
+  .awoa table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+  .awoa th{background:var(--primary-light);color:var(--primary-darker);text-align:left;
+    font-size:12.5px;padding:9px 10px;border-bottom:1px solid var(--primary-border);white-space:nowrap}
+  .awoa td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .awoa tr:last-child td{border-bottom:none}
+  .awoa td input[type=text],.awoa td textarea,.awoa td select{border-width:1px;padding:7px 9px;font-size:13.5px;min-height:0}
+  .awoa td textarea{min-height:40px}
+  .awoa-addrow{background:none;border:1px dashed var(--primary-border);color:var(--primary);
+    font-family:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:7px 14px;cursor:pointer;margin:2px 0 8px}
+  .awoa-addrow:hover{background:var(--primary-light)}
+
+  /* ---------- scorecard ---------- */
+  .awoa-scorebtns{display:flex;gap:5px}
+  .awoa-scorebtn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--line);background:#fff;
+    font-family:inherit;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer;transition:all .12s}
+  .awoa-scorebtn:hover{border-color:var(--primary)}
+  .awoa-scorebtn.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+  .awoa-scoreboard{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--primary-light);
+    border:1px solid var(--primary-border);border-radius:12px;padding:16px 20px;margin:16px 0}
+  .awoa-scoretotal{font-size:34px;font-weight:700;color:var(--primary-darker);line-height:1}
+  .awoa-scoretotal small{font-size:15px;font-weight:600;color:var(--muted)}
+  .awoa-scorelabel{font-weight:700;font-size:16px;padding:7px 16px;border-radius:999px}
+  .awoa-scoreadvice{flex-basis:100%;font-size:14px;color:var(--primary-darker)}
+  .lab-strong{background:var(--green-bg);color:var(--green)}
+  .lab-promising{background:var(--amber-bg);color:var(--amber)}
+  .lab-premature{background:var(--gold-bg);color:#8a6d00}
+  .lab-weak{background:var(--red-bg);color:var(--red)}
+  .lab-none{background:#eee;color:var(--muted)}
+
+  /* ---------- radio rows ---------- */
+  .awoa-radios{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+  .awoa-radio{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border:1px solid var(--line);
+    border-radius:9px;padding:11px 13px;cursor:pointer;font-size:14.5px;transition:all .15s}
+  .awoa-radio:hover{border-color:var(--primary-border)}
+  .awoa-radio input{accent-color:var(--primary);margin-top:3px;flex-shrink:0;cursor:pointer}
+  .awoa-radio.checked{background:var(--primary-light);border-color:var(--primary);color:var(--primary-darker)}
+  .awoa-radio small{display:block;color:var(--muted);font-size:13px}
+  .awoa-radio.checked small{color:var(--primary-dark)}
+
+  /* ---------- nav buttons ---------- */
+  .awoa-nav{display:flex;justify-content:space-between;gap:12px;margin-top:8px}
+  .awoa-btn{font-family:inherit;font-size:15px;font-weight:700;border-radius:10px;padding:12px 26px;
+    cursor:pointer;transition:all .15s;border:1.5px solid transparent}
+  .awoa-btn.primary{background:var(--primary);color:#fff}
+  .awoa-btn.primary:hover{background:var(--primary-dark)}
+  .awoa-btn.ghost{background:#fff;border-color:var(--line);color:var(--muted)}
+  .awoa-btn.ghost:hover{border-color:var(--primary);color:var(--primary)}
+  .awoa-btn:disabled{opacity:.4;cursor:default}
+
+  /* ---------- summary view ---------- */
+  .awoa-summary-block{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0;background:var(--bg)}
+  .awoa-summary-block h4{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:5px}
+  .awoa-summary-block p{font-size:14.5px;white-space:pre-wrap}
+  .awoa-summary-block p:empty::before{content:"— not completed —";color:var(--muted);font-style:italic}
+  .awoa-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 4px}
+
+  .awoa-footer{text-align:center;color:var(--muted);font-size:12.5px;margin-top:34px}
+  .awoa-footer button{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
+
+  .awoa-saved{position:fixed;bottom:18px;right:18px;background:var(--primary-darker);color:#fff;
+    font-size:13px;font-weight:600;padding:8px 16px;border-radius:999px;opacity:0;transform:translateY(8px);
+    transition:all .3s;pointer-events:none;z-index:50}
+  .awoa-saved.show{opacity:1;transform:none}
+
+  /* ---------- print ---------- */
+  @media print{
+    .awoa{background:#fff}
+    .awoa-progress,.awoa-stepper,.awoa-nav,.awoa-toolbar,.awoa-addrow,.awoa-footer,.awoa-saved{display:none!important}
+    .awoa-section{display:block!important;page-break-after:always}
+    .awoa-card{box-shadow:none;border-color:#ccc}
+    .awoa textarea{min-height:0}
+  }
+</style>
+</head>
+<body class="awoa">
+<div class="awoa-wrap">
+
+  <header class="awoa-header">
+    <span class="awoa-kicker">Guided Assessment</span>
+    <h1>AI Workflow Opportunity Assessment</h1>
+    <p>Decide wheter an AI opportunity is useful. Your answers save automatically in this browser.</p>
+  </header>
+
+  <div class="awoa-progress">
+    <div class="awoa-bar"><div class="awoa-bar-fill" id="barFill"></div></div>
+    <div class="awoa-progress-label"><span id="progStep">Getting started</span><span id="progPct">0% complete</span></div>
+  </div>
+
+  <nav class="awoa-stepper" id="stepper"></nav>
+
+  <main id="sections"></main>
+
+  <footer class="awoa-footer">
+    AI Workflow Opportunity Assessment · Answers are stored only in your browser ·
+    <button id="resetBtn" type="button">Start over</button>
+  </footer>
+</div>
+
+<div class="awoa-saved" id="savedToast">Saved ✓</div>
+
+<script>
+(function(){
+"use strict";
+const STORE_KEY = "awoa-assessment-v1";
+
+/* ============================================================
+   SECTION DEFINITIONS
+============================================================ */
+const SCORE_DIMS = [
+  ["Value","Does improving this workflow materially matter?"],
+  ["Feasibility","Can a practical test be run without a major implementation?"],
+  ["Risk","Higher score means risk is lower or more manageable."],
+  ["Repeatability","Does this work happen often enough to justify improvement?"],
+  ["Data readiness","Are safe inputs, examples, records, and rules available?"],
+  ["Adoption likelihood","Will users and stakeholders participate and trust the change?"],
+  ["Measurability","Can the team judge whether the change worked?"],
+  ["Requirements clarity","Are users, scope, capabilities, review, and outputs clear?"]
+];
+const SCORE_BANDS = [
+  [34,40,"Strong candidate","lab-strong","Proceed toward requirements and a smallest safe experiment."],
+  [27,33,"Promising but incomplete","lab-promising","Clarify key unknowns before deeper investment."],
+  [20,26,"Premature","lab-premature","Return to workflow, pain, data, or stakeholder discovery."],
+  [13,19,"Weak fit","lab-weak","Redirect to process improvement or a different opportunity."],
+  [8,12,"Not appropriate for AI","lab-weak","Stop as an AI opportunity unless the facts change."]
+];
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function checkGrid(name, items, wide){
+  return '<div class="awoa-checks'+(wide?' wide':'')+'">' + items.map((it,i)=>
+    '<label class="awoa-check"><input type="checkbox" data-k="'+name+'.'+i+'"><span>'+esc(it)+'</span></label>'
+  ).join("") + '</div>';
+}
+function radioList(name, items){
+  return '<div class="awoa-radios">' + items.map((it,i)=>{
+    const [t,sub] = Array.isArray(it)?it:[it,""];
+    return '<label class="awoa-radio"><input type="radio" name="'+name+'" value="'+esc(t)+'" data-k="'+name+'"><span>'+esc(t)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span></label>';
+  }).join("") + '</div>';
+}
+function ta(key,label,hint,rows){
+  return '<div class="awoa-field"><label>'+esc(label)+'</label>'+(hint?'<div class="awoa-hint">'+esc(hint)+'</div>':'')+
+    '<textarea data-k="'+key+'" rows="'+(rows||3)+'"></textarea></div>';
+}
+function txt(key,label,hint){
+  return '<div class="awoa-field"><label>'+esc(label)+'</label>'+(hint?'<div class="awoa-hint">'+esc(hint)+'</div>':'')+
+    '<input type="text" data-k="'+key+'"></div>';
+}
+/* growable table: cols = [{h,type(text|ta|sel),opts}] */
+function dynTable(id, cols, startRows){
+  let head = cols.map(c=>'<th>'+esc(c.h)+'</th>').join("");
+  return '<div class="awoa-tablewrap"><table data-dyn="'+id+'" data-cols="'+cols.length+'"><thead><tr>'+head+'</tr></thead><tbody></tbody></table></div>'+
+    '<button type="button" class="awoa-addrow" data-add="'+id+'">+ Add row</button>';
+}
+const DYN_DEFS = {};
+function defDyn(id, cols, startRows){ DYN_DEFS[id]={cols:cols,start:startRows}; return dynTable(id,cols,startRows); }
+
+/* fixed-label table (label col + input col rows) */
+function labelRows(prefix, labels, useTa){
+  return '<div class="awoa-tablewrap"><table><thead><tr><th style="width:38%">Boundary</th><th>Response</th></tr></thead><tbody>'+
+    labels.map((l,i)=>'<tr><td style="padding:10px;font-weight:600;font-size:13.5px">'+esc(l)+'</td><td>'+
+      (useTa?'<textarea data-k="'+prefix+'.'+i+'" rows="2"></textarea>':'<input type="text" data-k="'+prefix+'.'+i+'">')+'</td></tr>').join("")+
+    '</tbody></table></div>';
+}
+function labelRows2(prefix, header1, header2, labels){
+  return '<div class="awoa-tablewrap"><table><thead><tr><th style="width:34%">'+esc(header1)+'</th><th>'+esc(header2)+'</th></tr></thead><tbody>'+
+    labels.map((l,i)=>'<tr><td style="padding:10px;font-weight:600;font-size:13.5px">'+esc(l)+'</td><td><textarea data-k="'+prefix+'.'+i+'" rows="2"></textarea></td></tr>').join("")+
+    '</tbody></table></div>';
+}
+
+const sections = [
+
+/* ---------- 0 WELCOME ---------- */
+{ id:"welcome", nav:"Start", title:"Getting started", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">★</span><span class="lbl">Before you begin</span></div>
+    <h2>How this assessment works</h2>
+    <p class="awoa-outcome">Use this for <b>one workflow at a time</b>. It can be completed solo, but it works best in a 60–120 minute working session with the people who understand the workflow.</p>
+
+    <div class="awoa-note purple"><b>Core promise</b>Turn vague AI interest into a practical, assessed, safely testable workflow opportunity.</div>
+
+    <h3>Ground rules</h3>
+    ${checkGrid("rules",[
+      "Start with work, not a tool",
+      "Assess one workflow, not a department",
+      "Let “not AI” be an acceptable answer",
+      "End with a next decision"
+    ],true)}
+
+    <h3>Session details</h3>
+    <div class="awoa-grid2">
+      ${txt("meta.owner","Assessment owner")}
+      ${txt("meta.team","Team / function")}
+      ${txt("meta.workflow","Workflow assessed")}
+      <div class="awoa-field"><label>Date</label><input type="date" data-k="meta.date"></div>
+    </div>
+    ${txt("meta.participants","Session participants")}
+
+    <div class="awoa-note purple"><b>Final output</b>By the end, you'll have an opportunity score, decision label, risk view, requirements readiness view, smallest safe experiment, and a shareable opportunity summary.</div>
+  </div>`
+},
+
+/* ---------- 1 ---------- */
+{ id:"step1", nav:"1. Workflow", title:"Step 1 · Identify the workflow", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">1</span><span class="lbl">Step 1 of 7</span></div>
+    <h2>Identify the workflow</h2>
+    <p class="awoa-outcome">Choose a specific workflow to assess instead of discussing AI in the abstract.</p>
+
+    <h3>Best-fit workflow signals <span style="font-weight:400;color:var(--muted);font-size:13px">— check all that describe it</span></h3>
+    ${checkGrid("s1.signals",["Manual","Repetitive","Fragmented","Spreadsheet heavy","Knowledge dependent","Decision heavy","Exception heavy","Slow to coordinate","Hard to audit","Hard to scale","Dependent on tribal knowledge","Visible enough to matter"])}
+
+    ${ta("s1.statement","Workflow candidate statement","We are assessing [workflow] used by [users/stakeholders] to [purpose/outcome], because it currently appears [manual / fragmented / slow / risky / hard to scale…].",4)}
+
+    <h3>Workflow boundaries</h3>
+    ${labelRows("s1.bounds",[
+      "Where the workflow starts",
+      "Where the workflow ends",
+      "Primary users / operators",
+      "People who depend on the output",
+      "Tools, spreadsheets, documents, or systems involved",
+      "Out of scope for this assessment"
+    ],true)}
+
+    <div class="awoa-note gold"><b>Decision gate</b>Move on when the workflow is specific, users are identifiable, the output is clear, and there is observable pain.</div>
+  </div>`
+},
+
+/* ---------- 2 ---------- */
+{ id:"step2", nav:"2. Pain", title:"Step 2 · Define the pain", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">2</span><span class="lbl">Step 2 of 7</span></div>
+    <h2>Define the pain</h2>
+    <p class="awoa-outcome">Clarify what is painful about the current workflow and why it matters.</p>
+
+    <h3>Pain inventory <span style="font-weight:400;color:var(--muted);font-size:13px">— check all that apply</span></h3>
+    ${checkGrid("s2.pains",["Slow","Costly","Risky","Inconsistent","Invisible","Error-prone","Hard to scale","Hard to explain","Hard to audit","Dependent on specific people","Frustrating for users","Frustrating for downstream teams"])}
+
+    <h3>Pain points in detail</h3>
+    ${defDyn("painTable",[{h:"Pain point"},{h:"Who feels it?"},{h:"Impact"},{h:"Evidence or workaround"}],3)}
+
+    ${ta("s2.definition","Pain definition","The workflow is painful because [specific pain], which affects [people/team/process] by causing [impact]. The most important pain to assess is [priority pain].",4)}
+    ${ta("s2.rootcause","Root-cause hypothesis","What may be causing the pain underneath the visible symptoms?",3)}
+  </div>`
+},
+
+/* ---------- 3 ---------- */
+{ id:"step3", nav:"3. AI Change", title:"Step 3 · Identify what AI changes", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">3</span><span class="lbl">Step 3 of 7</span></div>
+    <h2>Identify what AI changes</h2>
+    <p class="awoa-outcome">Turn AI from a trend into a specific change hypothesis for the workflow.</p>
+
+    <h3>Possible AI change dimensions</h3>
+    ${checkGrid("s3.dims",["Speed","Cost","Quality","Consistency","Scale","Accessibility","Visibility","Coordination","Decision support","Knowledge retrieval","Documentation","Exception handling"])}
+
+    ${ta("s3.hypothesis","AI change hypothesis","AI may improve this workflow by helping [user] with [task/change], which could affect [speed/cost/quality/scale/accessibility/feasibility] while still requiring [human review/guardrail].",4)}
+
+    <h3>Bound the role of AI</h3>
+    ${defDyn("aiBounds",[{h:"AI may help by…"},{h:"AI should not…"},{h:"Simpler non-AI alternative considered"}],3)}
+
+    <div class="awoa-note gold"><b>Useful test</b>If the team cannot explain what AI changes in operational terms, return to the workflow and pain before scoring.</div>
+  </div>`
+},
+
+/* ---------- 4 ---------- */
+{ id:"step4", nav:"4. Score", title:"Step 4 · Evaluate opportunity fit", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">4</span><span class="lbl">Step 4 of 7</span></div>
+    <h2>Evaluate opportunity fit</h2>
+    <p class="awoa-outcome">Use both a numerical score and a label to make judgment visible and discussable.</p>
+    <div class="awoa-note purple"><b>Scoring scale</b>1 = very weak · 2 = weak · 3 = mixed or unclear · 4 = strong · 5 = very strong</div>
+
+    <div class="awoa-tablewrap"><table id="scoreTable"><thead><tr><th>Dimension</th><th>Question</th><th>Score</th><th>Evidence / notes</th></tr></thead><tbody>
+    ${SCORE_DIMS.map((d,i)=>`
+      <tr><td style="padding:10px;font-weight:700;font-size:13.5px;white-space:nowrap">${esc(d[0])}</td>
+      <td style="padding:10px;font-size:13px;color:var(--muted);min-width:180px">${esc(d[1])}</td>
+      <td><div class="awoa-scorebtns" data-dim="${i}">${[1,2,3,4,5].map(n=>'<button type="button" class="awoa-scorebtn" data-score="'+n+'">'+n+'</button>').join("")}</div></td>
+      <td><input type="text" data-k="s4.note.${i}" placeholder="Notes…"></td></tr>`).join("")}
+    </tbody></table></div>
+
+    <div class="awoa-scoreboard">
+      <div><div class="awoa-scoretotal"><span id="scoreTotal">–</span><small> / 40</small></div></div>
+      <div class="awoa-scorelabel lab-none" id="scoreLabel">Score all 8 dimensions</div>
+      <div class="awoa-scoreadvice" id="scoreAdvice"></div>
+    </div>
+
+    <h3>Interpretation</h3>
+    ${defDyn("s4summary",[{h:"Top strengths"},{h:"Top risks or unknowns"},{h:"Recommended direction"}],2)}
+  </div>`
+},
+
+/* ---------- 5 ---------- */
+{ id:"step5", nav:"5. Impact", title:"Step 5 · Map stakeholders & system impact", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">5</span><span class="lbl">Step 5 of 7</span></div>
+    <h2>Map stakeholders and system impact</h2>
+    <p class="awoa-outcome">Reveal who and what the opportunity touches before moving toward requirements.</p>
+
+    <h3>Stakeholders</h3>
+    ${defDyn("stakeholders",[{h:"Stakeholder / role"},{h:"Current role"},{h:"Future / experiment role"},{h:"Concern / need"},{h:"Required involvement"}],3)}
+
+    <h3>Systems and artifacts</h3>
+    ${defDyn("systems",[{h:"System, spreadsheet, document, or artifact"},{h:"Purpose in workflow"},{h:"Owner"},{h:"Input / output / handoff"},{h:"Pain or limitation"}],3)}
+
+    <h3>Impact readiness</h3>
+    ${checkGrid("s5.ready",[
+      "Primary users are clear","Review and approval points are clear","Inputs and outputs are visible","Data owners are identified",
+      "Business rules are understood","Exceptions are known enough","Trust concerns are named","Open questions are assigned"
+    ],true)}
+  </div>`
+},
+
+/* ---------- 6 ---------- */
+{ id:"step6", nav:"6. Requirements", title:"Step 6 · Convert into requirements", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">6</span><span class="lbl">Step 6 of 7</span></div>
+    <h2>Convert into requirements</h2>
+    <p class="awoa-outcome">Create a formal requirements brief only when the opportunity is clear enough.</p>
+
+    <h3>Requirements brief header</h3>
+    <div class="awoa-grid2">
+      ${txt("s6.oppname","Opportunity name")}
+      ${txt("s6.reqowner","Requirements owner")}
+      ${txt("s6.risktriage","Risk triage decision","Complete after the Risk Triage step if needed")}
+      <div class="awoa-field"><label>Requirements status</label>
+        <select data-k="s6.status"><option value="">Select…</option><option>Draft</option><option>Ready for review</option><option>Needs discovery</option><option>Not ready</option></select>
+      </div>
+    </div>
+
+    <h3>Requirement areas</h3>
+    <div class="awoa-tablewrap"><table><thead><tr><th>Requirement area</th><th>Known now</th><th>Missing or unclear</th><th>Owner / next step</th></tr></thead><tbody>
+    ${["Users and stakeholders","Main use case","Required capabilities","Inputs and data restrictions","Outputs and quality expectations","Human review and decision ownership","Exceptions and failure handling","Success measures / acceptance criteria"]
+      .map((a,i)=>'<tr><td style="padding:10px;font-weight:600;font-size:13px;min-width:140px">'+esc(a)+'</td>'+
+        '<td><textarea data-k="s6.known.'+i+'" rows="2"></textarea></td>'+
+        '<td><textarea data-k="s6.missing.'+i+'" rows="2"></textarea></td>'+
+        '<td><textarea data-k="s6.next.'+i+'" rows="2"></textarea></td></tr>').join("")}
+    </tbody></table></div>
+
+    <h3>Readiness decision</h3>
+    ${radioList("s6.readiness",["Ready for experiment planning","Needs targeted discovery","Reduce scope first","Redirect to non-AI improvement","Not ready","Stop or park"])}
+  </div>`
+},
+
+/* ---------- RISK ---------- */
+{ id:"risk", nav:"Risk Triage", title:"AI suitability and risk triage", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">!</span><span class="lbl">Safety checkpoint</span></div>
+    <h2>AI suitability and risk triage</h2>
+    <p class="awoa-outcome">Use this before testing with real data, live users, or connected systems.</p>
+
+    <div class="awoa-tablewrap"><table><thead><tr><th>Area</th><th>Key question</th><th>Status</th><th>Notes / guardrail</th></tr></thead><tbody>
+    ${[
+      ["AI change","Does AI clearly change cost, speed, quality, scale, accessibility, or feasibility?",["Yes","No","Unclear"]],
+      ["Better alternative","Would a process fix, rule, report, training, or standard automation solve the pain more simply?",["Yes","No","Unclear"]],
+      ["Decision impact","Could a wrong output affect people, operations, compliance, money, safety, or trust?",["Low","Medium","High"]],
+      ["Data sensitivity","Would sensitive, confidential, regulated, or private data be used?",["No","Maybe","Yes"]],
+      ["Human review","Is review, approval, override, and escalation clearly defined?",["Yes","No","Unclear"]],
+      ["Failure handling","Is there a safe fallback when output is wrong, missing, or low-confidence?",["Yes","No","Unclear"]],
+      ["Experiment boundary","Can a small, controlled, reversible experiment be designed?",["Yes","No","Unclear"]],
+      ["Governance need","Does this need risk, compliance, security, legal, HR, or data-owner review?",["No","Maybe","Yes"]]
+    ].map((r,i)=>'<tr><td style="padding:10px;font-weight:700;font-size:13px;white-space:nowrap">'+esc(r[0])+'</td>'+
+      '<td style="padding:10px;font-size:13px;color:var(--muted);min-width:200px">'+esc(r[1])+'</td>'+
+      '<td><select data-k="risk.status.'+i+'"><option value="">–</option>'+r[2].map(o=>'<option>'+o+'</option>').join("")+'</select></td>'+
+      '<td><input type="text" data-k="risk.note.'+i+'"></td></tr>').join("")}
+    </tbody></table></div>
+
+    <h3>Triage decision</h3>
+    ${radioList("risk.decision",["Proceed with guardrails","Proceed only with targeted discovery","Reduce scope before proceeding","Redirect to non-AI improvement","Stop as an AI opportunity"])}
+
+    ${ta("risk.guardrails","Required guardrails","Data restrictions, human review, audit trail, fallback path, scope limits, approvals.",3)}
+  </div>`
+},
+
+/* ---------- 7 ---------- */
+{ id:"step7", nav:"7. Experiment", title:"Step 7 · Design the smallest safe experiment", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">7</span><span class="lbl">Step 7 of 7</span></div>
+    <h2>Design the smallest safe experiment</h2>
+    <p class="awoa-outcome">Plan the lowest-risk test that can produce useful evidence.</p>
+
+    <h3>Experiment type <span style="font-weight:400;color:var(--muted);font-size:13px">— select one or more</span></h3>
+    ${checkGrid("s7.types",["Manual prototype","Prompt workflow test","Spreadsheet model","No-code workflow","Guided analysis","Simulated workflow","Lightweight demo","Controlled pilot"],true)}
+
+    ${ta("s7.objective","Experiment objective","This experiment will test whether [AI-assisted change] can help [user] improve [workflow task] by [expected outcome], while staying within [guardrails].",4)}
+
+    <h3>Experiment plan</h3>
+    ${labelRows2("s7.plan","Experiment element","Plan",[
+      "Learning hypothesis","Participants","Inputs / examples","In scope","Out of scope","Human review points","Success measures","Stop criteria","Next decision date / owner"
+    ])}
+  </div>`
+},
+
+/* ---------- SUMMARY ---------- */
+{ id:"summary", nav:"Summary", title:"Opportunity summary", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">✦</span><span class="lbl">Decision artifact</span></div>
+    <h2>Opportunity summary</h2>
+    <p class="awoa-outcome">Complete this last — it's the shareable one-page decision artifact. Fields marked “auto” are pulled from your earlier answers; you can edit anything.</p>
+
+    <div class="awoa-toolbar">
+      <button type="button" class="awoa-btn primary" id="autofillBtn">↺ Pull answers from earlier steps</button>
+    </div>
+
+    <div class="awoa-grid2">
+      ${txt("sum.name","Opportunity name (auto)")}
+      ${txt("sum.workflow","Workflow assessed (auto)")}
+      ${txt("sum.users","Primary users (auto)")}
+      ${txt("sum.score","Opportunity score / label (auto)")}
+    </div>
+    <div class="awoa-field"><label>Recommended next decision</label>
+      <select data-k="sum.decision"><option value="">Select…</option><option>Proceed</option><option>Discover</option><option>Reduce scope</option><option>Redirect</option><option>Park</option><option>Stop</option></select>
+    </div>
+
+    ${ta("sum.pain","Workflow and pain (auto)","Summarize the workflow candidate statement and priority pain.",4)}
+    ${ta("sum.hypothesis","AI change hypothesis (auto)","Summarize what AI may change and what remains human-owned.",3)}
+    ${ta("sum.strengths","Top strengths",null,2)}
+    ${ta("sum.risks","Top risks or unknowns",null,2)}
+    ${ta("sum.stakenotes","Stakeholder / system notes",null,2)}
+    ${ta("sum.requirements","Requirements status and guardrails (auto)","What is ready, what is missing, and what boundaries are required?",3)}
+    ${ta("sum.experiment","Smallest safe experiment (auto)","Experiment type, objective, success measures, stop criteria, next owner.",3)}
+    ${ta("sum.questions","Open questions","List the questions that must be answered before the next investment decision.",3)}
+  </div>`
+},
+
+/* ---------- CLOSEOUT ---------- */
+{ id:"closeout", nav:"Closeout", title:"Facilitator closeout", html:`
+  <div class="awoa-card">
+    <div class="awoa-step-tag"><span class="awoa-step-num">✓</span><span class="lbl">Quality check</span></div>
+    <h2>Facilitator closeout</h2>
+    <p class="awoa-outcome">Use this as a final quality check before sharing the opportunity summary.</p>
+
+    ${checkGrid("close.checks",[
+      "Workflow is specific enough to assess","Pain is tied to operational impact","AI role is bounded and practical",
+      "Score and label have a rationale","Human review is explicit","Stakeholders and data owners are visible",
+      "Risks and guardrails are written down","Requirements gaps are assigned","Experiment is small, controlled, and reversible","The next decision is clear"
+    ],true)}
+
+    <div class="awoa-note purple"><b>Good outcomes include stopping</b>A useful assessment can recommend proceeding, discovering more, reducing scope, redirecting to a non-AI fix, parking the idea, or stopping. The goal is a better decision, not a predetermined AI project.</div>
+
+    ${ta("close.final","Final decision and owner","Who owns the next step, by when, and what decision will they bring back?",3)}
+
+    <div class="awoa-toolbar">
+      <button type="button" class="awoa-btn primary" id="printBtn">🖨 Print / save as PDF</button>
+      <button type="button" class="awoa-btn ghost" id="copyBtn">Copy summary as text</button>
+    </div>
+  </div>`
+}
+];
+
+/* ============================================================
+   RENDER
+============================================================ */
+const sectionsEl = document.getElementById("sections");
+const stepperEl = document.getElementById("stepper");
+sections.forEach((s,i)=>{
+  const div=document.createElement("div");
+  div.className="awoa-section"; div.id="sec-"+s.id; div.innerHTML=s.html;
+  const nav=document.createElement("div"); nav.className="awoa-nav";
+  nav.innerHTML=(i>0?'<button type="button" class="awoa-btn ghost" data-go="'+(i-1)+'">← Back</button>':'<span></span>')+
+    (i<sections.length-1?'<button type="button" class="awoa-btn primary" data-go="'+(i+1)+'">'+(i===0?'Begin Step 1 →':'Continue →')+'</button>':'<span></span>');
+  div.appendChild(nav);
+  sectionsEl.appendChild(div);
+  const dot=document.createElement("button"); dot.type="button"; dot.className="awoa-step-dot"; dot.textContent=s.nav; dot.dataset.go=i;
+  stepperEl.appendChild(dot);
+});
+
+/* build dynamic table rows */
+function addDynRow(id, values){
+  const table=document.querySelector('table[data-dyn="'+id+'"]');
+  const tbody=table.querySelector("tbody");
+  const r=tbody.children.length;
+  const tr=document.createElement("tr");
+  const cols=DYN_DEFS[id].cols;
+  tr.innerHTML=cols.map((c,ci)=>'<td><textarea rows="2" data-k="dyn.'+id+'.'+r+'.'+ci+'"></textarea></td>').join("");
+  tbody.appendChild(tr);
+  if(values) tr.querySelectorAll("textarea").forEach((el,ci)=>{el.value=values[ci]||"";});
+  return tr;
+}
+Object.keys(DYN_DEFS).forEach(id=>{ for(let r=0;r<DYN_DEFS[id].start;r++) addDynRow(id); });
+
+/* ============================================================
+   STATE
+============================================================ */
+let state={};
+try{ state=JSON.parse(localStorage.getItem(STORE_KEY)||"{}"); }catch(e){ state={}; }
+
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  toast();
+}
+let toastT;
+function toast(){
+  const t=document.getElementById("savedToast");
+  t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1200);
+}
+
+/* restore dynamic rows beyond defaults */
+Object.keys(DYN_DEFS).forEach(id=>{
+  let maxRow=DYN_DEFS[id].start-1;
+  Object.keys(state).forEach(k=>{
+    const m=k.match(new RegExp("^dyn\\."+id+"\\.(\\d+)\\."));
+    if(m) maxRow=Math.max(maxRow,parseInt(m[1],10));
+  });
+  const tbody=document.querySelector('table[data-dyn="'+id+'"] tbody');
+  while(tbody.children.length<=maxRow) addDynRow(id);
+});
+
+/* restore values */
+function applyState(){
+  document.querySelectorAll("[data-k]").forEach(el=>{
+    const v=state[el.dataset.k];
+    if(v===undefined) return;
+    if(el.type==="checkbox"){ el.checked=!!v; el.closest(".awoa-check").classList.toggle("checked",!!v); }
+    else if(el.type==="radio"){ if(el.value===v){ el.checked=true; el.closest(".awoa-radio").classList.add("checked"); } }
+    else el.value=v;
+  });
+  /* scores */
+  for(let i=0;i<8;i++){
+    const v=state["s4.score."+i];
+    if(v) document.querySelectorAll('[data-dim="'+i+'"] .awoa-scorebtn').forEach(b=>b.classList.toggle("sel",b.dataset.score==v));
+  }
+  updateScore();
+}
+
+/* input handling (delegated) */
+document.addEventListener("input",e=>{
+  const el=e.target;
+  if(!el.dataset||!el.dataset.k) return;
+  if(el.type==="checkbox"){ state[el.dataset.k]=el.checked; el.closest(".awoa-check").classList.toggle("checked",el.checked); }
+  else if(el.type==="radio"){
+    state[el.dataset.k]=el.value;
+    document.querySelectorAll('input[name="'+el.name+'"]').forEach(r=>r.closest(".awoa-radio").classList.toggle("checked",r.checked));
+  }
+  else state[el.dataset.k]=el.value;
+  saveState(); updateProgress();
+});
+
+/* clicks: nav, stepper, scores, add-row */
+document.addEventListener("click",e=>{
+  const go=e.target.closest("[data-go]");
+  if(go){ showSection(parseInt(go.dataset.go,10)); return; }
+  const add=e.target.closest("[data-add]");
+  if(add){ addDynRow(add.dataset.add); return; }
+  const sb=e.target.closest(".awoa-scorebtn");
+  if(sb){
+    const dim=sb.closest("[data-dim]").dataset.dim;
+    state["s4.score."+dim]=parseInt(sb.dataset.score,10);
+    sb.parentElement.querySelectorAll(".awoa-scorebtn").forEach(b=>b.classList.toggle("sel",b===sb));
+    updateScore(); saveState(); updateProgress();
+  }
+});
+
+/* ============================================================
+   SCORECARD
+============================================================ */
+function scoreInfo(){
+  let total=0,count=0;
+  for(let i=0;i<8;i++){ const v=state["s4.score."+i]; if(v){total+=v;count++;} }
+  return {total,count};
+}
+function bandFor(total){
+  return SCORE_BANDS.find(b=>total>=b[0]&&total<=b[1]);
+}
+function updateScore(){
+  const {total,count}=scoreInfo();
+  const totalEl=document.getElementById("scoreTotal");
+  const labEl=document.getElementById("scoreLabel");
+  const advEl=document.getElementById("scoreAdvice");
+  totalEl.textContent=count?total:"–";
+  if(count===8){
+    const b=bandFor(total);
+    labEl.textContent=b[2]; labEl.className="awoa-scorelabel "+b[3];
+    advEl.textContent="Recommended direction: "+b[4];
+  }else{
+    labEl.textContent="Scored "+count+" of 8 dimensions"; labEl.className="awoa-scorelabel lab-none";
+    advEl.textContent="";
+  }
+}
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+let current=0;
+const SECTION_KEYS=[
+  ["meta.owner","meta.workflow"],
+  ["s1.statement","s1.bounds.0"],
+  ["s2.definition","dyn.painTable.0.0"],
+  ["s3.hypothesis","dyn.aiBounds.0.0"],
+  ["s4.score.0","s4.score.7"],
+  ["dyn.stakeholders.0.0","dyn.systems.0.0"],
+  ["s6.known.0","s6.readiness"],
+  ["risk.status.0","risk.decision"],
+  ["s7.objective","s7.plan.0"],
+  ["sum.pain","sum.decision"],
+  ["close.final"]
+];
+function sectionDone(i){
+  return (SECTION_KEYS[i]||[]).some(k=>{ const v=state[k]; return v!==undefined&&v!==""&&v!==false; });
+}
+function updateProgress(){
+  const done=sections.map((_,i)=>sectionDone(i)).filter(Boolean).length;
+  const pct=Math.round(done/sections.length*100);
+  document.getElementById("barFill").style.width=pct+"%";
+  document.getElementById("progPct").textContent=pct+"% complete";
+  document.querySelectorAll(".awoa-step-dot").forEach((d,i)=>{
+    d.classList.toggle("active",i===current);
+    d.classList.toggle("done",i!==current&&sectionDone(i));
+  });
+}
+function showSection(i){
+  current=Math.max(0,Math.min(sections.length-1,i));
+  document.querySelectorAll(".awoa-section").forEach((s,j)=>s.classList.toggle("active",j===current));
+  document.getElementById("progStep").textContent=sections[current].title;
+  updateProgress();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ============================================================
+   SUMMARY AUTOFILL
+============================================================ */
+function v(k){ return (state[k]||"").toString().trim(); }
+function autofill(){
+  const set=(key,val)=>{ if(!val) return; state[key]=val; const el=document.querySelector('[data-k="'+key+'"]'); if(el) el.value=val; };
+  set("sum.name", v("s6.oppname")||v("meta.workflow"));
+  set("sum.workflow", v("meta.workflow"));
+  set("sum.users", v("s1.bounds.2"));
+  const {total,count}=scoreInfo();
+  if(count===8){ const b=bandFor(total); set("sum.score", total+" / 40 — "+b[2]); }
+  const painParts=[v("s1.statement"),v("s2.definition")].filter(Boolean);
+  set("sum.pain", painParts.join("\n\n"));
+  set("sum.hypothesis", v("s3.hypothesis"));
+  const reqParts=[];
+  if(v("s6.status")) reqParts.push("Requirements status: "+v("s6.status"));
+  if(v("s6.readiness")) reqParts.push("Readiness decision: "+v("s6.readiness"));
+  if(v("risk.decision")) reqParts.push("Risk triage: "+v("risk.decision"));
+  if(v("risk.guardrails")) reqParts.push("Guardrails: "+v("risk.guardrails"));
+  set("sum.requirements", reqParts.join("\n"));
+  const types=[]; document.querySelectorAll('[data-k^="s7.types."]').forEach((el)=>{ if(el.checked) types.push(el.closest(".awoa-check").textContent.trim()); });
+  const expParts=[];
+  if(types.length) expParts.push("Type: "+types.join(", "));
+  if(v("s7.objective")) expParts.push(v("s7.objective"));
+  if(v("s7.plan.6")) expParts.push("Success measures: "+v("s7.plan.6"));
+  if(v("s7.plan.7")) expParts.push("Stop criteria: "+v("s7.plan.7"));
+  if(v("s7.plan.8")) expParts.push("Next decision: "+v("s7.plan.8"));
+  set("sum.experiment", expParts.join("\n"));
+  saveState(); updateProgress();
+}
+document.getElementById("autofillBtn").addEventListener("click",autofill);
+
+/* ============================================================
+   EXPORT
+============================================================ */
+function summaryText(){
+  const {total,count}=scoreInfo();
+  const band=count===8?bandFor(total):null;
+  const L=[];
+  L.push("AI WORKFLOW OPPORTUNITY ASSESSMENT — SUMMARY");
+  L.push("=".repeat(48));
+  L.push("Opportunity name: "+v("sum.name"));
+  L.push("Workflow assessed: "+(v("sum.workflow")||v("meta.workflow")));
+  L.push("Assessment owner: "+v("meta.owner"));
+  L.push("Date: "+v("meta.date"));
+  L.push("Primary users: "+v("sum.users"));
+  L.push("Opportunity score: "+(band?(total+" / 40 — "+band[2]):v("sum.score")));
+  L.push("Recommended next decision: "+v("sum.decision"));
+  L.push("");
+  const block=(title,val)=>{ L.push(title); L.push("-".repeat(title.length)); L.push(val||"(not completed)"); L.push(""); };
+  block("WORKFLOW AND PAIN", v("sum.pain"));
+  block("AI CHANGE HYPOTHESIS", v("sum.hypothesis"));
+  block("TOP STRENGTHS", v("sum.strengths"));
+  block("TOP RISKS OR UNKNOWNS", v("sum.risks"));
+  block("STAKEHOLDER / SYSTEM NOTES", v("sum.stakenotes"));
+  block("REQUIREMENTS STATUS AND GUARDRAILS", v("sum.requirements"));
+  block("SMALLEST SAFE EXPERIMENT", v("sum.experiment"));
+  block("OPEN QUESTIONS", v("sum.questions"));
+  block("FINAL DECISION AND OWNER", v("close.final"));
+  return L.join("\n");
+}
+document.getElementById("printBtn").addEventListener("click",()=>window.print());
+document.getElementById("copyBtn").addEventListener("click",function(){
+  const btn=this;
+  const done=()=>{ btn.textContent="Copied ✓"; setTimeout(()=>btn.textContent="Copy summary as text",1600); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(summaryText()).then(done); }
+  else{
+    const t=document.createElement("textarea"); t.value=summaryText(); document.body.appendChild(t);
+    t.select(); document.execCommand("copy"); document.body.removeChild(t); done();
+  }
+});
+
+/* reset */
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  if(!confirm("Clear all answers and start over? This cannot be undone.")) return;
+  localStorage.removeItem(STORE_KEY);
+  location.reload();
+});
+
+/* init */
+applyState();
+showSection(0);
+updateProgress();
+})();
+</script>
+</body>
+</html>

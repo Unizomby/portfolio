@@ -1,0 +1,77 @@
+# robots.txt — https://dtucker.xyz
+# Blocks AI training crawlers. Allows search engines and
+# user-initiated AI fetches, so the site stays discoverable.
+
+User-agent: *
+Allow: /
+Disallow: /node_modules/
+Disallow: /1test.txt
+
+# ── Blocked: AI model training ───────────────────────────────
+# Anthropic
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: ai2bot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# Google (Gemini / Vertex AI training). Search still unaffected.
+User-agent: Google-Extended
+Disallow: /
+
+# Meta
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+# OpenAI
+User-agent: GPTBot
+Disallow: /
+
+# Amazon
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Amazonbot-Shopping
+Disallow: /
+
+# ByteDance — aggressive scraper, ignores robots.txt in practice
+User-agent: Bytespider
+Disallow: /
+
+# Common Crawl — the upstream corpus most LLM training runs on
+User-agent: CCBot
+Disallow: /
+
+# Miscellaneous scrapers and model crawlers
+User-agent: CoHere-ai
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent:Omgilibot
+Disallow: /
+
+User-agent: PanguBot
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+# ── Allowed: search engines ───────────────────────────────────
+# Left unlisted = allowed by the User-agent: * rule above.
+
+# ── Allowed: user-initiated AI fetches ───────────────────────
+# These fire because a person asked, not for bulk training.
+# Being cited by AI can help a portfolio, so these stay open.
+# Claude-User, Claude-SearchBot, OAI-SearchBot, ChatGPT-User,
+# PerplexityBot, Perplexity-User

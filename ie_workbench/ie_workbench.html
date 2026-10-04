@@ -34,6 +34,7 @@
       --grad-labor:        linear-gradient(135deg,#f093fb,#f5576c);
       --grad-inventory:    linear-gradient(135deg,#fa709a,#fee140);
       --grad-six-sigma:    linear-gradient(135deg,#30cfd0,#5b2d8e);
+      --grad-economics:    linear-gradient(135deg,#0ba360,#3cba92);
     }
 
     html, body { height: 100%; }
@@ -338,6 +339,7 @@
     .cat-tab.active[data-cat="labor"]        { background: var(--grad-labor); }
     .cat-tab.active[data-cat="inventory"]    { background: var(--grad-inventory); }
     .cat-tab.active[data-cat="six-sigma"]    { background: var(--grad-six-sigma); }
+    .cat-tab.active[data-cat="economics"]    { background: var(--grad-economics); }
 
     #tool-grid-wrap {
       flex: 1;
@@ -1188,6 +1190,7 @@
           <button class="cat-tab" data-cat="labor">👷 Labor</button>
           <button class="cat-tab" data-cat="inventory">📦 Inventory</button>
           <button class="cat-tab" data-cat="six-sigma">📐 Six Sigma</button>
+          <button class="cat-tab" data-cat="economics">💰 Eng. Economics</button>
         </div>
       </div>
 
@@ -1318,6 +1321,7 @@ const CATEGORIES = {
   'labor':        { label: 'Labor',                gradient: 'var(--grad-labor)',        emoji: '👷' },
   'inventory':    { label: 'Inventory / Ops',      gradient: 'var(--grad-inventory)',    emoji: '📦' },
   'six-sigma':    { label: 'Six Sigma',            gradient: 'var(--grad-six-sigma)',    emoji: '📐' },
+  'economics':    { label: 'Engineering Economics', gradient: 'var(--grad-economics)',    emoji: '💰' },
 };
 
 const TOOL_REGISTRY = [
@@ -2814,6 +2818,115 @@ const TOOL_REGISTRY = [
 
       // Initial visibility pass
       updateVisibility();
+    }
+  },
+
+  /* ── 24.Net Present Value (NPV) ───────────────────────────────────── */
+  {
+    id: 'npv',
+    name: 'Net Present Value (NPV)',
+    category: 'economics',
+    emoji: '💰',
+    description: 'Discounts a project\'s future cash flows back to today to determine whether the investment creates value.',
+    tags: ['npv', 'discount', 'present value', 'cash flow', 'investment', 'capital budgeting', 'roi'],
+    formula: 'NPV = −Initial Investment + Σ CFₜ ÷ (1 + r)ᵗ',
+    howToUse: [
+      'Enter the initial investment as a positive number (it is treated as a cash outflow at time 0).',
+      'Enter the discount rate (your required rate of return or cost of capital) as a percentage.',
+      'Enter the net cash flow expected at the end of each year. Leave later years blank if unused.',
+      'A positive NPV means the project earns more than the discount rate and adds value; a negative NPV means it does not.'
+    ],
+    example: {
+      scenario: 'A $10,000 machine returns $3,000/yr for 5 years. The required return is 8%.',
+      inputs: { 'Initial Investment': '$10,000', 'Discount Rate': '8%', 'Cash Flows': '$3,000 × 5' },
+      output: 'NPV ≈ $1,978 (accept)'
+    },
+    inputs: [
+      { id: 'initial', label: 'Initial Investment (outflow at year 0)', type: 'number', placeholder: '10000', tooltip: 'Up-front cost, entered as a positive number' },
+      { id: 'rate',    label: 'Discount Rate (%)',                       type: 'number', placeholder: '8',     tooltip: 'Required rate of return or cost of capital' },
+      { id: 'cf1', label: 'Year 1 Cash Flow', type: 'number', placeholder: '3000', tooltip: 'Net cash inflow at end of year 1' },
+      { id: 'cf2', label: 'Year 2 Cash Flow', type: 'number', placeholder: '3000' },
+      { id: 'cf3', label: 'Year 3 Cash Flow', type: 'number', placeholder: '3000' },
+      { id: 'cf4', label: 'Year 4 Cash Flow', type: 'number', placeholder: '3000' },
+      { id: 'cf5', label: 'Year 5 Cash Flow (optional)', type: 'number', placeholder: '3000' },
+      { id: 'cf6', label: 'Year 6 Cash Flow (optional)', type: 'number', placeholder: '' }
+    ],
+    calculate(v) {
+      const flows = [v.cf1, v.cf2, v.cf3, v.cf4, v.cf5, v.cf6].map(x => Number(x) || 0);
+      const hasFlow = flows.some(x => x !== 0);
+      if (!v.initial || v.rate === undefined || v.rate === null || v.rate === '' || !hasFlow) return [];
+
+      const r = v.rate / 100;
+      let pvInflows = 0;
+      flows.forEach((cf, i) => { pvInflows += cf / Math.pow(1 + r, i + 1); });
+      const npv = pvInflows - v.initial;
+      const pi  = pvInflows / v.initial;
+
+      const results = [
+        { label: 'PV of Future Cash Flows', value: '$' + pvInflows.toLocaleString(undefined, { maximumFractionDigits: 0 }), unit: '' },
+        { label: 'Net Present Value', value: '$' + npv.toLocaleString(undefined, { maximumFractionDigits: 0 }), unit: '',
+          type: npv >= 0 ? 'good' : 'warning',
+          note: npv >= 0
+            ? '✅ Positive NPV — the project earns more than the discount rate and adds value.'
+            : '⚠️ Negative NPV — at this discount rate the project destroys value.' }
+      ];
+      results.push({ label: 'Profitability Index', value: pi.toFixed(2), unit: '× per $ invested',
+        note: pi >= 1 ? 'PI ≥ 1.0 supports accepting the project.' : 'PI < 1.0 suggests rejecting the project.' });
+      return results;
+    }
+  },
+  /* ── 25. Interpolation Calculator ───────────────────────────────── */
+  {
+    id: 'interpolation',
+    name: 'Interpolation Calculator',
+    category: 'capacity',
+    emoji: '📈',
+    description: 'Performs linear interpolation between two known data points to estimate an unknown value inside the interval.',
+    tags: ['interpolation', 'linear', 'estimate', 'table lookup', 'trend', 'engineering'],
+    formula: 'y = y1 + ((x − x1) ÷ (x2 − x1)) × (y2 − y1)',
+    howToUse: [
+      'Enter the two known points from a chart, standard table, calibration curve, or process data set.',
+      'Enter the target X value where you need the estimated Y value.',
+      'Use the result when the relationship is reasonably linear between the two known points.',
+      'If the target X is outside the two known X values, the calculator will flag the result as extrapolation.'
+    ],
+    example: {
+      scenario: 'A lookup table shows 20 psi at 50 units/hr and 32 psi at 80 units/hr. Estimate pressure at 65 units/hr.',
+      inputs: { 'Point 1': '(50, 20)', 'Point 2': '(80, 32)', 'Target X': '65' },
+      output: '26.00 estimated Y'
+    },
+    inputs: [
+      { id: 'x1', label: 'Known X1', type: 'number', placeholder: '50', tooltip: 'The X value for the first known point' },
+      { id: 'y1', label: 'Known Y1', type: 'number', placeholder: '20', tooltip: 'The Y value paired with X1' },
+      { id: 'x2', label: 'Known X2', type: 'number', placeholder: '80', tooltip: 'The X value for the second known point' },
+      { id: 'y2', label: 'Known Y2', type: 'number', placeholder: '32', tooltip: 'The Y value paired with X2' },
+      { id: 'targetX', label: 'Target X', type: 'number', placeholder: '65', tooltip: 'The X value where you want to estimate Y' }
+    ],
+    calculate(v) {
+      if (!v.x1 || !v.x2 || !v.targetX) return [];
+      if (v.x1 === v.x2) return [
+        { label: 'Interpolation Error', value: 'Undefined', unit: '', type: 'bad',
+          note: 'X1 and X2 must be different values; otherwise the slope cannot be calculated.' }
+      ];
+
+      const fraction = (v.targetX - v.x1) / (v.x2 - v.x1);
+      const slope = (v.y2 - v.y1) / (v.x2 - v.x1);
+      const interpolatedY = v.y1 + fraction * (v.y2 - v.y1);
+      const minX = Math.min(v.x1, v.x2);
+      const maxX = Math.max(v.x1, v.x2);
+      const isExtrapolation = v.targetX < minX || v.targetX > maxX;
+
+      return [
+        { label: 'Estimated Y', value: interpolatedY.toFixed(4), unit: 'at target X',
+          type: isExtrapolation ? 'warning' : 'good',
+          note: isExtrapolation
+            ? 'Target X is outside the two known points, so this is extrapolation. Verify the trend still applies.'
+            : `Target X is ${(fraction * 100).toFixed(1)}% of the way from X1 to X2.` },
+        { label: 'Slope', value: slope.toFixed(4), unit: 'Y per X',
+          note: `Y changes ${slope.toFixed(4)} for each 1-unit change in X.` },
+        { label: 'Interval Fraction', value: fraction.toFixed(4), unit: 'of X1 → X2',
+          note: '0.0000 = exactly X1, 1.0000 = exactly X2.' }
+      ];
     }
   },
 
